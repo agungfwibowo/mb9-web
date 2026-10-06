@@ -1,0 +1,16 @@
+# Security header untuk hosting statis yang membaca file _headers
+# (Netlify, Cloudflare Pages). Hosting lain: lihat README.md.
+#
+# CSP: script inline di <head> index.html diizinkan lewat hash.
+# Bila isi <script> inline itu diubah, hitung ulang hash-nya (lihat README.md),
+# kalau tidak script tersebut diblokir browser.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net 'sha256-pm/j2bLbUfaFFuiNwtYhBB9kAJqmKlh0dfbupEbTrHU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; frame-src https://www.google.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  X-Frame-Options: DENY
+
+/.well-known/security.txt
+  Content-Type: text/plain; charset=utf-8
