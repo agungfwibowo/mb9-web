@@ -1185,7 +1185,6 @@
       put(el, `<span class="jopen mono ${st[0]}">${st[1]}</span>`);
     });
   };
-  setInterval(markLive, 60000);
   let panelH = 0;
   const renderDay = (key) => {
     currentKey = key;
@@ -1301,6 +1300,8 @@
       }
     }
     markLive();
+    // Durasi dibuka langsung di kartu yang masih aktif (yang sudah tutup ada di strip kiri).
+    $$('.jrail', panel).forEach((rail) => { rail._active = rail.dataset.start = firstActive(rail); });
     syncRails();
     // tinggi jadwal berubah (ganti hari/tampilan) → posisi pin section di
     // bawahnya (Layanan dll.) harus diukur ulang, kalau tidak jadi tumpang tindih
@@ -1358,6 +1359,12 @@
       c.classList.toggle('has-more', more > 0);
       c.classList.toggle('has-more2', more > 1);
       c.classList.toggle('is-left', i === start - 1);
+      // lapis garis tumpukan ikut status kartunya, diurut dari strip ke arah luar:
+      // [0] = strip itu sendiri, [1] = lapis dalam, [2..] = lapis luar
+      const pile = i === end ? cards.slice(end) : i === start - 1 ? cards.slice(0, start).reverse() : [];
+      const done = (list) => list.length > 0 && list.every((x) => x.classList.contains('is-done'));
+      c.classList.toggle('near-done', done(pile.slice(1, 2)));
+      c.classList.toggle('far-done', done(pile.slice(2)));
     });
     void rail.offsetWidth;
     if (!hadNoAnim) rail.classList.remove('no-flex-anim');
@@ -1399,6 +1406,36 @@
     });
   };
   const syncRails = () => $$('.jrail', panel).forEach(syncRail);
+  // indeks kartu pertama yang belum selesai (semua selesai → kartu terakhir/paling kanan)
+  const firstActive = (rail) => {
+    const cards = $$('.jcard', rail);
+    const i = cards.findIndex((c) => !c.classList.contains('is-done'));
+    return i < 0 ? cards.length - 1 : i;
+  };
+  // Perbarui status; baris Durasi digeser ke kartu aktif HANYA bila ada kartu
+  // yang baru tutup — geseran manual pengunjung tidak diganggu tiap menit.
+  const refreshLive = () => {
+    markLive();
+    $$('.jrail', panel).forEach((rail) => {
+      const to = firstActive(rail);
+      if (to !== rail._active) { rail._active = to; moveRail(rail, to); } else syncRail(rail);
+    });
+  };
+  // Timer per menit (pas di pergantian menit) hanya selama halaman dilihat DAN
+  // tampilan Durasi terbuka: tab ditinggal / pindah ke Tabel → berhenti; kembali,
+  // Durasi dibuka lagi, sinyal tersambung lagi, atau halaman dipulihkan dari
+  // cache (Back / buka ulang app) → langsung diperbarui & jalan lagi.
+  let liveTimer = 0;
+  const stopLive = () => { clearTimeout(liveTimer); clearInterval(liveTimer); };
+  const startLive = () => {
+    stopLive();
+    liveTimer = setTimeout(() => { refreshLive(); liveTimer = setInterval(refreshLive, 60000); }, 60000 - (Date.now() % 60000));
+  };
+  const resumeLive = () => { if (document.hidden || jView !== 'durasi') return; refreshLive(); startLive(); };
+  document.addEventListener('visibilitychange', () => (document.hidden ? stopLive() : resumeLive()));
+  window.addEventListener('online', resumeLive);
+  window.addEventListener('pageshow', (e) => { if (e.persisted) resumeLive(); });
+  if (!document.hidden && jView === 'durasi') startLive();
   panel.addEventListener('click', (e) => {
     const b = e.target.closest('.jdur__nav button');
     if (b) {
@@ -1449,6 +1486,7 @@
       try { localStorage.setItem('mb9-jview', jView); } catch (err) { /* abaikan */ }
       syncView();
       if (currentKey) renderDay(currentKey);
+      if (jView === 'durasi') resumeLive(); else stopLive();
     });
   }
 

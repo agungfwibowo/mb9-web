@@ -35,7 +35,9 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; } /* jangan pakai scroll-behavior: smooth — mengacaukan pengukuran ScrollTrigger */
+/* tap-highlight transparent: tanpa kotak biru saat tap di HP (umpan balik dari :active/:hover elemen).
+   Jangan pakai scroll-behavior: smooth — mengacaukan pengukuran ScrollTrigger */
+html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 main { overflow-x: clip; }
@@ -861,10 +863,19 @@ html:not(.js) .preloader { display: none; }
 .jdur .jcard.is-piled:last-child { border-right: 0; border-left: 1px solid var(--grey-2); }
 /* masih ada kartu lain di balik strip → garis berlapis di tepi luar */
 /* +1 → satu garis lapis; +2 dst → dua garis */
-.jdur .jcard.is-piled.has-more { box-shadow: inset -7px 0 0 var(--white), inset -8px 0 0 var(--grey-2); }
-.jdur .jcard.is-piled.has-more.is-left { box-shadow: inset 7px 0 0 var(--white), inset 8px 0 0 var(--grey-2); }
-.jdur .jcard.is-piled.has-more2 { box-shadow: inset -3px 0 0 var(--white), inset -4px 0 0 var(--grey-2), inset -7px 0 0 var(--white), inset -8px 0 0 var(--grey-2); }
-.jdur .jcard.is-piled.has-more2.is-left { box-shadow: inset 3px 0 0 var(--white), inset 4px 0 0 var(--grey-2), inset 7px 0 0 var(--white), inset 8px 0 0 var(--grey-2); }
+.jdur .jcard.is-piled { --b1: var(--white); --b2: var(--white); }
+.jdur .jcard.is-piled.has-more { box-shadow: inset -7px 0 0 var(--b1), inset -8px 0 0 var(--grey-2); }
+.jdur .jcard.is-piled.has-more.is-left { box-shadow: inset 7px 0 0 var(--b1), inset 8px 0 0 var(--grey-2); }
+.jdur .jcard.is-piled.has-more2 { box-shadow: inset -3px 0 0 var(--b2), inset -4px 0 0 var(--grey-2), inset -7px 0 0 var(--b1), inset -8px 0 0 var(--grey-2); }
+.jdur .jcard.is-piled.has-more2.is-left { box-shadow: inset 3px 0 0 var(--b2), inset 4px 0 0 var(--grey-2), inset 7px 0 0 var(--b1), inset 8px 0 0 var(--grey-2); }
+/* strip yang sudah selesai: abu-abu seperti kartu yang sudah lewat (hover tetap lime = bisa diklik).
+   Tiap lapis garis tumpukan (+N) ikut status kartunya: lapis dalam = kartu tersembunyi terdekat
+   (.near-done), lapis luar = kartu-kartu sesudahnya (.far-done) — diatur di syncRail */
+.jdur .jcard.is-piled.is-done { background: var(--paper); }
+.jdur .jcard.is-piled.is-done .jcard__edge { color: var(--grey); }
+.jdur .jcard.is-piled.is-done .jcard__edge i { background: var(--paper); }
+.jdur .jcard.is-piled.near-done { --b1: var(--paper); }
+.jdur .jcard.is-piled.far-done { --b2: var(--paper); }
 .jdur .jcard.is-piled:hover { background: var(--lime-3); }
 .jdur .jcard.is-piled.is-pink:hover { background: #fdeef5; }
 .jcard__edge { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 0 14px; opacity: 0; pointer-events: none; color: var(--blue); }
