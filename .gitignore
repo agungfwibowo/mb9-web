@@ -18,9 +18,9 @@ Archive.zip
 *.7z
 *.bak
 *.tmp
-bahan/
 
 # --- Tool / dependensi (bila nanti dipakai) ---
+bahan/
 node_modules/
 .lighthouseci/
 *.log
