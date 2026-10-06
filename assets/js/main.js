@@ -2525,9 +2525,7 @@
 
   // Kunjungan ulang dalam sesi yang sama (reload, kembali dari tab lain):
   // preloader cukup memudar singkat, tanpa hitungan 0–100 & panel lagi.
-  // HP/tablet (≤860px): tanpa layar pembuka — hanya tirai polos yang langsung
-  // memudar, lalu intro hero jalan. Hero (LCP) terlihat jauh lebih cepat.
-  const quickPre = matchMedia('(max-width: 860px)').matches;
+  // Sesi baru (desktop maupun HP) selalu mendapat preloader penuh.
   let seenThisSession = false;
   try { seenThisSession = sessionStorage.getItem('mb9-pre') === '1'; sessionStorage.setItem('mb9-pre', '1'); } catch (_) { /* abaikan */ }
   const finishPreloader = () => new Promise((resolve) => {
@@ -2538,7 +2536,7 @@
       return;
     }
     // mode cepat: panel sudah menutup (CSS) → langsung diangkat bergantian
-    if (seenThisSession || quickPre) {
+    if (seenThisSession) {
       gsap.to('.preloader__panels i', {
         scaleY: 0, transformOrigin: '50% 0%', duration: .5, stagger: .06, ease: 'power4.inOut',
         onComplete: () => { pre.remove(); resolve(); },
@@ -2881,7 +2879,7 @@
   });
   // Tidak menunggu event 'load' (semua aset: logo tenant, CDN, dll.) — cukup
   // foto hero + font siap, maksimal 1,5 dtk. Dulu 'load' / 2,5 dtk.
-  if (document.readyState === 'complete' || quickPre) boot();
+  if (document.readyState === 'complete' || seenThisSession) boot();
   else {
     let booted = false;
     const go = () => { if (!booted) { booted = true; boot(); } };

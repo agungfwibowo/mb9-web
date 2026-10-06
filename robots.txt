@@ -3,3 +3,5 @@
 # di index.html. Saat situs siap tayang, hapus tag noindex tersebut.
 User-agent: *
 Allow: /
+
+Sitemap: https://www.muslimberdedikasi.com/sitemap.xml
