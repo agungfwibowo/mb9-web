@@ -1311,9 +1311,20 @@
           </div>`).join('')}
         </div>`).join('')}</div></div></div>`;
     };
+    // Durasi: acara panggung berurutan (tanpa group) dikumpulkan jadi satu baris
+    // kartu horizontal di atas (judul dari tag-nya, mis. "Kajian & Talkshow") — lepas dari Pagi/Siang/Sore/
+    // Malam agar tetap terasa bersambung; layanan/stan (punya group) tetap per
+    // periode di bawahnya.
+    const chainRows = jView === 'durasi' ? rows.filter((r) => !r.group) : [];
+    // judul dari tag yang ada di rangkaian (urutan TAGS): mis. "Kajian & Talkshow"
+    const chainTags = Object.keys(TAGS).filter((k) => chainRows.some((r) => r.tag === k)).map((k) => TAGS[k]);
+    const chainTitle = chainTags.length ? chainTags.join(', ').replace(/, ([^,]*)$/, ' & $1') : 'Acara Panggung';
+    const chain = chainRows.length
+      ? `<div class="jperiode"><span>${esc(chainTitle)}</span></div>${chainRows.length > 1 ? durHtml({ rows: chainRows }) : rowHtml(chainRows[0])}`
+      : '';
     let lastP = null;
     const sections = [];
-    rows.forEach((r) => {
+    (jView === 'durasi' ? rows.filter((r) => r.group) : rows).forEach((r) => {
       const p = periodeOf(r.time);
       if (p !== lastP) sections.push({ p, rows: [] });
       sections[sections.length - 1].rows.push(r);
@@ -1342,7 +1353,7 @@
       return `<div class="jperiode"><span>${sec.p.label}</span></div>${[...sec.rows].sort(byOrder).map(rowHtml).join('')}`;
     }).join('');
     panel.innerHTML = banner + (rows.length
-      ? body
+      ? chain + body
       : past
         ? `<div class="soon">
           <div class="soon__icon" aria-hidden="true"><svg viewBox="0 0 56 56"><path d="M16 29l8 8 16-18"/></svg></div>
@@ -1497,21 +1508,21 @@
       if (to !== rail._active) { rail._active = to; moveRail(rail, to); } else syncRail(rail);
     });
   };
-  // Timer per menit (pas di pergantian menit) hanya selama halaman dilihat DAN
-  // tampilan Durasi terbuka: tab ditinggal / pindah ke Tabel → berhenti; kembali,
-  // Durasi dibuka lagi, sinyal tersambung lagi, atau halaman dipulihkan dari
-  // cache (Back / buka ulang app) → langsung diperbarui & jalan lagi.
+  // Timer per menit (pas di pergantian menit) untuk Tabel & Durasi, hanya selama
+  // halaman dilihat: tab ditinggal → berhenti; kembali, sinyal tersambung lagi,
+  // atau halaman dipulihkan dari cache (Back / buka ulang app) → langsung
+  // diperbarui & jalan lagi.
   let liveTimer = 0;
   const stopLive = () => { clearTimeout(liveTimer); clearInterval(liveTimer); };
   const startLive = () => {
     stopLive();
     liveTimer = setTimeout(() => { refreshLive(); liveTimer = setInterval(refreshLive, 60000); }, 60000 - (Date.now() % 60000));
   };
-  const resumeLive = () => { if (document.hidden || jView !== 'durasi') return; refreshLive(); startLive(); };
+  const resumeLive = () => { if (document.hidden) return; refreshLive(); startLive(); };
   document.addEventListener('visibilitychange', () => (document.hidden ? stopLive() : resumeLive()));
   window.addEventListener('online', resumeLive);
   window.addEventListener('pageshow', (e) => { if (e.persisted) resumeLive(); });
-  if (!document.hidden && jView === 'durasi') startLive();
+  if (!document.hidden) startLive();
   panel.addEventListener('click', (e) => {
     const b = e.target.closest('.jdur__nav button');
     if (b) {
@@ -1562,7 +1573,6 @@
       try { localStorage.setItem('mb9-jview', jView); } catch (err) { /* abaikan */ }
       syncView();
       if (currentKey) renderDay(currentKey);
-      if (jView === 'durasi') resumeLive(); else stopLive();
     });
   }
 
@@ -1683,7 +1693,9 @@
       else scrollTo({ top: scrollY + dy, behavior: 'instant' });
     }));
   };
-  setInterval(rollDay, 60 * 1000);
+  // Selaras pergantian menit (detik :00) → "Selesai" muncul tepat 21:00:00
+  const everyMinute = (fn) => setTimeout(() => { fn(); setInterval(fn, 60000); }, 60000 - (Date.now() % 60000));
+  everyMinute(rollDay);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) rollDay(); });
   addEventListener('resize', layoutDays);
 
@@ -1728,7 +1740,7 @@
       else if (!on && tag) tag.remove();
     });
   };
-  if (agrid.querySelector('.ustadz[data-id]')) { markAsatidzLive(); setInterval(markAsatidzLive, 60 * 1000); }
+  if (agrid.querySelector('.ustadz[data-id]')) { markAsatidzLive(); everyMinute(markAsatidzLive); }
 
   // Tenant marquee + grid
   const tenants = D.tenants.map(([name, file, tone]) => ({ name, tone, src: `assets/img/tenant/${file}` }));
@@ -2393,7 +2405,8 @@
     // "hari ini" = sudah masuk tanggalnya & belum lewat jam tutup (WIB)
     const today = openDayAt(now);
     const reopen = running && !today ? nextOpenAt(now) : 0;
-    const text = !running ? 'Menuju hari H' : reopen ? 'Dibuka kembali dalam' : 'Acara berakhir dalam';
+    // hari pertama sebelum jam buka sudah "hari ini" → bukan lagi "Menuju hari H"
+    const text = !running ? (today ? 'Dibuka dalam' : 'Menuju hari H') : reopen ? 'Dibuka kembali dalam' : 'Acara berakhir dalam';
     if (label.textContent !== text) label.textContent = text;
     // Hari acara (belum lewat jam tutup): link ke jadwal hari ini. Selain itu: "Lihat jadwal".
     if (today) {
