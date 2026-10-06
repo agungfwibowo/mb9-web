@@ -3,7 +3,7 @@
    di lokasi acara. Naikkan VERSION setiap rilis: cache lama
    otomatis dibuang saat worker baru aktif.
    ========================================================= */
-const VERSION = 'mb9-1.1.311';
+const VERSION = 'mb9-1.1.312';
 // Versi aset diambil dari VERSION, jadi cukup satu kali naik versi dan URL
 // ?v= di sini selalu sama persis dengan yang ditulis index.html.
 const V = VERSION.slice(VERSION.indexOf('-') + 1);
@@ -62,9 +62,12 @@ self.addEventListener('fetch', (e) => {
   // getInstalledRelatedApps() tidak pernah cocok.
   // Halaman selain beranda (mis. /privasi/) disimpan di kunci sendiri; tanpa
   // ini membuka halaman lain akan menimpa salinan offline index.html.
+  // Dihitung relatif ke folder sw.js agar tetap benar bila situs dilayani
+  // dari subfolder (mis. username.github.io/mb9-web/).
   const path = new URL(req.url).pathname;
+  const base = new URL('./', self.location).pathname;
   if (req.mode === 'navigate' || path.endsWith('.webmanifest')) {
-    const page = path === '/' || path === '/index.html' ? './index.html' : path;
+    const page = path === base || path === base + 'index.html' ? './index.html' : path;
     const key = req.mode === 'navigate' ? page : req;
     e.respondWith(
       fetch(req)

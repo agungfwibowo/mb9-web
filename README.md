@@ -17,7 +17,7 @@ assets/fonts/           Font self-hosted (Public Sans, Roboto Mono, subset Noto 
 assets/img/             Gambar & logo (org/, sponsor/, tenant/, logo/)
 sw.js                   Service worker — cache offline untuk dipakai di lokasi acara
 manifest.webmanifest    Manifest PWA (bisa dipasang ke layar utama)
-_headers                Security header (Netlify / Cloudflare Pages)
+.github/workflows/deploy.yml  Deploy otomatis ke GitHub Pages
 .well-known/security.txt  Kontak pelaporan celah keamanan (RFC 9116)
 robots.txt, sitemap.xml SEO
 bahan/                  Materi mentah dari panitia — di-.gitignore, tidak ikut deploy
@@ -36,9 +36,29 @@ python3 -m http.server 5501
 
 Buka <http://localhost:5501/>. Service worker hanya aktif di `localhost` atau HTTPS.
 
+## Deploy (GitHub Pages)
+
+Situs terbit otomatis lewat GitHub Actions ([deploy.yml](.github/workflows/deploy.yml)) setiap ada
+push ke `main`. Bisa juga dijalankan manual: tab **Actions** → *Deploy GitHub Pages* → *Run workflow*.
+Hanya file situs yang diterbitkan; README dan `.github/` tidak ikut.
+
+Setup awal (sekali saja):
+
+1. Repo → **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Push ke `main` (atau jalankan workflow manual). Situs tampil di
+   `https://agungfwibowo.github.io/mb9-web/`.
+3. Domain sendiri: di **Settings → Pages → Custom domain** isi `www.muslimberdedikasi.com`.
+   Lalu di **pengelola DNS domain** (registrar tempat domain dibeli, bukan GitHub) buat record:
+   - `CNAME` `www` → `agungfwibowo.github.io`
+   - `A` `@` → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+
+   Setelah DNS aktif (bisa sampai 24 jam), centang **Enforce HTTPS**.
+
+Catatan: GitHub Pages gratis untuk repo **public**. Untuk repo private butuh akun GitHub Pro/Team.
+
 ## Merilis perubahan
 
-1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.311` → `mb9-1.1.312`).
+1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.312` → `mb9-1.1.313`).
 2. Samakan semua `?v=` di [index.html](index.html) dengan angka versi tersebut
    (`style.css`, `data.js`, `main.js`). Cache lama otomatis dibuang saat worker baru aktif.
 3. Perbarui `<lastmod>` di [sitemap.xml](sitemap.xml) bila konten berubah.
@@ -50,9 +70,8 @@ pakai path aset `../assets/...`, lalu tambahkan `'./nama/'` ke daftar `CORE` di 
 
 - [ ] Hapus `<meta name="robots" content="noindex, nofollow">` di `index.html` **dan** `privasi/index.html`.
 - [ ] Pastikan domain memakai HTTPS.
-- [ ] Pasang security header (lihat bawah), lalu buka situs dan cek Console browser: tidak boleh ada
+- [ ] Buka situs dan cek Console browser: tidak boleh ada
       error `Content Security Policy`. Uji juga peta, menu Bagikan/QR, dan mode offline.
-- [ ] Cek header di <https://securityheaders.com>.
 
 ## Privasi
 
@@ -69,20 +88,16 @@ barunya ke CSP.
 
 ### Security header
 
-[_headers](_headers) langsung terbaca di **Netlify** dan **Cloudflare Pages**. Untuk hosting lain,
-salin header yang sama:
-
-- **Apache (`.htaccess`)**: `Header always set Content-Security-Policy "…"` untuk tiap header
-  (butuh `mod_headers`).
-- **Nginx**: `add_header Content-Security-Policy "…" always;` di blok `server`.
-- **Vercel**: properti `headers` di `vercel.json`.
-- **GitHub Pages**: tidak bisa mengatur header. Taruh di depan Cloudflare, atau pakai
-  `<meta http-equiv="Content-Security-Policy">` (tanpa `frame-ancestors`, yang tidak berlaku via meta).
+GitHub Pages tidak bisa mengatur header HTTP, jadi CSP dan Referrer-Policy dipasang lewat tag
+`<meta>` di `<head>` setiap halaman. HTTPS/HSTS diurus GitHub (aktifkan *Enforce HTTPS*).
+Yang tidak bisa lewat meta: perlindungan anti-iframe (`frame-ancestors`/`X-Frame-Options`) dan
+`X-Content-Type-Options`. Kalau dibutuhkan, taruh situs di belakang Cloudflare (gratis) dan
+pasang header di sana.
 
 ### CSP dan script inline
 
 CSP mengizinkan satu `<script>` inline di `<head>` `index.html` lewat hash `sha256-…`.
-**Setiap kali isi script itu diubah**, hitung ulang hash-nya dan ganti nilainya di `_headers`:
+**Setiap kali isi script itu diubah**, hitung ulang hash-nya dan ganti nilainya di tag CSP `<meta>` `index.html`:
 
 ```bash
 python3 -c "import re,hashlib,base64;s=open('index.html').read();[print('sha256-'+base64.b64encode(hashlib.sha256(m.encode()).digest()).decode()) for m in re.findall(r'<script>(.*?)</script>',s,re.S)]"
