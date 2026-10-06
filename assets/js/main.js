@@ -1153,15 +1153,24 @@
       const gs = Math.min(...rg.map((x) => x[0])), ge = Math.max(...rg.map((x) => x[1]));
       const same = rg.every((x) => x[0] === gs);
       const head = same ? `Mulai <b>${fmtMin(gs)}</b>` : `<b>${fmtMin(gs)}</b> – <b>${fmtMin(ge)}</b>`;
+      // acara dengan jam (selesai) yang sama → satu kartu, isinya berderet
+      const cards = [];
+      rs.forEach((r, i) => {
+        const label = same ? `s/d ${fmtMin(rg[i][1])}` : esc(r.time);
+        const last = cards[cards.length - 1];
+        if (last && last.label === label) last.items.push(r); else cards.push({ label, items: [r] });
+      });
       // Kartu berjajar 1 baris (geser horizontal, urut jam selesai). Di atas
       // tiap kartu ada garis waktu bersambung dengan titik di jam selesainya.
-      return `<div class="jdur"><div class="jdur__head"><span>${head}</span><span class="jdur__nav" hidden><button type="button" data-dir="-1" aria-label="Geser ke kiri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></span></div><div class="jrail"><div class="jrail__track">${rs.map((r, i) => `
-        <div class="jcard${pinkCls(r)}">
-          <span class="jcard__edge" aria-hidden="true" data-t="${same ? `s/d ${fmtMin(rg[i][1])}` : esc(r.time)}"></span>
-          <div class="jstop"><i aria-hidden="true"></i><time>${same ? `s/d ${fmtMin(rg[i][1])}` : esc(r.time)}</time></div>
-          <h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>
-          ${r.note ? `<p>${esc(r.note)}</p>` : ''}
-          ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : ''}
+      return `<div class="jdur"><div class="jdur__head"><span>${head}</span><span class="jdur__nav" hidden><button type="button" data-dir="-1" aria-label="Geser ke kiri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></span></div><div class="jrail"><div class="jrail__track">${cards.map((c) => `
+        <div class="jcard${c.items.every((r) => r.ladies) ? ' is-pink' : ''}">
+          <span class="jcard__edge" aria-hidden="true" data-t="${c.label}"></span>
+          <div class="jstop"><i aria-hidden="true"></i><time>${c.label}</time></div>${c.items.map((r) => `
+          <div class="jcard__item${pinkCls(r)}">
+            <h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>
+            ${r.note ? `<p>${esc(r.note)}</p>` : ''}
+            ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : ''}
+          </div>`).join('')}
         </div>`).join('')}</div></div></div>`;
     };
     let lastP = null;
@@ -1256,6 +1265,21 @@
     const start = Math.min(Math.max(Number(rail.dataset.start) || 0, 0), n - m);
     rail.dataset.start = start;
     const end = start + m;
+    // Tinggi baris dikunci setinggi kartu TERTINGGI di grup (diukur dalam
+    // keadaan terbuka selebar kartu normal) — kalau tidak, tinggi melompat
+    // tiap kali jendela bergeser ke kartu yang isinya lebih banyak.
+    const track = rail.firstElementChild;
+    const hadNoAnim = rail.classList.contains('no-flex-anim');
+    rail.classList.add('no-flex-anim');
+    const ow = (w - Math.min(n - m, 2) * sliver) / m;
+    track.style.minHeight = '';
+    // border-box: lebar ukur = lebar tampil sebenarnya (termasuk padding)
+    cards.forEach((c) => { c.classList.remove('is-piled', 'is-gone'); c.style.flex = `0 0 ${ow}px`; c.style.boxSizing = 'border-box'; });
+    track.style.flexWrap = 'wrap'; track.style.alignItems = 'flex-start';
+    const tallest = Math.max(...cards.map((c) => c.getBoundingClientRect().height));
+    track.style.flexWrap = ''; track.style.alignItems = '';
+    cards.forEach((c) => { c.style.flex = ''; c.style.boxSizing = ''; });
+    track.style.minHeight = `${tallest}px`;
     cards.forEach((c, i) => {
       const piled = i < start || i >= end;
       // yang jadi strip hanya tetangga terdekat jendela; sisanya disembunyikan
@@ -1271,6 +1295,8 @@
       c.classList.toggle('has-more2', more > 1);
       c.classList.toggle('is-left', i === start - 1);
     });
+    void rail.offsetWidth;
+    if (!hadNoAnim) rail.classList.remove('no-flex-anim');
     if (!nav) return;
     nav.hidden = m >= n;
     const [prev, next] = nav.querySelectorAll('button');
