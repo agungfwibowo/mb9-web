@@ -16,7 +16,8 @@ window.MB9 = {
 
   // Cukup key + iso (YYYY-MM-DD); nama hari & tanggal dibentuk otomatis di main.js
   days: [
-    { key: 'd1', iso: '2026-12-23' },
+    // UJI: hari ke-1 selalu = hari ini (WIB) — aslinya '2026-12-23'
+    { key: 'd1', iso: new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date()) },
     { key: 'd2', iso: '2026-12-24' },
     { key: 'd3', iso: '2026-12-25' },
     { key: 'd4', iso: '2026-12-26' },
