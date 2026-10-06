@@ -1117,6 +1117,16 @@
     todayIdx = hhmm >= OPEN && !dayClosed ? D.days.findIndex((d) => d.iso === todayWIB) : -1;
   };
   readClock();
+  // Hari acara yang SEDANG buka pada waktu t (ms) — dipakai countdown & penanda menu.
+  // Fungsi murni (tidak mengubah state tab), aman dipanggil tiap detik.
+  const openDayAt = (t) => {
+    const at = (d, hhmm) => new Date(`${d.iso}T${hhmm}:00+07:00`).getTime();
+    return D.days.find((d) => t >= at(d, OPEN) && t < at(d, CLOSE)) || null;
+  };
+  const nextOpenAt = (t) => {
+    const d = D.days.find((x) => new Date(`${x.iso}T${OPEN}:00+07:00`).getTime() > t);
+    return d ? new Date(`${d.iso}T${OPEN}:00+07:00`).getTime() : 0;
+  };
   const isPast = (d) => d.iso < todayWIB || (d.iso === todayWIB && dayClosed);
   // Tab otomatis: hari ini selama jam acara, selain itu hari berikutnya yang belum lewat
   const autoIdx = () => {
@@ -2376,13 +2386,16 @@
       label.textContent = 'Jazakumullahu khairan atas kehadiran Anda';
       return false;
     }
-    // Sebelum mulai → hitung ke start; selama acara → hitung ke end
+    // Sebelum mulai → hitung ke start. Selama rangkaian: saat jam buka hitung ke
+    // akhir acara; di luar jam buka (lewat jam tutup / malam antar-hari) hitung
+    // ke jam buka hari berikutnya.
     const running = now >= start;
-    const text = running ? 'Acara berakhir dalam' : 'Menuju hari H';
+    // hari yang sedang buka (jam buka–tutup WIB); lewat jam tutup bukan "hari ini" lagi
+    const today = running ? openDayAt(now) : null;
+    const reopen = running && !today ? nextOpenAt(now) : 0;
+    const text = !running ? 'Menuju hari H' : reopen ? 'Dibuka kembali dalam' : 'Acara berakhir dalam';
     if (label.textContent !== text) label.textContent = text;
-    // Selama acara: link ke jadwal hari ini (tanggal WIB, bisa berganti tengah malam).
-    // Sebelum acara: link umum "Lihat jadwal" ke section jadwal.
-    const today = running && D.days.find((d) => d.iso === new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(now));
+    // Saat buka: link ke jadwal hari ini. Selain itu: link umum "Lihat jadwal".
     if (today) {
       if (todayLink.dataset.day !== today.key) {
         todayLink.dataset.day = today.key;
@@ -2397,7 +2410,7 @@
     // penanda di menu mobile; ikut tick agar berganti sendiri lewat tengah malam
     if (menuFlag) menuFlag.hidden = !today;
     if (navFlag) navFlag.hidden = !today;
-    let t = Math.floor(((running ? end : start) - now) / 1000);
+    let t = Math.floor(((!running ? start : reopen || end) - now) / 1000);
     const v = { d: Math.floor(t / 86400), h: Math.floor((t %= 86400) / 3600), m: Math.floor((t %= 3600) / 60), s: t % 60 };
     Object.keys(v).forEach((k) => {
       const txt = k === 'd' ? String(v[k]) : pad(v[k]);
