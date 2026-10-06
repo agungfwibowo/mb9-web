@@ -3,13 +3,13 @@
    di lokasi acara. Naikkan VERSION setiap rilis: cache lama
    otomatis dibuang saat worker baru aktif.
    ========================================================= */
-const VERSION = 'mb9-1.1.313';
+const VERSION = 'mb9-1.1.315';
 // Versi aset diambil dari VERSION, jadi cukup satu kali naik versi dan URL
 // ?v= di sini selalu sama persis dengan yang ditulis index.html.
 const V = VERSION.slice(VERSION.indexOf('-') + 1);
 const CORE = [
   './', './index.html', './privasi/', './manifest.webmanifest',
-  `assets/css/style.css?v=${V}`, `assets/js/data.js?v=${V}`, `assets/js/main.js?v=${V}`,
+  `assets/css/style.css?v=${V}`, `assets/js/data-prod.js?v=${V}`, `assets/js/data-dev.js?v=${V}`, `assets/js/main.js?v=${V}`,
   'assets/fonts/public-sans-latin.woff2', 'assets/fonts/roboto-mono-latin.woff2', 'assets/fonts/noto-sans-mono-blocks.woff2',
 ];
 

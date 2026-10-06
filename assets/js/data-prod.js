@@ -1,5 +1,6 @@
 /* =========================================================
-   DATA KONTEN — edit di sini tanpa menyentuh HTML/JS lain.
+   DATA KONTEN (PRODUKSI) — edit di sini tanpa menyentuh HTML/JS lain.
+   Data contoh/uji untuk pengembangan lokal ada di data-dev.js.
    ========================================================= */
 window.MB9 = {
   // Jam buka harian (WIB). Countdown otomatis: mulai = hari pertama jam open, selesai = hari terakhir jam close
@@ -16,8 +17,7 @@ window.MB9 = {
 
   // Cukup key + iso (YYYY-MM-DD); nama hari & tanggal dibentuk otomatis di main.js
   days: [
-    // UJI: hari ke-1 selalu = hari ini (WIB) — aslinya '2026-12-23'
-    { key: 'd1', iso: new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date()) },
+    { key: 'd1', iso: '2026-12-23' },
     { key: 'd2', iso: '2026-12-24' },
     { key: 'd3', iso: '2026-12-25' },
     { key: 'd4', iso: '2026-12-26' },
@@ -28,6 +28,8 @@ window.MB9 = {
      Isi per hari dengan format:
      d1: [ { time: '08.00 - 21.00', title: 'Open Gate Bazar & Foodcourt', note: '', tag: 'kajian|layanan|lomba|talkshow' }, ... ]
      ladies (opsional): true → acara khusus muslimah, ditandai warna pink.
+     ustadz (opsional): id dari ASATIDZ (atau daftar id: ['a', 'b']) → nama pengisi
+       tampil sebagai keterangan; bila note juga diisi, keduanya disambung ' · '.
      Tampilan Tabel mengikuti URUTAN BARIS di sini (per periode Pagi/Siang/…),
      jadi cukup pindah baris untuk mengubah urutan.
      group (opsional): acara yang berjalan bersamaan — di Tabel ditandai garis
@@ -36,31 +38,12 @@ window.MB9 = {
      tampil duluan; tanpa order = 0. Tampilan Durasi tetap diurut menurut jam.
      Selama kosong, tab hari menampilkan status "InsyaAllah menyusul". */
   jadwal: {
-    // Contoh tampilan — mengikuti pola susunan acara Hari ke-1 Muslim
-    // Berdedikasi 8 (edisi tahun lalu) sebagai referensi, BUKAN jadwal resmi
-    // MB9. Nama ustadz/ustadzah ikut dicontohkan apa adanya dari edisi lalu;
-    // menunggu konfirmasi final susunan & pengisi acara dari panitia MB9.
-    d1: [
-      { time: '08.00 - 21.00', title: 'Open Gate Bazar & Foodcourt', note: 'Berlangsung sepanjang hari', tag: 'layanan', group: 'g1' },
-      { time: '08.00 - 17.00', title: 'Khitanan Massal', note: 'Gratis', tag: 'layanan', group: 'g1' },
-      { time: '08.00 - 09.30', title: "Babak Grand Final Musabaqah Hifzhul Qur'an", note: 'Kategori Ikhwan', tag: 'lomba', group: 'g1' },
-      { time: '08.00 - 10.00', title: 'Talkshow: Pelatihan Tour Leader Umroh', note: 'Gratis', tag: 'talkshow' },
-      { time: '10.00 - 11.30', title: 'Kajian Ilmiah', note: 'Ustadz Ali Nur Medan', tag: 'kajian' },
-      { time: '10.00 - 15.00', title: 'Donor Darah', note: 'Gratis', tag: 'layanan', group: 'g2' },
-      { time: '10.00 - 16.00', title: 'Pemeriksaan Kesehatan Umum & Dermatologis', note: 'Ikhwan & Akhwat, Gratis', tag: 'layanan', group: 'g2' },
-      { time: '10.00 - 17.00', title: 'Bekam', note: 'Ikhwan, Gratis', tag: 'layanan', group: 'g2' },
-      { time: '10.00 - 17.00', title: '7/8 Cut', note: 'Ikhwan, Gratis', tag: 'layanan', group: 'g2' },
-      { time: '14.00 - 17.30', title: "Konsultasi Syar'i", note: 'Gratis', tag: 'layanan', group: 'g2' },
-      { time: '14.00 - 15.30', title: 'Kajian Muslimah', note: 'Ustadzah Ummu Hany', tag: 'kajian', ladies: true },
-      { time: '16.00 - 18.00', title: 'Kajian Ilmiah', note: 'Ustadz Abu Saif Wahyudi', tag: 'kajian' },
-      { time: '19.00 - 20.00', title: 'Kajian Ilmiah', note: "Ustadz Abu 'Aliyah Joko Sanubari", tag: 'kajian' },
-      { time: '20.00 - 21.00', title: 'Talkshow: Umroh Mandiri atau Pakai Travel?', note: 'Gratis', tag: 'talkshow' },
-    ],
-    d2: [], d3: [], d4: [], d5: [],
+    d1: [], d2: [], d3: [], d4: [], d5: [],
   },
 
   /* ASATIDZ — InsyaAllah menyusul.
-     Format: { name: 'Ustadz ...', role: 'Kajian Ilmiah', photo: 'assets/img/asatidz/nama.webp' } */
+     Format: { id: 'nama-singkat', name: 'Ustadz ...', role: 'Kajian Ilmiah', photo: 'assets/img/asatidz/nama.webp' }
+     id dipakai jadwal (field ustadz) untuk merujuk pengisi acara. */
   asatidz: [],
 
   layanan: [

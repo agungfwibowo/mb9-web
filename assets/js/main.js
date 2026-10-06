@@ -18,14 +18,49 @@
   // Lengkapi days dari iso: short "Rabu", date "23 Des", year "2026", full "Rabu, 23 Desember 2026"
   const HARI = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu'];
   const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-  D.days = D.days.map((d) => {
+  const fillDay = (d) => {
     const [y, m, dd] = d.iso.split('-').map(Number);
     const short = HARI[new Date(Date.UTC(y, m - 1, dd)).getUTCDay()];
     return { ...d, short, year: y, date: `${dd} ${BULAN[m - 1].slice(0, 3)}`, full: `${short}, ${dd} ${BULAN[m - 1]} ${y}` };
-  });
+  };
+  D.days = D.days.map(fillDay);
+
+  // Tanggal, hari, jam & lokasi di HTML ([data-mb9="…"]) diisi dari data —
+  // teks bawaan di HTML hanya cadangan (tanpa JS / untuk mesin pencari).
+  // Selalu tanggal ASLI (data-prod.js): data-dev.js menyimpannya di prodDays
+  // sebelum mengubah hari ke-1 menjadi hari ini.
+  const evDays = (D.prodDays || D.days).map(fillDay);
+  if (evDays.length) {
+    const parts = (iso) => { const [y, m, d] = iso.split('-').map(Number); return { y, m, d }; };
+    const a = parts(evDays[0].iso), b = parts(evDays[evDays.length - 1].iso);
+    const sameMonth = a.m === b.m && a.y === b.y;
+    const mon = (p) => BULAN[p.m - 1];
+    const range = (sep, fmt) => (sameMonth ? `${a.d}${sep}${b.d}` : `${a.d} ${fmt(mon(a))}${sep}${b.d} ${fmt(mon(b))}`);
+    const hrs = (sep) => (D.hours ? `${D.hours.open.replace(':', '.')}${sep}${D.hours.close.replace(':', '.')} WIB` : '');
+    const venue = (D.event && D.event.venue) || '';
+    const short3 = (t) => t.slice(0, 3);
+    const val = {
+      range: range(' – ', short3),
+      monthYear: `${(sameMonth ? mon(b) : `${short3(mon(a))} – ${short3(mon(b))}`).toUpperCase()}<br>${b.y}`,
+      daySpan: `${evDays[0].short} – ${evDays[evDays.length - 1].short}`,
+      hours: hrs(' – '),
+      hoursTight: hrs('–'),
+      venue,
+      dates: `${range('–', (t) => t)}${sameMonth ? ` ${mon(b)}` : ''} ${b.y}`,
+      menuDates: `${range(' — ', short3)}${sameMonth ? ` ${short3(mon(b))}` : ''} ${b.y}`.toUpperCase(),
+    };
+    $$('[data-mb9]').forEach((el) => {
+      const v = val[el.dataset.mb9];
+      if (!v) return;
+      if (el.dataset.mb9 === 'monthYear') el.innerHTML = v; else el.textContent = v;
+    });
+    $$('[data-mb9-aria="menuAria"]').forEach((el) => {
+      el.setAttribute('aria-label', `Lihat jadwal acara — ${range(' sampai ', (t) => t)}${sameMonth ? ` ${mon(b)}` : ''} ${b.y}, ${venue}`);
+    });
+  }
 
   // Deep link (#denah dll): lompatan bawaan browser terjadi saat HTML selesai
-  // di-parse — sebelum konten dari data.js dirender dan sebelum ScrollTrigger
+  // di-parse — sebelum konten dari data-prod.js dirender dan sebelum ScrollTrigger
   // memasang pin-spacer layanan/asatidz yang menambah ribuan piksel. Posisinya
   // jadi basi dan pengunjung mendarat jauh di atas target. Maka: hash ditahan,
   // halaman dimulai dari atas (preloader + intro hero tetap jalan), lalu
@@ -71,7 +106,7 @@
   }
 
   /* ---------------------------------------------------------
-     RENDER KONTEN DARI data.js
+     RENDER KONTEN DARI data-prod.js
      --------------------------------------------------------- */
   const ICONS = {
     medis: '<svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10"/></svg>',
@@ -1130,7 +1165,7 @@
     muslimah: 'M4.5 21C5 18 5 15 5 10a7 7 0 0 1 14 0c0 5 0 8 .5 11-5 1-10 1-15 0zM12 7a3.5 4.5 0 1 1 0 9 3.5 4.5 0 0 1 0-9zM8.7 10.2c2.1-.8 4.5-.8 6.6 0',
     titik: 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z',
   };
-  // Ikon dipilih dari kata kunci judul; r.icon di data.js bisa menimpanya.
+  // Ikon dipilih dari kata kunci judul; r.icon di data-prod.js bisa menimpanya.
   const ICON_RULES = [
     [/bazar|foodcourt/, 'toko'], [/khitan/, 'medis'], [/lomba|musabaqah|grand final/, 'piala'],
     [/donor/, 'tetes'], [/periksa|kesehatan/, 'nadi'], [/bekam/, 'hati'], [/cut|cukur/, 'gunting'],
@@ -1144,6 +1179,11 @@
   };
   const iconOf = (r) => `<svg class="jico" viewBox="0 0 24 24" aria-hidden="true"><path d="${JICONS[iconKey(r)]}"/></svg>`;
   const pinkCls = (r) => (r.ladies ? ' is-pink' : '');
+  // Keterangan acara: nama pengisi diambil dari D.asatidz lewat r.ustadz (id atau
+  // daftar id), lalu disambung note bila ada. Id tak dikenal diabaikan.
+  const ustadzById = Object.fromEntries((D.asatidz || []).filter((u) => u.id).map((u) => [u.id, u.name]));
+  const noteOf = (r) => [[].concat(r.ustadz || []).map((id) => ustadzById[id]).filter(Boolean).join(' & '), r.note]
+    .filter(Boolean).join(' · ');
   let jView = 'tabel';
   try { if (localStorage.getItem('mb9-jview') === 'durasi') jView = 'durasi'; } catch (e) { /* storage diblokir */ }
   let currentKey = null;
@@ -1222,7 +1262,7 @@
     const rowHtml = (r) => `
         <div class="jrow${pinkCls(r)}${jView === 'tabel' && r.group ? ' is-grp' : ''}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}>
           <time>${esc(r.time)}</time>
-          <div><h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>${r.note ? `<p>${esc(r.note)}</p>` : ''}</div>
+          <div><h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>${noteOf(r) ? `<p>${esc(noteOf(r))}</p>` : ''}</div>
           ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : '<span></span>'}
         </div>`;
     // kolom diurut kiri→kanan menurut jam selesai (lalu jam mulai) — yang
@@ -1255,7 +1295,7 @@
           <div class="jstop"><i aria-hidden="true"></i><time>${c.label}</time></div>${c.items.map((r) => `
           <div class="jcard__item${pinkCls(r)}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}>
             <h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>
-            ${r.note ? `<p>${esc(r.note)}</p>` : ''}
+            ${noteOf(r) ? `<p>${esc(noteOf(r))}</p>` : ''}
             ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : ''}
           </div>`).join('')}
         </div>`).join('')}</div></div></div>`;
@@ -1285,7 +1325,7 @@
           .map(([, list]) => (list.length > 1 ? durHtml({ rows: list }) : rowHtml(list[0]))).join('');
         return `<div class="jperiode"><span>${sec.p.label}</span></div>${html}`;
       }
-      // Tabel: urut sesuai susunan di data.js (atau `order` bila diisi:
+      // Tabel: urut sesuai susunan di data-prod.js (atau `order` bila diisi:
       // kecil duluan, default 0); sort() stabil → yang setara tetap urutan data
       const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0);
       return `<div class="jperiode"><span>${sec.p.label}</span></div>${[...sec.rows].sort(byOrder).map(rowHtml).join('')}`;
@@ -1612,9 +1652,25 @@
     let sel = activeIdx($$('.day', tabs));
     const keep = chosenDay && chosenDay !== prevAuto && !isPastDay(chosenDay);
     if (!keep) { sel = autoIdx(); chosenDay = null; }
+    // Pengunjung sedang melihat #jadwal → tetap di sana: tinggi panel bisa berubah
+    // drastis (mis. 14 acara → "menyusul") dan ScrollTrigger.refresh ikut menggeser.
+    const sec = $('#jadwal');
+    const r0 = sec.getBoundingClientRect();
+    const inView = r0.top < innerHeight && r0.bottom > 0;
     tabs.innerHTML = tabsHTML(sel);
     layoutDays();
     renderDay(D.days[sel].key);
+    if (!inView) return;
+    // dua frame: tunggu ScrollTrigger.refresh yang dijadwalkan renderDay
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const r1 = sec.getBoundingClientRect();
+      // posisi section di layar dipertahankan; kalau section kini terlalu pendek
+      // sehingga sudah lewat dari layar, kembali ke awal section
+      const dy = r1.bottom - (r1.top - r0.top) < innerHeight * 0.3 ? r1.top : r1.top - r0.top;
+      if (Math.abs(dy) < 1) return;
+      if (lenis) lenis.scrollTo(scrollY + dy, { immediate: true, force: true });
+      else scrollTo({ top: scrollY + dy, behavior: 'instant' });
+    }));
   };
   setInterval(rollDay, 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) rollDay(); });
@@ -1623,21 +1679,45 @@
   // Asatidz
   const agrid = $('#asatidzGrid');
   const SIL = '<svg class="sil" viewBox="0 0 100 120" fill="currentColor" aria-hidden="true"><circle cx="50" cy="34" r="22"/><path d="M8 120c0-26 19-44 42-44s42 18 42 44Z"/></svg>';
-  if (D.asatidz && D.asatidz.length) {
-    agrid.innerHTML = D.asatidz.map((u) => `
-      <article class="ustadz">
+  // Selalu minimal 6 kartu: asatidz yang sudah ada tampil duluan, sisanya
+  // kartu "InsyaAllah menyusul" sampai daftarnya lengkap.
+  const ASATIDZ_MIN = 6;
+  const asatidz = D.asatidz || [];
+  const soonN = Math.max(0, ASATIDZ_MIN - asatidz.length);
+  agrid.innerHTML = asatidz.map((u) => `
+      <article class="ustadz"${u.id ? ` data-id="${esc(u.id)}"` : ''}>
         ${u.photo ? `<img class="lazy-img" data-src="${esc(u.photo)}" alt="${esc(u.name)}" decoding="async">` : SIL}
         <div class="ustadz__body"><h3>${esc(u.name)}</h3>${u.role ? `<small>${esc(u.role)}</small>` : ''}</div>
-      </article>`).join('');
-    lazyWatch(agrid);
-  } else {
-    agrid.innerHTML = Array.from({ length: 6 }, (_, i) => `
+      </article>`).join('') + Array.from({ length: soonN }, (_, k) => {
+    const i = asatidz.length + k;
+    return `
       <article class="ustadz ustadz--soon" aria-label="Pemateri ${i + 1}, InsyaAllah menyusul">
         ${SIL}<span class="q" aria-hidden="true">?</span>
         <div class="ustadz__body"><h3>Pemateri ${String(i + 1).padStart(2, '0')}</h3><small>InsyaAllah menyusul</small></div>
-      </article>`).join('');
-    agrid.insertAdjacentHTML('afterend', '<p class="asatidz__note">Daftar asatidz InsyaAllah segera diumumkan</p>');
-  }
+      </article>`;
+  }).join('');
+  if (asatidz.length) lazyWatch(agrid);
+  if (soonN) agrid.insertAdjacentHTML('afterend', '<p class="asatidz__note">Daftar asatidz InsyaAllah segera diumumkan</p>');
+  // Tanda "Berlangsung" di kartu asatidz yang kajiannya sedang berjalan
+  // (jadwal hari ini menurut WIB, field ustadz). Diperiksa ulang tiap menit.
+  const markAsatidzLive = () => {
+    const now = wibNow();
+    const day = D.days.find((d) => d.iso === now.iso);
+    const live = new Map(); // id → ladies?
+    ((day && D.jadwal && D.jadwal[day.key]) || []).forEach((r) => {
+      const [a, b] = r.time.split(' - ').map(toMin);
+      if (now.min >= a && now.min < b) [].concat(r.ustadz || []).forEach((id) => live.set(id, !!r.ladies));
+    });
+    $$('.ustadz[data-id]', agrid).forEach((card) => {
+      const on = live.has(card.dataset.id);
+      card.classList.toggle('is-live', on);
+      card.classList.toggle('is-pink', on && live.get(card.dataset.id));
+      const tag = card.querySelector(':scope > .jlive');
+      if (on && !tag) card.insertAdjacentHTML('beforeend', '<span class="jlive mono">Berlangsung</span>');
+      else if (!on && tag) tag.remove();
+    });
+  };
+  if (agrid.querySelector('.ustadz[data-id]')) { markAsatidzLive(); setInterval(markAsatidzLive, 60 * 1000); }
 
   // Tenant marquee + grid
   const tenants = D.tenants.map(([name, file, tone]) => ({ name, tone, src: `assets/img/tenant/${file}` }));
