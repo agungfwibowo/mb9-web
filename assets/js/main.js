@@ -1068,24 +1068,43 @@
   const TAGS = { kajian: 'Kajian', layanan: 'Layanan', lomba: 'Lomba', talkshow: 'Talkshow' };
   const tabs = $('#dayTabs');
   const panel = $('#jadwalPanel');
-  // Hari ini menurut WIB (YYYY-MM-DD) → tab default saat acara berlangsung
-  const todayWIB = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
-  const todayIdx = D.days.findIndex((d) => d.iso === todayWIB);
+  // Status hari menurut jam WIB. Satu hari acara = jam buka s/d jam tutup:
+  // "Hari ini" hanya selama rentang itu, lewat jam tutup langsung "Selesai".
+  // `let`: diperbarui otomatis bila halaman dibiarkan terbuka (lihat rollDay).
+  const OPEN = (D.hours && D.hours.open) || '08:00';
+  const CLOSE = (D.hours && D.hours.close) || '21:00';
+  let todayWIB, dayClosed, todayIdx;
+  const readClock = () => {
+    const now = new Date();
+    const hhmm = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now);
+    todayWIB = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(now);
+    dayClosed = hhmm >= CLOSE;
+    todayIdx = hhmm >= OPEN && !dayClosed ? D.days.findIndex((d) => d.iso === todayWIB) : -1;
+  };
+  readClock();
+  const isPast = (d) => d.iso < todayWIB || (d.iso === todayWIB && dayClosed);
+  // Tab otomatis: hari ini selama jam acara, selain itu hari berikutnya yang belum lewat
+  const autoIdx = () => {
+    if (todayIdx >= 0) return todayIdx;
+    const next = D.days.findIndex((d) => !isPast(d));
+    return next >= 0 ? next : 0;
+  };
   // Deep link: ?hari=d3 membuka tab hari itu — panitia bisa membagikan tautan
-  // langsung ke jadwal satu hari. Kalau tidak ada, jatuh ke hari ini / hari-1.
+  // langsung ke jadwal satu hari. Kalau tidak ada, jatuh ke hari ini / berikutnya.
   const linkedIdx = D.days.findIndex((d) => d.key === new URLSearchParams(location.search).get('hari'));
-  const defaultIdx = linkedIdx >= 0 ? linkedIdx : todayIdx >= 0 ? todayIdx : 0;
+  const defaultIdx = linkedIdx >= 0 ? linkedIdx : autoIdx();
   // Hari yang sudah lewat tidak disimpan di URL: tautan lama tetap membuka tabnya,
   // tapi ?hari dibuang dari address bar supaya tidak ikut tersimpan/dibagikan.
-  const isPastDay = (key) => { const d = D.days.find((x) => x.key === key); return !!d && d.iso < todayWIB; };
+  const isPastDay = (key) => { const d = D.days.find((x) => x.key === key); return !!d && isPast(d); };
   if (linkedIdx >= 0 && isPastDay(D.days[linkedIdx].key)) {
     const u = new URL(location); u.searchParams.delete('hari'); history.replaceState(null, '', u);
   }
-  tabs.innerHTML = D.days.map((d, i) => `
-    <button class="day${i === todayIdx ? ' is-today' : ''}${d.iso < todayWIB ? ' is-past' : ''}" role="tab" id="tab-${d.key}" aria-selected="${i === defaultIdx}" aria-controls="jadwalPanel" data-day="${d.key}" tabindex="${i === defaultIdx ? 0 : -1}" aria-label="Hari ke-${i + 1}, ${esc(d.full || d.short)} ${esc(d.date)} ${d.year}">
+  const tabsHTML = (sel) => D.days.map((d, i) => `
+    <button class="day${i === todayIdx ? ' is-today' : ''}${isPast(d) ? ' is-past' : ''}" role="tab" id="tab-${d.key}" aria-selected="${i === sel}" aria-controls="jadwalPanel" data-day="${d.key}" tabindex="${i === sel ? 0 : -1}" aria-label="Hari ke-${i + 1}, ${esc(d.full || d.short)} ${esc(d.date)} ${d.year}">
       <small>Hari ke-${i + 1}</small><b>${esc(d.short)}</b><span>${esc(d.date)} ${d.year}</span><i class="day__edge" aria-hidden="true">${i === todayIdx ? 'Hari ini' : `Hari ke-${i + 1}`}</i>
-      ${i === todayIdx ? '<em class="day__badge day__badge--today mono">Hari ini</em>' : d.iso < todayWIB ? '<em class="day__badge day__badge--past mono">Selesai</em>' : ''}
+      ${i === todayIdx ? '<em class="day__badge day__badge--today mono">Hari ini</em>' : isPast(d) ? '<em class="day__badge day__badge--past mono">Selesai</em>' : ''}
     </button>`).join('');
+  tabs.innerHTML = tabsHTML(defaultIdx);
 
   // Tampilan "Per Waktu": jadwal yang sama dikelompokkan di bawah heading
   // Pagi/Siang/Sore/Malam (berdasar jam mulai) — murni pengelompokan visual,
@@ -1196,7 +1215,7 @@
     currentKey = key;
     const day = D.days.find((d) => d.key === key);
     const rows = (D.jadwal && D.jadwal[key]) || [];
-    const past = day.iso < todayWIB;
+    const past = isPast(day);
     panel.setAttribute('aria-labelledby', `tab-${key}`);
     panel.classList.toggle('is-past', past);
     const banner = past ? `<div class="jadwal__past mono"><span>Selesai</span> Rangkaian acara ${esc(day.full)} telah berakhir.</div>` : '';
@@ -1578,6 +1597,27 @@
   // transisi dinyalakan setelah frame pertama agar layout awal tidak ikut dianimasikan
   requestAnimationFrame(() => tabs.classList.add('is-ready'));
   addEventListener('load', layoutDays);
+
+  // Halaman dibiarkan terbuka (mis. layar info di lokasi): saat jam buka (08:00)
+  // dan jam tutup (21:00) WIB terlewati, badge "Hari ini"/"Selesai" diperbarui
+  // dan tab pindah ke hari ini / hari berikutnya. Pilihan pengunjung ke hari LAIN
+  // yang belum lewat tidak diganggu. Dicek tiap menit + saat tab kembali aktif
+  // (timer di latar bisa tertunda).
+  const clockKey = () => `${todayWIB}|${todayIdx}|${dayClosed}`;
+  const rollDay = () => {
+    const before = clockKey();
+    const prevAuto = D.days[autoIdx()].key;
+    readClock();
+    if (clockKey() === before) return;
+    let sel = activeIdx($$('.day', tabs));
+    const keep = chosenDay && chosenDay !== prevAuto && !isPastDay(chosenDay);
+    if (!keep) { sel = autoIdx(); chosenDay = null; }
+    tabs.innerHTML = tabsHTML(sel);
+    layoutDays();
+    renderDay(D.days[sel].key);
+  };
+  setInterval(rollDay, 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) rollDay(); });
   addEventListener('resize', layoutDays);
 
   // Asatidz
