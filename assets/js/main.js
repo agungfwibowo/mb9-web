@@ -1193,6 +1193,8 @@
   // Keterangan acara: nama pengisi diambil dari D.asatidz lewat r.ustadz (id atau
   // daftar id), lalu disambung note bila ada. Id tak dikenal diabaikan.
   const ustadzById = Object.fromEntries((D.asatidz || []).filter((u) => u.id).map((u) => [u.id, u.name]));
+  // id pengisi di elemen jadwal → badge asatidz bisa menemukan acaranya
+  const ustAttr = (r) => (r.ustadz ? ` data-ustadz="${esc([].concat(r.ustadz).join(' '))}"` : '');
   const noteOf = (r) => [[].concat(r.ustadz || []).map((id) => ustadzById[id]).filter(Boolean).join(' & '), r.note]
     .filter(Boolean).join(' · ');
   let jView = 'tabel';
@@ -1271,7 +1273,7 @@
     panel.classList.toggle('is-past', past);
     const banner = past ? `<div class="jadwal__past mono"><span>Selesai</span> Rangkaian acara ${esc(day.full)} telah berakhir.</div>` : '';
     const rowHtml = (r) => `
-        <div class="jrow${pinkCls(r)}${jView === 'tabel' && r.group ? ' is-grp' : ''}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}>
+        <div class="jrow${pinkCls(r)}${jView === 'tabel' && r.group ? ' is-grp' : ''}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}${ustAttr(r)}>
           <time>${esc(r.time)}</time>
           <div><h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>${noteOf(r) ? `<p>${esc(noteOf(r))}</p>` : ''}</div>
           ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : '<span></span>'}
@@ -1300,11 +1302,11 @@
       });
       // Kartu berjajar 1 baris (geser horizontal, urut jam selesai). Di atas
       // tiap kartu ada garis waktu bersambung dengan titik di jam selesainya.
-      return `<div class="jdur"><div class="jdur__head"><span>${head}</span><span class="jdur__nav" hidden><button type="button" data-dir="-1" aria-label="Geser ke kiri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></span></div><div class="jrail${cards.length > 2 ? ' jrail--many' : ''}"><div class="jrail__track">${cards.map((c) => `
+      return `<div class="jdur"><div class="jdur__head"><span>${head}</span><span class="jdur__nav" hidden><button type="button" data-dir="-1" aria-label="Geser ke kiri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></span></div><div class="jrail${cards.length > 2 ? ' jrail--many' : ''}${same ? '' : ' jrail--range'}"><div class="jrail__track">${cards.map((c) => `
         <div class="jcard${c.items.every((r) => r.ladies) ? ' is-pink' : ''}">
           <span class="jcard__edge" aria-hidden="true" data-t="${c.label}"></span>
           <div class="jstop"><i aria-hidden="true"></i><time>${c.label}</time></div>${c.items.map((r) => `
-          <div class="jcard__item${pinkCls(r)}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}>
+          <div class="jcard__item${pinkCls(r)}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}${ustAttr(r)}>
             <h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>
             ${noteOf(r) ? `<p>${esc(noteOf(r))}</p>` : ''}
             ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : ''}
@@ -1721,25 +1723,84 @@
   }).join('');
   if (asatidz.length) lazyWatch(agrid);
   if (soonN) agrid.insertAdjacentHTML('afterend', '<p class="asatidz__note">Daftar asatidz InsyaAllah segera diumumkan</p>');
-  // Tanda "Berlangsung" di kartu asatidz yang kajiannya sedang berjalan
-  // (jadwal hari ini menurut WIB, field ustadz). Diperiksa ulang tiap menit.
+  // Badge di foto kartu asatidz yang punya jadwal HARI INI (sejak 00:00 WIB s/d
+  // jam tutup, lihat openDayAt): "Hari ini · 16.00" sebelum mulai → "Berlangsung"
+  // (+ garis tepi) saat kajiannya jalan → "Selesai" setelahnya. Cek tiap menit.
   const markAsatidzLive = () => {
     const now = wibNow();
-    const day = D.days.find((d) => d.iso === now.iso);
-    const live = new Map(); // id → ladies?
+    const day = openDayAt(Date.now());
+    const st = new Map(); // id → { live, next (menit mulai terdekat), ladies }
     ((day && D.jadwal && D.jadwal[day.key]) || []).forEach((r) => {
       const [a, b] = r.time.split(' - ').map(toMin);
-      if (now.min >= a && now.min < b) [].concat(r.ustadz || []).forEach((id) => live.set(id, !!r.ladies));
+      [].concat(r.ustadz || []).forEach((id) => {
+        // t = jam sesi yang dituju badge: yang berjalan › terdekat › terakhir selesai
+        const o = st.get(id) || { live: false, next: null, ladies: false, t: '', tNext: '', tDone: '' };
+        if (now.min >= a && now.min < b) { o.live = true; o.ladies = !!r.ladies; o.t = r.time; }
+        else if (now.min < a) { if (o.next === null || a < o.next) { o.next = a; o.tNext = r.time; } }
+        else o.tDone = r.time;
+        st.set(id, o);
+      });
     });
     $$('.ustadz[data-id]', agrid).forEach((card) => {
-      const on = live.has(card.dataset.id);
-      card.classList.toggle('is-live', on);
-      card.classList.toggle('is-pink', on && live.get(card.dataset.id));
-      const tag = card.querySelector(':scope > .jlive');
-      if (on && !tag) card.insertAdjacentHTML('beforeend', '<span class="jlive mono">Berlangsung</span>');
-      else if (!on && tag) tag.remove();
+      const o = st.get(card.dataset.id);
+      const live = !!o && o.live;
+      card.classList.toggle('is-live', live);
+      card.classList.toggle('is-pink', live && o.ladies);
+      // badge = tautan ke jadwal hari ini (tab dipilih di handler klik agrid)
+      const t = !o ? '' : live ? o.t : o.next !== null ? o.tNext : o.tDone;
+      const badge = (cls, text) => `<a href="#jadwal" class="ustadz__badge ${cls} mono" data-day="${day.key}" data-t="${esc(t)}" aria-label="${text} — buka jadwal hari ini">${text}<span class="ustadz__go" aria-hidden="true">→</span></a>`;
+      const html = !o ? ''
+        : live ? badge('jlive', 'Berlangsung')
+          : o.next !== null ? badge('ustadz__badge--today', `Hari ini · ${fmtMin(o.next)}`)
+            : badge('ustadz__badge--done', 'Selesai');
+      const old = card.querySelector(':scope > .ustadz__badge');
+      if (old && old.outerHTML === html) return;
+      if (old) old.remove();
+      if (html) card.insertAdjacentHTML('beforeend', html);
     });
   };
+  // klik badge → pilih tab hari itu dulu (gulir ke #jadwal oleh handler anchor
+  // umum), lalu acara ustadz itu berkedip di tampilan yang sedang terbuka:
+  // Tabel → barisnya; Durasi → kartunya (baris kartu digeser ke sana dulu).
+  let flashTimer = 0;
+  agrid.addEventListener('click', (e) => {
+    const a = e.target.closest('.ustadz__badge[data-day]');
+    const btn = a && $(`#tab-${a.dataset.day}`);
+    if (!btn) return;
+    selectDay(btn);
+    const id = a.closest('.ustadz').dataset.id;
+    const el = $$('[data-ustadz]', panel).find((x) => x.dataset.ustadz.split(' ').includes(id) && x.dataset.t === a.dataset.t);
+    if (!el) return; // acara tak ditemukan → cukup gulir ke #jadwal (handler anchor umum)
+    // gulir sendiri langsung ke acaranya (bukan ke awal section) agar kedipnya terlihat
+    e.preventDefault();
+    e.stopPropagation();
+    const card = el.closest('.jcard');
+    const rail = el.closest('.jrail');
+    if (rail && card) {
+      const i = $$('.jcard', rail).indexOf(card);
+      if (card.classList.contains('is-piled') || card.classList.contains('is-gone')) moveRail(rail, i);
+    }
+    const target = card || el;
+    // posisi diukur setelah ScrollTrigger.refresh (dijadwalkan renderDay) → 2 frame;
+    // acaranya ditaruh di tengah layar
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const r = target.getBoundingClientRect();
+      const y = Math.max(0, scrollY + r.top - (innerHeight - r.height) / 2);
+      if (lenis) lenis.scrollTo(y, { duration: 1 });
+      else scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
+    }));
+    // mulai setelah gulirnya kurang lebih selesai; 4× nyala-padam
+    clearTimeout(flashTimer); clearInterval(flashTimer);
+    $$('.is-flash, .is-flashing', panel).forEach((x) => x.classList.remove('is-flash', 'is-flashing'));
+    let n = 0;
+    flashTimer = setTimeout(() => {
+      target.classList.add('is-flashing');
+      flashTimer = setInterval(() => {
+        target.classList.toggle('is-flash', n % 2 === 0);
+        if (++n >= 8) { clearInterval(flashTimer); target.classList.remove('is-flashing'); }
+      }, 450);
+    }, 1100);
+  });
   if (agrid.querySelector('.ustadz[data-id]')) { markAsatidzLive(); everyMinute(markAsatidzLive); }
 
   // Tenant marquee + grid
