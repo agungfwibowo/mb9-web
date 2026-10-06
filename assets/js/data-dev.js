@@ -1,14 +1,13 @@
 /* =========================================================
-   DATA UJI (DEV) — hanya aktif saat dibuka di komputer sendiri
-   (localhost / 127.0.0.1 / IP jaringan lokal). Di situs produksi
-   file ini langsung keluar tanpa mengubah apa pun.
+   DATA UJI (DEV) — aktif di mana saja KECUALI domain produksi
+   (muslimberdedikasi.com / www.muslimberdedikasi.com): localhost,
+   agungfwibowo.github.io, dll. Di domain produksi file ini langsung
+   keluar tanpa mengubah apa pun.
    Dimuat SETELAH data-prod.js dan menimpa sebagian isinya.
    ========================================================= */
 (() => {
-  const h = location.hostname;
-  const local = h === 'localhost' || h === '::1' || h.endsWith('.local')
-    || /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(h);
-  if (!local || !window.MB9) return;
+  const PROD = ['muslimberdedikasi.com', 'www.muslimberdedikasi.com'];
+  if (PROD.includes(location.hostname) || !window.MB9) return;
   const D = window.MB9;
 
   // Tanggal asli tetap dipakai untuk teks hero/lokasi (lihat evDays di main.js)
