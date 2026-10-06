@@ -2466,11 +2466,18 @@
   let seenThisSession = false;
   try { seenThisSession = sessionStorage.getItem('mb9-pre') === '1'; sessionStorage.setItem('mb9-pre', '1'); } catch (_) { /* abaikan */ }
   const finishPreloader = () => new Promise((resolve) => {
-    if (!hasGsap || reduced || seenThisSession || quickPre) {
-      const ms = (seenThisSession || quickPre) && !reduced ? 300 : 400;
-      pre.style.transition = `opacity ${ms}ms`;
+    if (!hasGsap || reduced) {
+      pre.style.transition = 'opacity .4s';
       pre.style.opacity = '0';
-      setTimeout(() => { pre.remove(); resolve(); }, ms);
+      setTimeout(() => { pre.remove(); resolve(); }, 400);
+      return;
+    }
+    // mode cepat: panel sudah menutup (CSS) → langsung diangkat bergantian
+    if (seenThisSession || quickPre) {
+      gsap.to('.preloader__panels i', {
+        scaleY: 0, transformOrigin: '50% 0%', duration: .5, stagger: .06, ease: 'power4.inOut',
+        onComplete: () => { pre.remove(); resolve(); },
+      });
       return;
     }
     const o = { v: 0 };
