@@ -3,12 +3,12 @@
    di lokasi acara. Naikkan VERSION setiap rilis: cache lama
    otomatis dibuang saat worker baru aktif.
    ========================================================= */
-const VERSION = 'mb9-1.1.310';
+const VERSION = 'mb9-1.1.311';
 // Versi aset diambil dari VERSION, jadi cukup satu kali naik versi dan URL
 // ?v= di sini selalu sama persis dengan yang ditulis index.html.
 const V = VERSION.slice(VERSION.indexOf('-') + 1);
 const CORE = [
-  './', './index.html', './manifest.webmanifest',
+  './', './index.html', './privasi/', './manifest.webmanifest',
   `assets/css/style.css?v=${V}`, `assets/js/data.js?v=${V}`, `assets/js/main.js?v=${V}`,
   'assets/fonts/public-sans-latin.woff2', 'assets/fonts/roboto-mono-latin.woff2', 'assets/fonts/noto-sans-mono-blocks.woff2',
 ];
@@ -60,11 +60,16 @@ self.addEventListener('fetch', (e) => {
   // Manifest ikut jaringan-dulu: Chrome membacanya untuk menentukan
   // installability & related_applications — versi basi dari cache bikin
   // getInstalledRelatedApps() tidak pernah cocok.
-  if (req.mode === 'navigate' || new URL(req.url).pathname.endsWith('.webmanifest')) {
+  // Halaman selain beranda (mis. /privasi/) disimpan di kunci sendiri; tanpa
+  // ini membuka halaman lain akan menimpa salinan offline index.html.
+  const path = new URL(req.url).pathname;
+  if (req.mode === 'navigate' || path.endsWith('.webmanifest')) {
+    const page = path === '/' || path === '/index.html' ? './index.html' : path;
+    const key = req.mode === 'navigate' ? page : req;
     e.respondWith(
       fetch(req)
-        .then((res) => { putCopy(req.mode === 'navigate' ? './index.html' : req, res); return res; })
-        .catch(() => caches.match(req.mode === 'navigate' ? './index.html' : req)),
+        .then((res) => { putCopy(key, res); return res; })
+        .catch(() => caches.match(key)),
     );
     return;
   }

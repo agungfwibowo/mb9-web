@@ -1,0 +1,7 @@
+# Muslim Berdedikasi 9 — kebijakan pelaporan celah keamanan (RFC 9116)
+# Perbarui "Expires" sebelum tanggalnya lewat (maksimal 1 tahun ke depan).
+Contact: https://wa.me/6281255557120
+Expires: 2027-10-06T00:00:00.000Z
+Preferred-Languages: id, en
+Canonical: https://www.muslimberdedikasi.com/.well-known/security.txt
+Policy: https://www.muslimberdedikasi.com/privasi/
