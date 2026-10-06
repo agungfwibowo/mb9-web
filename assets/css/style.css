@@ -808,7 +808,7 @@ html:not(.js) .preloader { display: none; }
 .jdur .jcard.is-live .jstop time { background: #edf1ff; }
 .jdur .jcard.is-live.is-pink .jstop time { background: #fdeef5; }
 @media (prefers-reduced-motion: reduce) { .jrow.is-live::after, .jdur .jcard.is-live .jstop i { animation: none; } }
-/* Tabel: acara yang berjalan bersamaan (field group di data.js) → garis biru kiri */
+/* Tabel: acara yang berjalan bersamaan (field group di data-prod.js) → garis biru kiri */
 /* latar putih (abu-abu khusus untuk acara yang sudah lewat) — paralel cukup ditandai garis biru */
 .jrow.is-grp { box-shadow: inset 4px 0 0 var(--blue); }
 .jrow time { font: 700 15px/1 var(--mono); color: var(--blue); }
@@ -996,11 +996,17 @@ html:not(.js) .preloader { display: none; }
 .ustadz { position: relative; aspect-ratio: 3/4; background: var(--paper); border: 2px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
 .ustadz img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: transform .8s var(--ease), filter .6s; }
 .ustadz:hover img { transform: scale(1.06); filter: grayscale(0); }
-.ustadz__body { position: relative; padding: 16px; background: var(--ink); color: var(--white); box-shadow: inset 1px 0 0 rgba(255, 255, 255, .22); }
+/* min-height = padding + nama 2 baris + peran → kotak nama sama tinggi, teks rata atas */
+.ustadz__body { position: relative; min-height: 85px; padding: 16px; background: var(--ink); color: var(--white); box-shadow: inset 1px 0 0 rgba(255, 255, 255, .22); }
 .ustadz__body h3 { font: 700 15px/1.25 var(--mono); }
 .ustadz__body small { display: block; color: var(--lime); font: 12px/1.25 var(--mono); }
+/* Kajiannya sedang berlangsung (markAsatidzLive di main.js) */
+.ustadz.is-live { z-index: 1; border-color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); }
+.ustadz.is-live.is-pink { border-color: var(--pink); box-shadow: inset 0 0 0 2px var(--pink); }
+.ustadz > .jlive { position: absolute; top: 14px; left: 14px; z-index: 1; animation: live-pulse 1.4s ease-out infinite; }
+.ustadz.is-pink > .jlive { animation-name: live-pulse-pink; }
 .ustadz--soon { background: repeating-linear-gradient(-45deg, var(--paper) 0 14px, #e2e2df 14px 28px); }
-.ustadz--soon .sil { position: absolute; left: 50%; top: 18%; width: 58%; transform: translateX(-50%); color: var(--grey-2); transition: color .4s, transform .6s var(--ease); }
+.ustadz .sil { position: absolute; left: 50%; top: 18%; width: 58%; transform: translateX(-50%); color: var(--grey-2); transition: color .4s, transform .6s var(--ease); }
 .ustadz--soon:hover .sil { color: var(--grey); }
 .ustadz--soon .q { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; display: grid; place-items: center; background: var(--lime); font: 700 20px/1 var(--mono); color: var(--ink); }
 .asatidz__note { margin-top: 30px; padding: 0 var(--gutter); display: flex; justify-content: center; align-items: center; gap: 14px; text-align: left; flex-wrap: nowrap; font: 700 14px/1.4 var(--mono); text-transform: uppercase; }
@@ -1411,7 +1417,7 @@ html:not(.js) .preloader { display: none; }
   .asatidz .sec-head .sec-sub { margin-top: 10px; font-size: 14.5px; line-height: 1.5; }
   /* aspect-ratio 3/4 → tinggi = basis x 1.33; 34vh menahannya di ~45vh */
   .asatidz__grid > .ustadz { flex: 0 0 min(62vw, 34vh); }
-  .ustadz__body { padding: 12px; }
+  .ustadz__body { padding: 12px; min-height: 73px; }
   .ustadz__body h3 { font-size: 14px; }
   .ustadz__body small { font-size: 11px; }
   .ustadz--soon .q { width: 30px; height: 30px; top: 10px; right: 10px; font-size: 16px; }
