@@ -13,12 +13,12 @@ Desktop.ini
 
 # --- Arsip & cadangan (jangan ikut repo) ---
 Archive.zip
-Archive/
 *.zip
 *.rar
 *.7z
 *.bak
 *.tmp
+bahan/
 
 # --- Tool / dependensi (bila nanti dipakai) ---
 node_modules/
