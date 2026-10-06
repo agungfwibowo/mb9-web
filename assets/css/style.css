@@ -287,7 +287,7 @@ html:not(.js) .preloader { display: none; }
 .nav__links a:hover::after, .nav__links a.is-active::after { transform: scaleX(1); }
 .nav__links a.is-active { color: var(--ink); }
 /* penanda "ada jadwal hari ini" di link Jadwal — hanya tampil selama acara */
-.nav__flag { position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; background: var(--lime); outline: 1.5px solid var(--ink); animation: blink 1s steps(2) infinite; }
+.nav__flag { position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; background: var(--blue); animation: blink 1s steps(2) infinite; }
 .nav__flag[hidden] { display: none; }
 .nav__burger { --t: 7px; display: none; width: 46px; height: 46px; border: 0; background: var(--ink); cursor: pointer; position: relative; }
 /* Ikon piksel dalam kisi 3x3 sel berukuran --t: satu kotak nyata (sel kiri-atas)
