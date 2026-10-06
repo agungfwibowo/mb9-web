@@ -1,0 +1,5 @@
+# Muslim Berdedikasi 9
+# Crawl diizinkan agar mesin pencari bisa membaca tag <meta name="robots" content="noindex, nofollow">
+# di index.html. Saat situs siap tayang, hapus tag noindex tersebut.
+User-agent: *
+Allow: /

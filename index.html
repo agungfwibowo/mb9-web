@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Muslim Berdedikasi 9 — Generasi Berdedikasi Di Masa Depan</title>
+  <meta name="description" content="Muslim Berdedikasi 9: Festival Islam & Keluarga Terbesar di Medan. Rabu – Ahad, 23 – 27 Desember 2026, 08.00 – 21.00 WIB di Komplek Lapangan Asrama Haji Medan.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#c5fa01">
+  <meta property="og:title" content="Muslim Berdedikasi 9 — Generasi Berdedikasi Di Masa Depan">
+  <meta property="og:description" content="Festival Islam & Keluarga Terbesar di Medan · 23 – 27 Desember 2026 · Komplek Lapangan Asrama Haji Medan">
+  <!-- Preview saat link dibagikan (WhatsApp, Facebook, Telegram, X).
+       URL WAJIB absolut: path relatif diabaikan crawler → preview tanpa gambar.
+       Gambar 1200x630 (1.91:1) = format kartu besar. ?v= dinaikkan bila gambar
+       diganti, karena WhatsApp menyimpan preview lama cukup lama. -->
+  <meta property="og:site_name" content="Muslim Berdedikasi 9">
+  <meta property="og:url" content="https://app.kliklinik.com/">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:image" content="https://app.kliklinik.com/assets/img/og-cover.jpg?v=1">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Muslim Berdedikasi 9 — 23–27 Desember 2026, Komplek Lapangan Asrama Haji Medan">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="assets/img/logo/favicon.png?v=2">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2b2b2b">
+  <link rel="apple-touch-icon" href="assets/img/logo/icon-192.png?v=3">
+
+  <!-- Font di-host sendiri (dulu Google Fonts): tanpa 2 koneksi ke domain
+       lain yang berurutan, dan file font di-preload bersamaan dengan HTML.
+       Keduanya variable font → satu file subset latin memuat semua weight.
+       Noto Sans Mono: subset 3 glyph ░▒▓ untuk efek scramble — Roboto Mono
+       tidak punya glyph ini, jadi tanpa subset ini tiap OS memakai fallback
+       sendiri (Menlo di Mac, Noto di Android) dan bentuknya beda-beda.
+       unicode-range membuatnya hanya dipakai untuk U+2591-2593. Weight 700
+       disamakan dengan judul agar tidak ditebalkan sintetis. -->
+  <link rel="preload" href="assets/fonts/public-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/roboto-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face { font-family: 'Public Sans'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(assets/fonts/public-sans-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    @font-face { font-family: 'Roboto Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(assets/fonts/roboto-mono-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    @font-face { font-family: 'Noto Sans Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(assets/fonts/noto-sans-mono-blocks.woff2) format('woff2'); unicode-range: U+2591-2593; }
+  </style>
+  <link rel="stylesheet" href="assets/css/style.css?v=1.1.242">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+  <!-- ============ PRELOADER ============ -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__inner">
+      <img src="assets/img/logo/mb9-mark.webp" srcset="assets/img/logo/mb9-mark-320.webp 320w, assets/img/logo/mb9-mark.webp 650w" sizes="170px" alt="" class="preloader__mark" width="650" height="830">
+      <div class="preloader__text mono">MUSLIM BERDEDIKASI <span class="hl">9</span></div>
+      <div class="preloader__count mono"><span id="loadCount">0</span>%</div>
+    </div>
+    <div class="preloader__panels"><i></i><i></i><i></i></div>
+  </div>
+
+  <div class="noise is-intro" aria-hidden="true"></div>
+
+  <!-- ============ AJAKAN PASANG APLIKASI ============ -->
+  <aside class="a2hs" id="a2hs" role="dialog" aria-labelledby="a2hsTitle" aria-describedby="a2hsText" hidden>
+    <img src="assets/img/logo/mb9-mark-sm.webp" srcset="assets/img/logo/mb9-mark-xs.webp?v=2 120w, assets/img/logo/mb9-mark-sm.webp?v=2 283w" sizes="58px" alt="" width="58" height="58">
+    <div class="a2hs__body">
+      <b id="a2hsTitle" class="mono">Pasang di layar utama</b>
+      <p id="a2hsText">Buka lebih cepat, dan jadwal serta denah tetap bisa dibuka saat sinyal lemah di lokasi acara.</p>
+      <label class="a2hs__never"><input type="checkbox" id="a2hsNever"> Jangan tampilkan lagi</label>
+    </div>
+    <div class="a2hs__actions">
+      <button type="button" class="btn btn--sm" id="a2hsInstall"><span>Pasang</span></button>
+      <button type="button" class="btn btn--ghost btn--sm" id="a2hsLater"><span>Nanti</span></button>
+    </div>
+  </aside>
+  <!-- ============ STATUS PEMASANGAN APLIKASI (mobile) ============ -->
+  <dialog class="zoom" id="zoomDlg" aria-label="Gambar asli denah — perbesar" data-lenis-prevent>
+    <div class="zoom__stage" id="zoomStage"><img id="zoomImg" alt="Layout tenant Muslim Berdedikasi 9" decoding="async" draggable="false"></div>
+    <div class="zoom__bar mono">
+      <button type="button" data-zoom="out" aria-label="Perkecil">−</button>
+      <output id="zoomPct">100%</output>
+      <button type="button" data-zoom="in" aria-label="Perbesar">+</button>
+      <button type="button" data-zoom="fit" aria-label="Pas layar">⤢</button>
+      <a id="zoomRaw" href="assets/img/layout-tenant.jpg" target="_blank" rel="noopener" aria-label="Buka di tab baru">↗</a>
+      <button type="button" data-zoom="close" aria-label="Tutup">✕</button>
+    </div>
+    <p class="zoom__hint mono">Cubit / scroll untuk zoom · seret untuk menggeser · ketuk 2× untuk perbesar</p>
+  </dialog>
+  <div class="itoast" id="itoast" role="status" aria-live="polite" hidden>
+    <i class="itoast__caret" aria-hidden="true"></i>
+    <div class="itoast__box">
+      <div class="itoast__row">
+        <b class="itoast__title mono" id="itoastTitle"></b>
+        <button type="button" class="itoast__x" id="itoastClose" aria-label="Tutup">&times;</button>
+      </div>
+      <p class="itoast__text" id="itoastText"></p>
+      <span class="itoast__bar" aria-hidden="true"><span></span></span>
+    </div>
+  </div>
+  <div class="ntoast" id="ntoast" role="status" aria-live="polite" hidden>
+    <span class="ntoast__dot" aria-hidden="true"></span>
+    <p class="ntoast__text" id="ntoastText"></p>
+    <button type="button" class="ntoast__x" id="ntoastClose" aria-label="Kecilkan — tetap tampil sebagai titik di navbar">&times;</button>
+  </div>
+  <div class="scroll-progress" aria-hidden="true"><span></span></div>
+  <div class="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav" id="nav">
+    <a href="#home" class="nav__brand" aria-label="Muslim Berdedikasi 9 — ke atas">
+      <span class="mono">Muslim<br>Berdedikasi</span>
+      <img src="assets/img/logo/mb9-mark-sm.webp?v=2" srcset="assets/img/logo/mb9-mark-xs.webp?v=2 120w, assets/img/logo/mb9-mark-sm.webp?v=2 283w" sizes="36px" alt="" width="34" height="42">
+    </a>
+    <button type="button" class="nav__status" id="navStatus" aria-label="Mode offline — tampilkan detail" disabled></button>
+    <nav class="nav__links" aria-label="Navigasi utama">
+      <a href="#tentang">Tentang</a>
+      <a href="#jadwal">Jadwal<i class="nav__flag" id="navToday" title="Ada jadwal hari ini" hidden></i></a>
+      <a href="#layanan">Layanan Gratis</a>
+      <a href="#denah">Denah</a>
+      <a href="#tenant">Tenant</a>
+    </nav>
+    <a href="#lokasi" class="btn btn--dark btn--sm nav__cta magnetic">Temukan Lokasi</a>
+    <button class="nav__burger" id="burger" aria-label="Buka menu" aria-expanded="false" aria-controls="mobileMenu"><span></span></button>
+  </header>
+
+  <div class="mmenu" id="mobileMenu" aria-hidden="true" data-lenis-prevent>
+    <nav>
+      <a href="#tentang"><small>01</small>Tentang</a>
+      <a href="#jadwal"><small>02</small>Jadwal<em class="mmenu__flag mono" id="menuToday" hidden>Hari ini</em></a>
+      <a href="#layanan"><small>03</small>Layanan Gratis</a>
+      <a href="#asatidz"><small>04</small>Asatidz</a>
+      <a href="#denah"><small>05</small>Denah</a>
+      <a href="#tenant"><small>06</small>Tenant</a>
+      <a href="#lokasi"><small>07</small>Lokasi</a>
+      <a href="#sponsor"><small>08</small>Sponsor</a>
+    </nav>
+    <div class="mmenu__foot">
+      <button type="button" class="mmenu__home" id="menuShare" aria-label="Bagikan acara"><img class="mmenu__logo" src="assets/img/logo/mb9-mark.webp" srcset="assets/img/logo/mb9-mark-320.webp 320w, assets/img/logo/mb9-mark.webp 650w" sizes="104px" alt="" width="56" height="68"></button>
+      <a href="#jadwal" class="mmenu__meta mono" aria-label="Lihat jadwal acara — 23 sampai 27 Desember 2026, Asrama Haji Medan">23 — 27 DES 2026 · ASRAMA HAJI MEDAN</a>
+    </div>
+  </div>
+
+  <main>
+    <!-- ============ 1. HERO ============ -->
+    <section class="hero" id="home">
+      <div class="hero__bg" aria-hidden="true">
+        <picture><source media="(max-width: 860px) and (orientation: portrait)" type="image/avif" srcset="assets/img/hero-m.avif"><source media="(max-width: 860px) and (orientation: portrait)" type="image/webp" srcset="assets/img/hero-m.webp"><source type="image/avif" srcset="assets/img/hero.avif"><img src="assets/img/hero.webp" alt="" class="hero__photo" width="1800" height="1202" fetchpriority="high" decoding="async"></picture>
+        <svg class="hero__grid" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="iso" width="160" height="92.4" patternUnits="userSpaceOnUse">
+              <path d="M0 46.2 L80 0 L160 46.2 L80 92.4 Z" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            </pattern>
+          </defs>
+          <rect width="1600" height="1000" fill="url(#iso)"/>
+        </svg>
+      </div>
+
+      <div class="hero__inner">
+        <div class="hero__copy">
+          <div class="kicker mono reveal-up"> <p class="blk"><span class="tag tag--dark">Muslim Berdedikasi 9</span> <span class="outline">Generasi Berdedikasi Di Masa Depan</span></p></div>
+          <h1 class="hero__title" aria-label="Festival Islam & Keluarga Terbesar Di Medan">
+            <span class="line"><span class="blk">Festival Islam</span></span>
+            <span class="line"><span class="blk blk--lime">&amp; Keluarga</span></span>
+            <span class="line"><span class="blk">Terbesar Di Medan</span></span>
+          </h1>
+
+          <div class="hero__meta reveal-up">
+            <div class="hero__date">
+              <strong class="mono">23 – 27</strong>
+              <span class="mono">DESEMBER<br>2026</span>
+            </div>
+            <ul class="hero__facts">
+              <li><b>Rabu – Ahad</b></li>
+              <li>08.00 – 21.00 WIB</li>
+              <li>Komplek Lapangan Asrama Haji Medan</li>
+            </ul>
+          </div>
+
+          <div class="hero__actions reveal-up">
+            <a href="#lokasi" class="btn btn--dark magnetic" data-cursor="Lokasi"><span>Temukan Lokasi</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a href="#denah" class="btn btn--ghost magnetic" data-cursor="Denah"><span>Lihat Denah</span></a>
+          </div>
+        </div>
+
+        <button type="button" class="hero__visual" id="heroShare" aria-label="Bagikan acara" data-cursor="Bagikan">
+          <div class="tilt" id="heroTilt">
+            <div class="tilt__shadow"></div>
+            <!-- Jejak outline di belakang logo. Di-inline (bukan <img src=".svg">)
+                 supaya stroke bisa mengikuti currentColor dan diatur dari CSS. -->
+            <div class="tilt__echo">
+              <svg viewBox="0 0 650 830"><path id="mb9Edge" d="M649 377 L649 501 L331 684 L223 829 L212 827 L21 713 L1 703 L1 493 L27 478 L1 464 L1 248 L427 2 L433 1 L649 127 L649 377 Z"/></svg>
+              <svg viewBox="0 0 650 830"><use href="#mb9Edge"/></svg>
+              <svg viewBox="0 0 650 830"><use href="#mb9Edge"/></svg>
+            </div>
+            <img src="assets/img/logo/mb9-mark.webp" srcset="assets/img/logo/mb9-mark-320.webp 320w, assets/img/logo/mb9-mark.webp 650w" sizes="(max-width: 860px) 90px, 365px" alt="" class="tilt__mark" width="650" height="830">
+            <svg class="deco deco--squares" viewBox="0 0 170 145"><rect x="62" y="0" width="105" height="90" fill="#afc3f8"/><rect x="31" y="18" width="105" height="90" fill="#628af6"/><path d="M0 38h105v90H28L0 145Z" fill="#2150f5"/><text class="share-hint" x="53" y="88" text-anchor="middle" fill="#fff">BAGIKAN</text></svg>
+            <svg class="deco deco--arrows" viewBox="0 0 240 180"><path d="M0 50h170M135 10l45 40-45 40" fill="none" stroke="#333" stroke-width="26"/><path d="M240 132H70M105 92l-45 40 45 40" fill="none" stroke="#c5fa01" stroke-width="26"/></svg>
+          </div>
+          <!-- Petunjuk "BAGIKAN" khusus HP: balon terpisah bergaya kotak chat
+               biru (kotak birunya sendiri tidak diubah). Diatur main.js. -->
+          <span class="hero-hint" aria-hidden="true"><span class="hero-hint__b mono">Bagikan</span></span>
+        </button>
+      </div>
+
+      <div class="countdown reveal-up" id="countdown" aria-live="polite">
+        <div class="countdown__head">
+          <span class="countdown__label mono">Menuju hari H</span>
+          <a href="#jadwal" class="countdown__today mono" hidden></a>
+        </div>
+        <div class="countdown__units">
+          <div><b data-cd="d">--</b><small>Hari</small></div>
+          <div><b data-cd="h">--</b><small>Jam</small></div>
+          <div><b data-cd="m">--</b><small>Menit</small></div>
+          <div><b data-cd="s">--</b><small>Detik</small></div>
+        </div>
+      </div>
+
+      <a href="#tentang" class="hero__scroll mono" aria-label="Scroll ke bawah"><span>Scroll</span><i></i></a>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee marquee--dark" aria-hidden="true">
+      <div class="marquee__track">
+        <span>Bazar &amp; Foodcourt</span><b>✦</b><span>Kajian Islam Ilmiah</span><b>✦</b><span>Konsultasi Agama</span><b>✦</b><span>Musabaqah Hifdzul Qur'an</span><b>✦</b><span>Cek Kesehatan Umum &amp; Gigi</span><b>✦</b><span>Khitanan Massal</span><b>✦</b><span>Nikah Gratis</span><b>✦</b><span>Donor Darah</span><b>✦</b><span>Bekam</span><b>✦</b><span>Tebar Jilbab</span><b>✦</b><span>Kids Zone</span><b>✦</b>
+      </div>
+    </div>
+
+    <!-- ============ 2. TEMA UTAMA ============ -->
+    <section class="section tema" id="tentang">
+      <div class="container tema__grid">
+        <div class="tema__media">
+          <div class="img-reveal lqip" style="--lqip:url(data:image/webp;base64,UklGRpQAAABXRUJQVlA4IIgAAAAwBACdASoUAA4APuleqE0pJSOiMAgBIB0JQBOgAydHiJVX6qTmHXFNBgAA+xbpuTEPHtuMkU5iLPAKT66YzImfC86MDFloxfkMW//P2SRR0Pw4Olfet/T+jk/fQWCnbYG2C0GZHHa0ZvoTVsonYYwj0vZhg9c+GGKnmWbDFkdngjKuYwafwAAA)">
+            <picture><source type="image/avif" srcset="assets/img/tema.avif"><img src="assets/img/tema.webp" alt="Suasana acara Muslim Berdedikasi" class="parallax-img" decoding="async" width="1400" height="935"></picture>
+          </div>
+          <svg class="deco deco--zigzag" viewBox="40 80 432 345" aria-hidden="true"><g fill="#2150f5"><polygon points="44,230 215,130 215,170 365,85 383,117 178,235 178,195 62,262"/><polygon points="85,297 218,220 218,258 405,153 424,186 181,323 181,285 103,329"/><polygon points="128,370 225,315 225,353 448,226 467,259 187,418 187,380 146,403"/></g></svg>
+          <svg class="deco deco--stripes deco--tema-b" viewBox="523 91 670 152" aria-hidden="true"><path fill="#353535" d="M523 91H1095L1193 108V142H1098L1193 159V192H1098L1193 209V243H620L523 226V192H620L523 176V142H620L523 125Z"/></svg>
+        </div>
+
+        <div class="tema__copy">
+          <p class="kicker mono" data-scramble>Tumbuh Berdedikasi, Mengukir Masa Depan</p>
+          <h2 class="title split-words" data-hl="Berdedikasi">Generasi Berdedikasi Di Masa Depan</h2>
+          <p class="lead reveal-up">Muslim Berdedikasi 9 adalah <em>Islamic Family Festival</em> 5 hari berturut-turut yang dirancang sebagai oase ilmu, kesehatan, dan kebersamaan di penghujung tahun 2026. Mengusung tema “Generasi Berdedikasi Di Masa Depan”, kegiatan ini hadir untuk mendorong lahirnya generasi yang berilmu, peduli, dan memiliki semangat dedikasi dalam memberikan manfaat bagi keluarga, masyarakat, dan masa depan.</p>
+          <p class="reveal-up">Ajak seluruh anggota keluarga Anda untuk merasakan paduan sempurna antara <b>Kajian Ilmiah</b> intensif, <b>Layanan Sosial GRATIS</b> berskala besar, kompetisi inspiratif, dan pengalaman kuliner terbaik di satu tempat. Jadikan momen liburan ini sebagai investasi terbesar untuk iman, ilmu, dan kesehatan keluarga Anda.</p>
+
+          <ul class="stats">
+            <li><b class="mono" data-count="5" data-stat="days">0</b><span>Hari penuh kegiatan</span></li>
+            <li><b class="mono" data-count="95" data-stat="booths">0</b><span>Tenda bazar &amp; foodcourt</span></li>
+            <li><b class="mono" data-count="13" data-suffix=" jam" data-stat="hours">0</b><span>Buka setiap hari</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3. JADWAL ============ -->
+    <section class="section jadwal" id="jadwal">
+      <div class="container">
+        <header class="sec-head">
+          <span class="sec-num mono">02</span>
+          <h2 class="title"><span class="notch" data-scramble>Jadwal Acara Lengkap</span></h2>
+          <p class="sec-sub">Open Gate Bazar &amp; Foodcourt: 08.00 – 21.00 WIB</p>
+        </header>
+
+        <div class="jadwal__bar">
+        <div class="jadwal__actions">
+        <div class="view-toggle" id="jadwalView" role="group" aria-label="Tampilan jadwal">
+          <button type="button" data-view="tabel" aria-pressed="true" aria-label="Tabel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 10h18M3 15h18M9 5v14"/></svg><span>Tabel</span></button>
+          <button type="button" data-view="durasi" aria-pressed="false" aria-label="Durasi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h8M4 12h16M4 18h11"/></svg><span>Durasi</span></button>
+        </div>
+        <details class="cal" id="calBox">
+          <summary class="btn btn--sm" aria-label="Simpan ke kalender">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v4M17 3v4M3 9h18M5 5h14v16H5z"/></svg>
+            <span>Simpan ke Kalender</span>
+            <i class="cal__caret" aria-hidden="true">&#9662;</i>
+          </summary>
+          <div class="cal__opts">
+            <button type="button" class="btn btn--sm" id="icsBtn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v4M17 3v4M3 9h18M5 5h14v16H5z"/></svg>
+              <span>Apple / Outlook (.ics)</span>
+            </button>
+            <a class="btn btn--ghost btn--sm" id="gcalBtn" href="#" target="_blank" rel="noopener"><span>Google Calendar</span></a>
+          </div>
+        </details>
+          <div class="share">
+            <button type="button" class="btn btn--ghost btn--sm" id="shareBtn" aria-label="Bagikan tautan">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v8h16v-8M12 3v13M8 7l4-4 4 4"/></svg>
+              <span>Bagikan</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="days-nav" id="daysNav">
+          <button type="button" data-dir="-1" aria-label="Hari sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button type="button" data-dir="1" aria-label="Hari berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        </div>
+        <div class="days" role="tablist" aria-label="Pilih hari" id="dayTabs"></div>
+        <div class="jadwal__panel" id="jadwalPanel" role="tabpanel" aria-live="polite"></div>
+        <p class="note"><b>NB:</b> Jadwal dapat berubah sewaktu-waktu. Terdapat jeda istirahat setiap memasuki waktu shalat. Mohon mengikuti pengumuman terbaru di lokasi acara.</p>
+      </div>
+    </section>
+
+    <!-- ============ 4. LAYANAN ============ -->
+    <section class="layanan" id="layanan">
+      <div class="layanan__pin">
+        <div class="container layanan__head">
+          <svg class="deco deco--blocks" viewBox="88 91 334 150" aria-hidden="true"><polygon fill="#c5fa01" points="88,112 125,91 200,91 200,112 237,91 311,91 311,112 348,91 422,91 422,220 385,241 311,241 311,220 274,241 200,241 200,220 163,241 88,241"/></svg>
+          <span class="sec-num mono">03</span>
+          <h2 class="title title--light">Layanan &amp; Fasilitas <span class="hl-block">Serba GRATIS</span></h2>
+          <p class="sec-sub">Ini adalah kesempatan Anda untuk mendapatkan layanan profesional berkualitas gratis.</p>
+        </div>
+        <div class="layanan__track" id="layananTrack"></div>
+      </div>
+    </section>
+
+    <!-- ============ 5. ASATIDZ ============ -->
+    <section class="section asatidz" id="asatidz">
+      <div class="asatidz__pin">
+        <div class="container">
+          <header class="sec-head">
+            <span class="sec-num mono">04</span>
+            <h2 class="title"><span class="notch" data-scramble>Hadirkan Para Asatidz Kompeten</span></h2>
+          </header>
+        </div>
+        <div class="asatidz__grid" id="asatidzGrid"></div>
+        <svg class="deco deco--sq deco--sq-b" viewBox="0 0 170 145" aria-hidden="true"><rect x="62" y="0" width="105" height="90" fill="#afc3f8"/><rect x="31" y="18" width="105" height="90" fill="#628af6"/><path d="M0 38h105v90H28L0 145Z" fill="#2150f5"/></svg>
+      </div>
+    </section>
+
+    <!-- ============ 6. DENAH ============ -->
+    <section class="section denah" id="denah">
+      <div class="container">
+        <header class="sec-head">
+          <span class="sec-num mono">05</span>
+          <h2 class="title"><span class="notch" data-scramble>Denah &amp; Layout Event</span></h2>
+          <p class="sec-sub">Peta lokasi bazar, panggung utama, dan tenda makan pengunjung. Arahkan kursor atau ketuk tenda untuk detail.</p>
+        </header>
+
+        <div class="denah__wrap">
+          <div class="denah__side">
+            <div class="seg" role="tablist" aria-label="Tampilan denah">
+              <button role="tab" aria-selected="true" data-view="map">Interaktif</button>
+              <button role="tab" aria-selected="false" data-view="img">Gambar Asli</button>
+            </div>
+            <p class="denah__hint mono">Filter kategori tenda</p>
+            <div class="legend" id="legend"></div>
+            <!-- muncul saat sebuah tenda dipilih; URL sudah berisi ?tenant=…
+                 Di panel ini, bukan di atas peta: di HP pojok peta tertutup nav
+                 yang fixed, dan di mana pun ia akan menutupi sebagian tenda. -->
+            <div class="share share--side">
+              <button type="button" class="btn btn--sm denah-share" id="boothShare" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v8h16v-8M12 3v13M8 7l4-4 4 4"/></svg>
+                <span>Bagikan lokasi</span>
+              </button>
+            </div>
+          </div>
+          <div class="denah__stage">
+            <div class="denah__view is-active" data-pane="map">
+              <svg id="denahSvg" viewBox="88 168 874 948" role="img" aria-label="Denah interaktif tenda Muslim Berdedikasi 9"></svg>
+              <div class="booth-tip" id="boothTip" role="status"></div>
+              <div class="denah-coach" id="denahCoach" role="dialog" aria-label="Cara memakai denah" hidden>
+                <p><b>Denah interaktif.</b> Arahkan kursor atau ketuk tenda untuk melihat nomor, kategori &amp; nama tenant-nya. Pakai <b>filter kategori</b> untuk menyorot satu jenis tenda.</p>
+                <button type="button" class="denah-coach__ok mono" id="denahCoachOk">Mengerti</button>
+              </div>
+            </div>
+            <div class="denah__view" data-pane="img">
+              <a href="assets/img/layout-tenant.jpg" target="_blank" rel="noopener" data-cursor="Perbesar" class="lqip" id="denahImgLink" style="--lqip:url(data:image/webp;base64,UklGRtwAAABXRUJQVlA4INAAAAAQBQCdASoUABkAPulqqVCpJaOiqAqpIB0JagDE2BEc8NoKFlUJqCiwRV5pbkQJqPDIAP7oZ05wgjTrjU19CbExNwq4PG0GFrrCXZpwY8YY12XHEjkYb3kmcyebsCbGw95zOiKorbjz49kYo3/hFkakRvCQ/HNRDTV8yavyz+uU34AvO3DlSgTSgHR3bgHCfxhDYnbiOSI/7yHBQj/Qa8tLtCKMSdtFae0/fJ3RCC9CYfjyAdQWwPfKWX7EqFAlQJJ5Bwhn8vscm+NdkdkEoAAA)">
+                <picture><source type="image/avif" srcset="assets/img/layout-tenant.avif"><source type="image/webp" srcset="assets/img/layout-tenant.webp"><img src="assets/img/layout-tenant.jpg" alt="Layout tenant Muslim Berdedikasi 9" loading="lazy" decoding="async" width="1080" height="1350"></picture>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <svg class="deco deco--stripes deco--denah" viewBox="523 91 670 152" aria-hidden="true"><path fill="#353535" d="M523 91H1095L1193 108V142H1098L1193 159V192H1098L1193 209V243H620L523 226V192H620L523 176V142H620L523 125Z"/></svg>
+    </section>
+
+    <!-- ============ 7. TENANT ============ -->
+    <section class="section tenant" id="tenant">
+      <div class="container">
+        <header class="sec-head sec-head--row">
+          <div>
+            <span class="sec-num mono">06</span>
+            <h2 class="title"><span class="notch" data-scramble>Brand Peserta Bazar</span></h2>
+            <p class="sec-sub"><b class="mono" id="tenantCount">0</b> brand pilihan siap meramaikan Open Gate Bazar &amp; Foodcourt.</p>
+          </div>
+          <button class="btn btn--dark magnetic" id="tenantToggle" aria-expanded="false" aria-controls="tenantAll"><span>Lihat Semua Brand</span></button>
+        </header>
+      </div>
+
+      <div class="logo-marquee" id="tenantMarquee" aria-hidden="true"></div>
+
+      <div class="container tenant__all" id="tenantAll" hidden>
+        <label class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input type="search" id="tenantSearch" placeholder="Cari brand…" autocomplete="off">
+        </label>
+        <ul class="tenant__grid" id="tenantGrid"></ul>
+        <p class="tenant__empty mono" id="tenantEmpty" hidden>Brand tidak ditemukan.</p>
+      </div>
+    </section>
+
+    <!-- ============ 8. LOKASI ============ -->
+    <section class="lokasi" id="lokasi">
+      <div class="lokasi__map">
+        <iframe title="Peta Asrama Haji Embarkasi Medan" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3982.204224983481!2d98.669455688855!3d3.540293900000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30312fff648e55c3%3A0xf1310432b9476107!2sAsrama%20Haji%20Embarkasi%20Medan!5e0!3m2!1sen!2sid!4v1765634045823!5m2!1sen!2sid" width="100%" height="100%" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+      <div class="lokasi__overlay">
+        <article class="loc-card">
+          <header class="loc-card__head mono">07 · Lokasi Acara</header>
+          <div class="loc-card__body">
+            <h2 class="loc-card__title">Komplek Lapangan Asrama Haji Medan</h2>
+            <p class="loc-card__addr">Jl. Jenderal Besar A.H. Nasution, Medan</p>
+            <dl class="loc-card__rows">
+              <div><dt>Tanggal</dt><dd>23–27 Desember 2026</dd></div>
+              <div><dt>Jam buka</dt><dd class="mono">08.00–21.00 WIB</dd></div>
+            </dl>
+            <div class="loc-card__actions">
+              <a href="https://maps.app.goo.gl/SZnxMJuUs6qJ5r7R9" target="_blank" rel="noopener" class="btn btn--lime magnetic" data-cursor="Buka">Petunjuk Arah</a>
+              <a href="https://wa.me/6281255557120" target="_blank" rel="noopener" class="btn btn--line magnetic" id="locWa" data-cursor="Chat">WhatsApp</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ 9. PENYELENGGARA & SPONSOR ============ -->
+    <section class="section partners" id="sponsor">
+      <div class="partners__grid" aria-hidden="true"></div>
+      <div class="container">
+        <header class="sec-head sec-head--center">
+          <span class="sec-num mono">08</span>
+          <h2 class="title"><span class="notch" data-scramble>Penyelenggara &amp; Sponsor</span></h2>
+        </header>
+        <div id="partners"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ 10. FOOTER ============ -->
+  <footer class="footer">
+    <div class="footer__big mono" aria-hidden="true"><span>MUSLIM BERDEDIKASI 9</span><span>MUSLIM BERDEDIKASI 9</span><span>MUSLIM BERDEDIKASI 9</span><span>MUSLIM BERDEDIKASI 9</span></div>
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <button type="button" class="footer__logo" id="footShare" aria-label="Bagikan acara" data-cursor="Bagikan"><picture><source media="(max-width: 560px)" srcset="assets/img/logo/mb9-mark-320.webp 320w, assets/img/logo/mb9-mark.webp 650w" sizes="150px" width="56" height="72"><img src="assets/img/logo/mb9-mark-sm.webp?v=2" srcset="assets/img/logo/mb9-mark-xs.webp?v=2 120w, assets/img/logo/mb9-mark-sm.webp?v=2 283w" sizes="52px" alt="" width="56" height="68"></picture></button>
+        <div>
+          <h3 class="mono">MUSLIM BERDEDIKASI 9</h3>
+          <p>Wadah kebersamaan umat untuk ilmu, sosial, dan keluarga. Tumbuh Berdedikasi, Mengukir Masa Depan.</p>
+        </div>
+      </div>
+      <div>
+        <h4 class="mono">Catatan Penting</h4>
+        <p>Jadwal dapat berubah sewaktu-waktu. Terdapat jeda istirahat setiap memasuki waktu shalat. Mohon mengikuti pengumuman terbaru di lokasi acara.</p>
+      </div>
+      <div>
+        <h4 class="mono">Hotline Informasi</h4>
+        <a class="footer__wa" id="hotline" href="https://wa.me/6281255557120" target="_blank" rel="noopener" data-cursor="Chat" title="Chat via WhatsApp">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 1.8 17.7L.1 24l6.4-1.7a11.8 11.8 0 0 0 5.6 1.4c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.4-8.4Zm-8.4 18.2a9.8 9.8 0 0 1-5-1.4l-.4-.2-3.8 1 1-3.7-.2-.4a9.8 9.8 0 1 1 8.4 4.7Zm5.4-7.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1l-.9 1.2c-.2.2-.3.2-.6.1a8 8 0 0 1-4-3.5c-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6a1.1 1.1 0 0 0-.8.4 3.4 3.4 0 0 0-1 2.5c0 1.5 1 2.9 1.2 3.1.1.2 2.1 3.2 5.1 4.5 1.9.8 2.6.9 3.6.7.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4l-.8-.5Z"/></svg>
+          <span class="mono" id="hotlineLabel">0812-5555-7120</span>
+        </a>
+        <small>Hanya WhatsApp</small>
+      </div>
+    </div>
+    <div class="container footer__bottom">
+      <span>© 2026 Muslim Berdedikasi 9. All rights reserved.</span>
+      <a href="#home" class="mono to-top">Kembali ke atas ↑</a>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+  <!-- QR untuk menu Bagikan (ikut di-precache SW → tetap jalan offline) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+  <script src="assets/js/data.js?v=1.1.242" defer></script>
+  <script src="assets/js/main.js?v=1.1.242" defer></script>
+</body>
+</html>

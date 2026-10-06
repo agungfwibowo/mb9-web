@@ -1,0 +1,290 @@
+{
+ "tenant": [
+  {
+   "name": "AKA Travel",
+   "src": "assets/img/tenant/aka-travel.jpg"
+  },
+  {
+   "name": "Akhwatgoods.id",
+   "src": "assets/img/tenant/akhwatgoods-id.png"
+  },
+  {
+   "name": "Abaya Nafisah",
+   "src": "assets/img/tenant/abaya-nafisah.jpg"
+  },
+  {
+   "name": "Abayabaruku",
+   "src": "assets/img/tenant/abayabaruku.png"
+  },
+  {
+   "name": "Adiani Syar'i",
+   "src": "assets/img/tenant/adiani-syar-i.png"
+  },
+  {
+   "name": "Al Hijaab",
+   "src": "assets/img/tenant/al-hijaab.png"
+  },
+  {
+   "name": "Alkahfi Tour & Travel",
+   "src": "assets/img/tenant/alkahfi-tour-travel.png"
+  },
+  {
+   "name": "Annurwear",
+   "src": "assets/img/tenant/annurwear.png"
+  },
+  {
+   "name": "Arbaqi Honey",
+   "src": "assets/img/tenant/arbaqi-honey.jpg"
+  },
+  {
+   "name": "Ayam Jukut Juragan",
+   "src": "assets/img/tenant/ayam-jukut-juragan.jpg"
+  },
+  {
+   "name": "Baraka",
+   "src": "assets/img/tenant/baraka.png"
+  },
+  {
+   "name": "Boksa Bakso",
+   "src": "assets/img/tenant/boksa-bakso.jpg"
+  },
+  {
+   "name": "Boksa Drink",
+   "src": "assets/img/tenant/boksa-drink.jpg"
+  },
+  {
+   "name": "Burger Kejam",
+   "src": "assets/img/tenant/burger-kejam.jpg"
+  },
+  {
+   "name": "Churros Faama.eat",
+   "src": "assets/img/tenant/churros-faama-eat.png"
+  },
+  {
+   "name": "Fastab Coffee",
+   "src": "assets/img/tenant/fastab-coffee.png"
+  },
+  {
+   "name": "GNG Shop",
+   "src": "assets/img/tenant/gng-shop.jpg"
+  },
+  {
+   "name": "Hiru Koffee",
+   "src": "assets/img/tenant/hiru-koffee.png"
+  },
+  {
+   "name": "House of Hurriyyah",
+   "src": "assets/img/tenant/house-of-hurriyyah.png"
+  },
+  {
+   "name": "Jejak Lapar",
+   "src": "assets/img/tenant/jejak-lapar.jpg"
+  },
+  {
+   "name": "Itam.id",
+   "src": "assets/img/tenant/itam-id.png"
+  },
+  {
+   "name": "Jajanan Umi Rina",
+   "src": "assets/img/tenant/jajanan-umi-rina.jpg"
+  },
+  {
+   "name": "Juragan Dimsum",
+   "src": "assets/img/tenant/juragan-dimsum.jpg"
+  },
+  {
+   "name": "Justrue",
+   "src": "assets/img/tenant/justrue.jpg"
+  },
+  {
+   "name": "Kalila Dailywear",
+   "src": "assets/img/tenant/kalila-dailywear.png"
+  },
+  {
+   "name": "Kalila Syar'i",
+   "src": "assets/img/tenant/kalila-syar-i.png"
+  },
+  {
+   "name": "Khansa Stores",
+   "src": "assets/img/tenant/khansa-stores.jpg"
+  },
+  {
+   "name": "Khazanah Store",
+   "src": "assets/img/tenant/khazanah-store.jpg"
+  },
+  {
+   "name": "Kitchyurie",
+   "src": "assets/img/tenant/kitchyurie.png"
+  },
+  {
+   "name": "Koaki.idn",
+   "src": "assets/img/tenant/koaki-idn.png"
+  },
+  {
+   "name": "Kopikuh",
+   "src": "assets/img/tenant/kopikuh.jpg"
+  },
+  {
+   "name": "Kuna Patisserie",
+   "src": "assets/img/tenant/kuna-patisserie.png"
+  },
+  {
+   "name": "Lagilah",
+   "src": "assets/img/tenant/lagilah.jpg"
+  },
+  {
+   "name": "Little Maryamm",
+   "src": "assets/img/tenant/little-maryamm.jpg"
+  },
+  {
+   "name": "Mabit Tour",
+   "src": "assets/img/tenant/mabit-tour.png"
+  },
+  {
+   "name": "Mahabbah Cake & Cookies",
+   "src": "assets/img/tenant/mahabbah-cake-cookies.png"
+  },
+  {
+   "name": "Mamawiwa",
+   "src": "assets/img/tenant/mamawiwa.png"
+  },
+  {
+   "name": "Mango Time",
+   "src": "assets/img/tenant/mango-time.jpg"
+  },
+  {
+   "name": "Maya Salon Muslimah",
+   "src": "assets/img/tenant/maya-salon-muslimah.jpg"
+  },
+  {
+   "name": "Mecca Luxury",
+   "src": "assets/img/tenant/mecca-luxury.jpg"
+  },
+  {
+   "name": "Muda Burger",
+   "src": "assets/img/tenant/muda-burger.png"
+  },
+  {
+   "name": "Mumtaz Store",
+   "src": "assets/img/tenant/mumtaz-store.jpg"
+  },
+  {
+   "name": "NIMERA",
+   "src": "assets/img/tenant/nimera.png"
+  },
+  {
+   "name": "Nasgor Basmati Rafka",
+   "src": "assets/img/tenant/nasgor-basmati-rafka.png"
+  },
+  {
+   "name": "Nasgor Tiarbah",
+   "src": "assets/img/tenant/nasgor-tiarbah.jpg"
+  },
+  {
+   "name": "Nasgor Wagyu Khalid",
+   "src": "assets/img/tenant/nasgor-wagyu-khalid.jpg"
+  },
+  {
+   "name": "Omarabic",
+   "src": "assets/img/tenant/omarabic.png"
+  },
+  {
+   "name": "Pempek Nabil",
+   "src": "assets/img/tenant/pempek-nabil.jpg"
+  },
+  {
+   "name": "Rafka Store",
+   "src": "assets/img/tenant/rafka-store.png"
+  },
+  {
+   "name": "Rasa Coffee",
+   "src": "assets/img/tenant/rasa-coffee.jpg"
+  },
+  {
+   "name": "Rihlah Store",
+   "src": "assets/img/tenant/rihlah-store.jpg"
+  },
+  {
+   "name": "Risol Mimi",
+   "src": "assets/img/tenant/risol-mimi.png"
+  },
+  {
+   "name": "Samase Shahih Gallery",
+   "src": "assets/img/tenant/samase-shahih-gallery.png"
+  },
+  {
+   "name": "Segerinajaa",
+   "src": "assets/img/tenant/segerinajaa.png"
+  },
+  {
+   "name": "Shaffat Parfum Arab Medan",
+   "src": "assets/img/tenant/shaffat-parfum-arab-medan.png"
+  },
+  {
+   "name": "Shawarma Al Masri",
+   "src": "assets/img/tenant/shawarma-al-masri.jpg"
+  },
+  {
+   "name": "Shockelat",
+   "src": "assets/img/tenant/shockelat.png"
+  },
+  {
+   "name": "Sirun Kebab",
+   "src": "assets/img/tenant/sirun-kebab.jpg"
+  },
+  {
+   "name": "SnD Kitchenette",
+   "pdf": "/Users/agungfw/Sites/PROJECTS/mb9/bahan/Logo Sponsor dan Tenant/Logo Tenant/SnD Logo_20260926_190903_0000 - snd kitchenette.pdf"
+  },
+  {
+   "name": "Sundae Halalicious",
+   "src": "assets/img/tenant/sundae-halalicious.jpg"
+  },
+  {
+   "name": "Teras Mbonk",
+   "src": "assets/img/tenant/teras-mbonk.jpg"
+  },
+  {
+   "name": "UMMECC",
+   "src": "assets/img/tenant/ummecc.png"
+  },
+  {
+   "name": "Warung Tiga Sekawan",
+   "src": "assets/img/tenant/warung-tiga-sekawan.png"
+  },
+  {
+   "name": "Warung Ummu Aisyah",
+   "src": "assets/img/tenant/warung-ummu-aisyah.jpg"
+  },
+  {
+   "name": "Wedrinkeat",
+   "src": "assets/img/tenant/wedrinkeat.png"
+  },
+  {
+   "name": "Yossi Soselisa",
+   "src": "assets/img/tenant/yossi-soselisa.jpg"
+  },
+  {
+   "name": "Youvieshop",
+   "src": "assets/img/tenant/youvieshop.png"
+  },
+  {
+   "name": "Yuriz",
+   "src": "assets/img/tenant/yuriz.jpg"
+  }
+ ],
+ "sponsor": [
+  {
+   "name": "Hanya Pagi",
+   "src": "assets/img/sponsor/hanya-pagi.jpg"
+  },
+  {
+   "name": "Indonesia Mengaji",
+   "src": "assets/img/sponsor/indonesia-mengaji.png"
+  },
+  {
+   "name": "Uwais Tour",
+   "src": "assets/img/sponsor/uwais-tour.jpg"
+  }
+ ]
+}
