@@ -479,7 +479,10 @@ html:not(.js) .preloader { display: none; }
 .countdown__label { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--lime); letter-spacing: .1em; }
 .countdown__label::before { content: ''; display: inline-block; width: 9px; height: 9px; margin-right: 10px; background: var(--lime); animation: blink 1s steps(2) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
-.countdown__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
+.countdown__head { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px 20px; }
+.countdown__label, .countdown__today { white-space: nowrap; }
+@media (max-width: 660px) { .countdown__date { display: none; } }
+@media (max-width: 380px) { .countdown__head { gap: 8px 10px; } .countdown__label { font-size: 10px; letter-spacing: .06em; } .countdown__label::before { margin-right: 7px; } .countdown__today { letter-spacing: .04em; } }
 .countdown__today { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); text-decoration: none; padding: 6px 10px; background: var(--lime); border: 1px solid var(--lime); transition: background .25s, color .25s, border-color .25s; }
 .countdown__today:hover, .countdown__today:focus-visible { background: var(--white); border-color: var(--white); }
 .countdown__units { --cdn: clamp(28px, 4vw, 44px); --cdg: clamp(26px, 5.5vw, 64px); display: flex; gap: var(--cdg); }
@@ -761,7 +764,8 @@ html:not(.js) .preloader { display: none; }
 @keyframes live-pulse { 0% { box-shadow: 0 0 0 0 rgba(33, 80, 245, .55); } 100% { box-shadow: 0 0 0 9px rgba(33, 80, 245, 0); } }
 .jrow.is-live.is-pink::after { animation-name: live-pulse-pink; }
 @keyframes live-pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(224, 51, 138, .55); } 100% { box-shadow: 0 0 0 9px rgba(224, 51, 138, 0); } }
-/* Status layanan di stan: Buka 10.00 / Buka / Segera tutup / Tutup; panggung: Berlangsung / Berikutnya */
+/* Status layanan di stan: Buka 10.00 / Segera buka / Buka / Segera tutup / Tutup;
+   panggung: Selanjutnya / Segera dimulai / Berlangsung / Selesai */
 .jopen { display: inline-flex; align-items: center; gap: 6px; width: max-content; padding: 3px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .jopen::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .jopen.is-open { background: var(--lime); color: var(--ink); }
@@ -771,6 +775,9 @@ html:not(.js) .preloader { display: none; }
 .jopen.is-wait::before { background: var(--grey); }
 .jnext { display: inline-flex; align-items: center; width: max-content; padding: 3px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); background: var(--white); box-shadow: inset 0 0 0 1.5px var(--blue); }
 .is-pink .jnext, .jcard.is-pink > .jnext { color: var(--pink); box-shadow: inset 0 0 0 1.5px var(--pink); }
+/* akan mulai/buka ≤30 menit: biru muda (beda dari oranye "Segera tutup") */
+.jopen.is-starting, .jnext.is-starting { background: #dce5ff; color: var(--blue); box-shadow: none; }
+.jrow.is-pink .jnext.is-starting, .jcard.is-pink > .jnext.is-starting { background: #fbdcea; color: var(--pink); box-shadow: none; }
 .jrow:has(.jopen) time, .jrow:has(.jnext) time { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 .jdur .jcard > .jnext, .jdur .jcard > .jopen { position: absolute; top: 0; right: 0; z-index: 2; box-sizing: border-box; height: 26px; padding: 0 8px; font-size: 10px; letter-spacing: .04em; }
 .jdur .jcard.is-piled > .jopen, .jdur .jcard.is-piled > .jnext { display: none; }
@@ -781,9 +788,10 @@ html:not(.js) .preloader { display: none; }
 .jrow.is-done:hover, .jdur .jcard.is-done:not(.is-piled):hover, .jdur .jcard.is-done:hover .jstop time { background: var(--paper); }
 .jrow.is-done > *, .jdur .jcard.is-done:not(.is-piled) > :not(.jcard__edge) { filter: grayscale(1); opacity: .5; }
 .jdur .jcard.is-done:not(.is-piled) > .jstop { filter: none; opacity: 1; }
-.jdur .jcard.is-done .jstop time { filter: grayscale(1); opacity: .5; }
+/* diredupkan lewat warna, bukan opacity — latar jam harus tetap pekat menutupi garis timeline */
+.jdur .jcard.is-done .jstop time { color: var(--grey-2); }
 /* label Tutup tetap jelas: jam diredupkan lewat warna, bukan opacity (opacity induk tidak bisa dibatalkan anaknya) */
-.jrow.is-done > time { filter: none; opacity: 1; color: var(--grey-2); }
+.jrow.is-done > time, .jrow.is-done.is-pink > time { filter: none; opacity: 1; color: var(--grey-2); }
 .jdur .jcard.is-done:not(.is-piled) > .jopen { filter: none; opacity: 1; }
 .jrow.is-seq.is-done::after, .jdur .jcard.is-done .jstop i { background: var(--grey); }
 /* Durasi: kartu yang sedang berjalan */
@@ -813,6 +821,8 @@ html:not(.js) .preloader { display: none; }
 .is-pink .jbar i { background: var(--pink); }
 .is-pink .tag { background: var(--pink-3); color: var(--pink); }
 .jrow.is-pink:hover, .jcard.is-pink:hover { background: #fdeef5; }
+/* pink yang sudah selesai: tetap abu-abu, termasuk saat hover */
+.jrow.is-done.is-pink, .jrow.is-done.is-pink:hover, .jdur .jcard.is-done.is-pink:not(.is-piled), .jdur .jcard.is-done.is-pink:not(.is-piled):hover, .jdur .jcard.is-done.is-pink:hover .jstop time { background: var(--paper); }
 .jico {flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 /* sesi yang jam-nya tumpang tindih (berjalan bersamaan) ditampilkan sebagai
    kolom berdampingan, bukan ditumpuk — jelas kelihatan itu pilihan paralel */
@@ -895,6 +905,9 @@ html:not(.js) .preloader { display: none; }
 .jcard:hover .jstop time { background: var(--lime-3); }
 .is-pink .jstop i { background: var(--pink); }
 .jcard.is-pink:hover .jstop i { box-shadow: 0 0 0 4px #fdeef5; }
+/* sudah selesai: cincin titik ikut latar abu-abu (termasuk saat hover) */
+.jdur .jcard.is-done .jstop i, .jdur .jcard.is-done:hover .jstop i { box-shadow: 0 0 0 4px var(--paper); }
+.jrow.is-seq.is-done::after, .jrow.is-seq.is-done:hover::after { box-shadow: 0 0 0 3px var(--paper); }
 .jcard.is-pink:hover .jstop time { background: #fdeef5; }
 .jbar { position: relative; display: block; height: 6px; margin: 4px 0 6px; background: var(--paper); }
 .jbar i { position: absolute; top: 0; bottom: 0; background: var(--blue); }

@@ -1138,7 +1138,7 @@
   };
   // Status otomatis dari jam (hanya di hari acara menurut WIB, cek tiap menit):
   // • acara panggung (rangkaian, tanpa group / data-seq): "Live" saat berjalan,
-  //   "Berikutnya" di acara panggung terdekat yang belum mulai
+  //   "Selanjutnya" di acara panggung terdekat yang belum mulai
   // • layanan di stan (punya group): "Buka 10.00" → "Buka" → "Segera tutup"
   //   (≤30 menit sebelum tutup) → "Tutup"
   const SOON = 30;
@@ -1169,17 +1169,23 @@
         el.classList.add('is-live');
         el.closest('.jcard')?.classList.add('is-live');
         put(el, '<span class="jlive mono">Berlangsung</span>');
+      } else if (now.min >= b) {
+        put(el, '<span class="jopen mono is-closed">Selesai</span>'); // gaya sama dengan "Tutup"
       }
     });
     const upcoming = seq.filter((el) => span(el)[0] > now.min).sort((x, y) => span(x)[0] - span(y)[0]);
-    if (upcoming.length) {
+    // ≤30 menit lagi → "Segera dimulai" (semua yang masuk rentang itu);
+    // selain itu acara terdekat → "Selanjutnya"
+    const starting = upcoming.filter((el) => span(el)[0] - now.min <= SOON);
+    if (starting.length) starting.forEach((el) => put(el, '<span class="jnext mono is-starting">Segera dimulai</span>'));
+    else if (upcoming.length) {
       const first = span(upcoming[0])[0];
-      upcoming.filter((el) => span(el)[0] === first).forEach((el) => put(el, '<span class="jnext mono">Berikutnya</span>'));
+      upcoming.filter((el) => span(el)[0] === first).forEach((el) => put(el, '<span class="jnext mono">Selanjutnya</span>'));
     }
     // layanan di stan
     units.filter((el) => !isSeq(el)).forEach((el) => {
       const [a, b] = span(el);
-      const st = now.min < a ? ['is-wait', `Buka ${fmtMin(a)}`]
+      const st = now.min < a ? (a - now.min <= SOON ? ['is-starting', 'Segera buka'] : ['is-wait', `Buka ${fmtMin(a)}`])
         : now.min >= b ? ['is-closed', 'Tutup']
           : b - now.min <= SOON ? ['is-soon', 'Segera tutup'] : ['is-open', 'Buka'];
       put(el, `<span class="jopen mono ${st[0]}">${st[1]}</span>`);
@@ -2260,7 +2266,8 @@
     if (today) {
       if (todayLink.dataset.day !== today.key) {
         todayLink.dataset.day = today.key;
-        todayLink.textContent = `Jadwal hari ini · ${today.short}, ${today.date} →`;
+        // tanggal di <span> → disembunyikan di layar sempit agar tetap satu baris dengan label
+        todayLink.innerHTML = `Jadwal hari ini<span class="countdown__date"> · ${esc(today.short)}, ${esc(today.date)}</span> →`;
       }
     } else if (todayLink.dataset.day !== '') {
       todayLink.dataset.day = '';

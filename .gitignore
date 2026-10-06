@@ -1,0 +1,31 @@
+# --- Sistem operasi ---
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# --- Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Arsip & cadangan (jangan ikut repo) ---
+Archive.zip
+Archive/
+*.zip
+*.rar
+*.7z
+*.bak
+*.tmp
+
+# --- Tool / dependensi (bila nanti dipakai) ---
+node_modules/
+.lighthouseci/
+*.log
+npm-debug.log*
+
+# --- Rahasia ---
+.env
+.env.*
