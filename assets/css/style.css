@@ -138,6 +138,7 @@ p { margin: 0 0 1em; }
 .anim-off .nav__flag,
 .anim-off .asatidz__note::before,
 .anim-off .day__badge--today::before,
+.anim-off .ustadz__badge--today::before,
 .anim-off .day.is-piled.is-today { animation-play-state: paused; }
 
 /* ---------- Scroll progress ---------- */
@@ -853,6 +854,8 @@ html:not(.js) .preloader { display: none; }
    lebih tinggi karena strip-nya juga memuat badge "+N" */
 .jdur .jcard { min-height: 140px; }
 .jrail--many .jcard { min-height: 160px; }
+/* jam mulai beda-beda (mis. Kajian & Talkshow): strip memuat jam lengkap "19.00 - 20.00" */
+.jrail--range .jcard { min-height: 200px; }
 .jdur .jcard > * { transition: opacity .14s linear .17s; }
 .jrail.no-flex-anim .jcard { transition: none; }
 .jrail__track { position: relative; }
@@ -1003,8 +1006,30 @@ html:not(.js) .preloader { display: none; }
 /* Kajiannya sedang berlangsung (markAsatidzLive di main.js) */
 .ustadz.is-live { z-index: 1; border-color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); }
 .ustadz.is-live.is-pink { border-color: var(--pink); box-shadow: inset 0 0 0 2px var(--pink); }
-.ustadz > .jlive { position: absolute; top: 14px; left: 14px; z-index: 1; animation: live-pulse 1.4s ease-out infinite; }
+.ustadz__badge { position: absolute; top: 0; left: 0; right: 0; z-index: 1; display: flex; align-items: center; width: auto; box-sizing: border-box; padding: 6px 10px; }
+.ustadz__badge { text-decoration: none; }
+/* dibuka dari badge asatidz: acaranya di jadwal berkedip (class .is-flash
+   dinyala-matikan JS). Saat menyala garis waktu ikut menyesuaikan: cincin titik &
+   latar jam jadi lime agar menyatu, garis dipertegas agar tetap terlihat. Saat
+   padam semuanya kembali ke gaya aslinya (Berlangsung/Selesai/hover). */
+/* selama urutan kedip (.is-flashing) transisi dimatikan → latar, cincin & garis berganti serempak */
+#jadwalPanel .is-flashing, #jadwalPanel .is-flashing *, #jadwalPanel .is-flashing::before, #jadwalPanel .is-flashing::after,
+#jadwalPanel .is-flashing *::before, #jadwalPanel .is-flashing *::after { transition: none !important; }
+#jadwalPanel .jrow.is-flash, #jadwalPanel .jcard.is-flash { background: var(--lime); box-shadow: inset 0 0 0 3px var(--blue); }
+#jadwalPanel .jrow.is-seq.is-flash::after { box-shadow: 0 0 0 3px var(--lime); }
+#jadwalPanel .jcard.is-flash .jstop i { box-shadow: 0 0 0 4px var(--lime); }
+#jadwalPanel .jrow.is-flash::after, #jadwalPanel .jcard.is-flash .jstop i { animation: none; } /* denyut Berlangsung jeda saat menyala */
+#jadwalPanel .jcard.is-flash .jstop time { background: var(--lime); }
+#jadwalPanel .jrow.is-seq.is-flash::before, #jadwalPanel .jcard.is-flash .jstop::before { background: var(--ink-3); }
+.ustadz__go { margin-left: auto; padding-left: 8px; font-size: 13px; line-height: 1; transition: transform .25s var(--ease); }
+.ustadz__badge:hover .ustadz__go, .ustadz__badge:focus-visible .ustadz__go { transform: translateX(3px); }
+.ustadz > .jlive { animation: live-pulse 1.4s ease-out infinite; }
 .ustadz.is-pink > .jlive { animation-name: live-pulse-pink; }
+/* punya jadwal hari ini (belum mulai / sudah selesai) — gaya sama dengan badge tab hari */
+.ustadz__badge--today, .ustadz__badge--done { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,.18); }
+.ustadz__badge--today { background: var(--blue); color: var(--white); }
+.ustadz__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--lime); animation: blink 1s steps(2) infinite; }
+.ustadz__badge--done { background: var(--grey-2); color: var(--ink-2); }
 .ustadz--soon { background: repeating-linear-gradient(-45deg, var(--paper) 0 14px, #e2e2df 14px 28px); }
 .ustadz .sil { position: absolute; left: 50%; top: 18%; width: 58%; transform: translateX(-50%); color: var(--grey-2); transition: color .4s, transform .6s var(--ease); }
 .ustadz--soon:hover .sil { color: var(--grey); }
