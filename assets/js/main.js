@@ -1103,8 +1103,8 @@
   const TAGS = { kajian: 'Kajian', layanan: 'Layanan', lomba: 'Lomba', talkshow: 'Talkshow' };
   const tabs = $('#dayTabs');
   const panel = $('#jadwalPanel');
-  // Status hari menurut jam WIB. Satu hari acara = jam buka s/d jam tutup:
-  // "Hari ini" hanya selama rentang itu, lewat jam tutup langsung "Selesai".
+  // Status hari menurut jam WIB. Indikatornya hanya jam tutup: sejak masuk
+  // tanggalnya (00:00) hari itu "Hari ini", lewat jam tutup langsung "Selesai".
   // `let`: diperbarui otomatis bila halaman dibiarkan terbuka (lihat rollDay).
   const OPEN = (D.hours && D.hours.open) || '08:00';
   const CLOSE = (D.hours && D.hours.close) || '21:00';
@@ -1114,14 +1114,15 @@
     const hhmm = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now);
     todayWIB = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(now);
     dayClosed = hhmm >= CLOSE;
-    todayIdx = hhmm >= OPEN && !dayClosed ? D.days.findIndex((d) => d.iso === todayWIB) : -1;
+    todayIdx = dayClosed ? -1 : D.days.findIndex((d) => d.iso === todayWIB);
   };
   readClock();
-  // Hari acara yang SEDANG buka pada waktu t (ms) — dipakai countdown & penanda menu.
+  // Hari acara yang berstatus "hari ini" pada waktu t (ms): sejak 00:00 WIB
+  // tanggalnya s/d jam tutup — dipakai countdown & penanda menu.
   // Fungsi murni (tidak mengubah state tab), aman dipanggil tiap detik.
   const openDayAt = (t) => {
     const at = (d, hhmm) => new Date(`${d.iso}T${hhmm}:00+07:00`).getTime();
-    return D.days.find((d) => t >= at(d, OPEN) && t < at(d, CLOSE)) || null;
+    return D.days.find((d) => t >= at(d, '00:00') && t < at(d, CLOSE)) || null;
   };
   const nextOpenAt = (t) => {
     const d = D.days.find((x) => new Date(`${x.iso}T${OPEN}:00+07:00`).getTime() > t);
@@ -1648,7 +1649,7 @@
   requestAnimationFrame(() => tabs.classList.add('is-ready'));
   addEventListener('load', layoutDays);
 
-  // Halaman dibiarkan terbuka (mis. layar info di lokasi): saat jam buka (08:00)
+  // Halaman dibiarkan terbuka (mis. layar info di lokasi): saat pergantian tanggal
   // dan jam tutup (21:00) WIB terlewati, badge "Hari ini"/"Selesai" diperbarui
   // dan tab pindah ke hari ini / hari berikutnya. Pilihan pengunjung ke hari LAIN
   // yang belum lewat tidak diganggu. Dicek tiap menit + saat tab kembali aktif
@@ -2386,16 +2387,15 @@
       label.textContent = 'Jazakumullahu khairan atas kehadiran Anda';
       return false;
     }
-    // Sebelum mulai → hitung ke start. Selama rangkaian: saat jam buka hitung ke
-    // akhir acara; di luar jam buka (lewat jam tutup / malam antar-hari) hitung
-    // ke jam buka hari berikutnya.
+    // Sebelum mulai → hitung ke start. Selama rangkaian hitung ke akhir acara;
+    // lewat jam tutup (sampai tengah malam) hitung ke jam buka hari berikutnya.
     const running = now >= start;
-    // hari yang sedang buka (jam buka–tutup WIB); lewat jam tutup bukan "hari ini" lagi
-    const today = running ? openDayAt(now) : null;
+    // "hari ini" = sudah masuk tanggalnya & belum lewat jam tutup (WIB)
+    const today = openDayAt(now);
     const reopen = running && !today ? nextOpenAt(now) : 0;
     const text = !running ? 'Menuju hari H' : reopen ? 'Dibuka kembali dalam' : 'Acara berakhir dalam';
     if (label.textContent !== text) label.textContent = text;
-    // Saat buka: link ke jadwal hari ini. Selain itu: link umum "Lihat jadwal".
+    // Hari acara (belum lewat jam tutup): link ke jadwal hari ini. Selain itu: "Lihat jadwal".
     if (today) {
       if (todayLink.dataset.day !== today.key) {
         todayLink.dataset.day = today.key;
