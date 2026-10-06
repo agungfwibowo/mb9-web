@@ -20,7 +20,6 @@ Archive.zip
 *.tmp
 
 # --- Tool / dependensi (bila nanti dipakai) ---
-bahan/
 node_modules/
 .lighthouseci/
 *.log
@@ -29,3 +28,6 @@ npm-debug.log*
 # --- Rahasia ---
 .env
 .env.*
+
+# --- Materi mentah dari panitia (logo asli, PDF, layout) — bukan untuk deploy ---
+bahan/
