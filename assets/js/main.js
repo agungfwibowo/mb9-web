@@ -1075,6 +1075,12 @@
   // langsung ke jadwal satu hari. Kalau tidak ada, jatuh ke hari ini / hari-1.
   const linkedIdx = D.days.findIndex((d) => d.key === new URLSearchParams(location.search).get('hari'));
   const defaultIdx = linkedIdx >= 0 ? linkedIdx : todayIdx >= 0 ? todayIdx : 0;
+  // Hari yang sudah lewat tidak disimpan di URL: tautan lama tetap membuka tabnya,
+  // tapi ?hari dibuang dari address bar supaya tidak ikut tersimpan/dibagikan.
+  const isPastDay = (key) => { const d = D.days.find((x) => x.key === key); return !!d && d.iso < todayWIB; };
+  if (linkedIdx >= 0 && isPastDay(D.days[linkedIdx].key)) {
+    const u = new URL(location); u.searchParams.delete('hari'); history.replaceState(null, '', u);
+  }
   tabs.innerHTML = D.days.map((d, i) => `
     <button class="day${i === todayIdx ? ' is-today' : ''}${d.iso < todayWIB ? ' is-past' : ''}" role="tab" id="tab-${d.key}" aria-selected="${i === defaultIdx}" aria-controls="jadwalPanel" data-day="${d.key}" tabindex="${i === defaultIdx ? 0 : -1}" aria-label="Hari ke-${i + 1}, ${esc(d.full || d.short)} ${esc(d.date)} ${d.year}">
       <small>Hari ke-${i + 1}</small><b>${esc(d.short)}</b><span>${esc(d.date)} ${d.year}</span><i class="day__edge" aria-hidden="true">${i === todayIdx ? 'Hari ini' : `Hari ke-${i + 1}`}</i>
@@ -1123,6 +1129,63 @@
   try { if (localStorage.getItem('mb9-jview') === 'durasi') jView = 'durasi'; } catch (e) { /* storage diblokir */ }
   let currentKey = null;
   const fmtMin = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}.${String(m % 60).padStart(2, '0')}`;
+  // "Sedang berlangsung": hanya untuk acara di rangkaian bertitik (Tabel,
+  // tanpa group) pada hari acara menurut WIB; diperiksa ulang tiap menit.
+  const wibNow = () => {
+    const f = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    const o = Object.fromEntries(f.formatToParts(new Date()).map((x) => [x.type, x.value]));
+    return { iso: `${o.year}-${o.month}-${o.day}`, min: Number(o.hour) * 60 + Number(o.minute) };
+  };
+  // Status otomatis dari jam (hanya di hari acara menurut WIB, cek tiap menit):
+  // • acara panggung (rangkaian, tanpa group / data-seq): "Live" saat berjalan,
+  //   "Berikutnya" di acara panggung terdekat yang belum mulai
+  // • layanan di stan (punya group): "Buka 10.00" → "Buka" → "Segera tutup"
+  //   (≤30 menit sebelum tutup) → "Tutup"
+  const SOON = 30;
+  const markLive = () => {
+    const day = D.days.find((d) => d.key === currentKey);
+    const now = wibNow();
+    const on = !!day && day.iso === now.iso;
+    const span = (el) => (el.dataset.t || '').split(' - ').map(toMin);
+    const isSeq = (el) => el.hasAttribute('data-seq');
+    // label-label status dibuat ulang tiap pemeriksaan
+    $$('.jlive, .jnext, .jopen', panel).forEach((x) => x.remove());
+    $$('.is-live', panel).forEach((x) => x.classList.remove('is-live'));
+    const units = [...$$('.jrow', panel), ...$$('.jcard__item', panel)];
+    units.forEach((el) => el.classList.toggle('is-done', on && now.min >= span(el)[1]));
+    $$('.jdur .jcard', panel).forEach((card) => card.classList.toggle('is-done', $$('.jcard__item', card).every((it) => it.classList.contains('is-done'))));
+    if (!on) return;
+    // tempat label: baris → di sel jam; item kartu Durasi → pojok kanan atas kartu
+    const put = (el, html) => {
+      const card = el.classList.contains('jcard__item') ? el.closest('.jcard') : null;
+      if (card) { if (!card.querySelector('.jlive, .jnext, .jopen')) card.insertAdjacentHTML('beforeend', html); }
+      else el.querySelector(':scope > time').insertAdjacentHTML('beforeend', html);
+    };
+    // panggung
+    const seq = units.filter(isSeq);
+    seq.forEach((el) => {
+      const [a, b] = span(el);
+      if (now.min >= a && now.min < b) {
+        el.classList.add('is-live');
+        el.closest('.jcard')?.classList.add('is-live');
+        put(el, '<span class="jlive mono">Berlangsung</span>');
+      }
+    });
+    const upcoming = seq.filter((el) => span(el)[0] > now.min).sort((x, y) => span(x)[0] - span(y)[0]);
+    if (upcoming.length) {
+      const first = span(upcoming[0])[0];
+      upcoming.filter((el) => span(el)[0] === first).forEach((el) => put(el, '<span class="jnext mono">Berikutnya</span>'));
+    }
+    // layanan di stan
+    units.filter((el) => !isSeq(el)).forEach((el) => {
+      const [a, b] = span(el);
+      const st = now.min < a ? ['is-wait', `Buka ${fmtMin(a)}`]
+        : now.min >= b ? ['is-closed', 'Tutup']
+          : b - now.min <= SOON ? ['is-soon', 'Segera tutup'] : ['is-open', 'Buka'];
+      put(el, `<span class="jopen mono ${st[0]}">${st[1]}</span>`);
+    });
+  };
+  setInterval(markLive, 60000);
   let panelH = 0;
   const renderDay = (key) => {
     currentKey = key;
@@ -1133,7 +1196,7 @@
     panel.classList.toggle('is-past', past);
     const banner = past ? `<div class="jadwal__past mono"><span>Selesai</span> Rangkaian acara ${esc(day.full)} telah berakhir.</div>` : '';
     const rowHtml = (r) => `
-        <div class="jrow${pinkCls(r)}${jView === 'tabel' && r.group ? ' is-grp' : ''}">
+        <div class="jrow${pinkCls(r)}${jView === 'tabel' && r.group ? ' is-grp' : ''}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}>
           <time>${esc(r.time)}</time>
           <div><h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>${r.note ? `<p>${esc(r.note)}</p>` : ''}</div>
           ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : '<span></span>'}
@@ -1162,11 +1225,11 @@
       });
       // Kartu berjajar 1 baris (geser horizontal, urut jam selesai). Di atas
       // tiap kartu ada garis waktu bersambung dengan titik di jam selesainya.
-      return `<div class="jdur"><div class="jdur__head"><span>${head}</span><span class="jdur__nav" hidden><button type="button" data-dir="-1" aria-label="Geser ke kiri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></span></div><div class="jrail"><div class="jrail__track">${cards.map((c) => `
+      return `<div class="jdur"><div class="jdur__head"><span>${head}</span><span class="jdur__nav" hidden><button type="button" data-dir="-1" aria-label="Geser ke kiri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></span></div><div class="jrail${cards.length > 2 ? ' jrail--many' : ''}"><div class="jrail__track">${cards.map((c) => `
         <div class="jcard${c.items.every((r) => r.ladies) ? ' is-pink' : ''}">
           <span class="jcard__edge" aria-hidden="true" data-t="${c.label}"></span>
           <div class="jstop"><i aria-hidden="true"></i><time>${c.label}</time></div>${c.items.map((r) => `
-          <div class="jcard__item${pinkCls(r)}">
+          <div class="jcard__item${pinkCls(r)}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}>
             <h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>
             ${r.note ? `<p>${esc(r.note)}</p>` : ''}
             ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : ''}
@@ -1237,6 +1300,7 @@
         all.forEach((el, i) => el.classList.toggle('is-thru', i > a && i < z && !el.classList.contains('is-seq')));
       }
     }
+    markLive();
     syncRails();
     // tinggi jadwal berubah (ganti hari/tampilan) → posisi pin section di
     // bawahnya (Layanan dll.) harus diukur ulang, kalau tidak jadi tumpang tindih
@@ -1444,7 +1508,8 @@
     const url = new URL(location);
     url.pathname = stripIndex(url.pathname);
     [...url.searchParams.keys()].forEach((k) => { if (k !== 'hari') url.searchParams.delete(k); });
-    url.searchParams.set('hari', btn.dataset.day);
+    if (isPastDay(btn.dataset.day)) url.searchParams.delete('hari');
+    else url.searchParams.set('hari', btn.dataset.day);
     url.hash = 'jadwal';
     history.replaceState(null, '', url);
     layoutDays();
@@ -2257,7 +2322,7 @@
     url.pathname = stripIndex(url.pathname);
     [...url.searchParams.keys()].forEach((k) => { if (!(KEEP[id] || []).includes(k)) url.searchParams.delete(k); });
     // kembali ke section-nya: pilihan yang masih aktif di layar ditulis lagi
-    if (id === '#jadwal' && chosenDay && !url.searchParams.has('hari')) url.searchParams.set('hari', chosenDay);
+    if (id === '#jadwal' && chosenDay && !isPastDay(chosenDay) && !url.searchParams.has('hari')) url.searchParams.set('hari', chosenDay);
     if (id === '#denah' && picked && !url.searchParams.has('tenant') && !url.searchParams.has('tenda')) {
       url.searchParams.set(picked.dataset.tenant ? 'tenant' : 'tenda', picked.dataset.tenant ? slug(picked.dataset.tenant) : picked.dataset.n);
     }

@@ -594,7 +594,7 @@ html:not(.js) .preloader { display: none; }
 .stats li:hover b { background: var(--lime); }
 
 /* ---------- Jadwal ---------- */
-.jadwal { background: var(--paper); background-image: linear-gradient(var(--grey-2) 1px, transparent 1px), linear-gradient(90deg, var(--grey-2) 1px, transparent 1px); background-size: 64px 64px; background-position: -1px -1px; }
+.jadwal { background: var(--paper); background-image: linear-gradient(var(--grey-2) 1px, transparent 1px), linear-gradient(90deg, var(--grey-2) 1px, transparent 1px); background-size: 64px 64px; background-position: calc(50% + 32px) -1px; /* simetris: satu garis tepat di tengah */ }
 .jadwal::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 30%, var(--paper) 80%); pointer-events: none; }
 .jadwal .container { position: relative; }
 /* Simpan ke kalender — di mobile jadi dropdown <details>, di desktop dipaksa
@@ -750,10 +750,60 @@ html:not(.js) .preloader { display: none; }
 .jrow.is-seq:hover::after { box-shadow: 0 0 0 3px var(--lime-3); }
 .jrow.is-seq.is-pink::after { background: var(--pink); }
 .jrow.is-seq.is-pink:hover::after { box-shadow: 0 0 0 3px #fdeef5; }
+/* Sedang berlangsung (hanya rangkaian bertitik, lihat markLive di main.js) */
+.jrow.is-live { background: #edf1ff; }
+.jrow.is-live.is-pink { background: #fdeef5; }
+/* label menempel di jam: desktop di bawah jam, HP sebaris di kanannya */
+.jrow.is-live time { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.jlive { display: inline-flex; align-items: center; gap: 6px; width: max-content; margin: 0; padding: 3px 8px; background: var(--blue); color: var(--white); font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.jlive::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
+.is-pink .jlive { background: var(--pink); }
+.jrow.is-live::after { animation: live-pulse 1.4s ease-out infinite; }
+@keyframes live-pulse { 0% { box-shadow: 0 0 0 0 rgba(33, 80, 245, .55); } 100% { box-shadow: 0 0 0 9px rgba(33, 80, 245, 0); } }
+.jrow.is-live.is-pink::after { animation-name: live-pulse-pink; }
+@keyframes live-pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(224, 51, 138, .55); } 100% { box-shadow: 0 0 0 9px rgba(224, 51, 138, 0); } }
+/* Status layanan di stan: Buka 10.00 / Buka / Segera tutup / Tutup; panggung: Berlangsung / Berikutnya */
+.jopen { display: inline-flex; align-items: center; gap: 6px; width: max-content; padding: 3px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.jopen::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.jopen.is-open { background: var(--lime); color: var(--ink); }
+.jopen.is-closed { background: var(--ink-3); color: var(--white); }
+.jopen.is-soon { background: #ffb020; color: var(--ink); }
+.jopen.is-wait { background: var(--white); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--grey-2); }
+.jopen.is-wait::before { background: var(--grey); }
+.jnext { display: inline-flex; align-items: center; width: max-content; padding: 3px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); background: var(--white); box-shadow: inset 0 0 0 1.5px var(--blue); }
+.is-pink .jnext, .jcard.is-pink > .jnext { color: var(--pink); box-shadow: inset 0 0 0 1.5px var(--pink); }
+.jrow:has(.jopen) time, .jrow:has(.jnext) time { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.jdur .jcard > .jnext, .jdur .jcard > .jopen { position: absolute; top: 0; right: 0; z-index: 2; box-sizing: border-box; height: 26px; padding: 0 8px; font-size: 10px; letter-spacing: .04em; }
+.jdur .jcard.is-piled > .jopen, .jdur .jcard.is-piled > .jnext { display: none; }
+/* Acara yang sudah lewat hari ini — gaya sama dengan hari yang sudah lewat
+   (.jadwal__panel.is-past): latar abu-abu muda, isi hitam-putih & pudar,
+   tanpa efek hover. Titik garis waktu diberi abu-abu tersendiri (pseudo). */
+.jrow.is-done, .jdur .jcard.is-done:not(.is-piled), .jdur .jcard.is-done .jstop time,
+.jrow.is-done:hover, .jdur .jcard.is-done:not(.is-piled):hover, .jdur .jcard.is-done:hover .jstop time { background: var(--paper); }
+.jrow.is-done > *, .jdur .jcard.is-done:not(.is-piled) > :not(.jcard__edge) { filter: grayscale(1); opacity: .5; }
+.jdur .jcard.is-done:not(.is-piled) > .jstop { filter: none; opacity: 1; }
+.jdur .jcard.is-done .jstop time { filter: grayscale(1); opacity: .5; }
+/* label Tutup tetap jelas: jam diredupkan lewat warna, bukan opacity (opacity induk tidak bisa dibatalkan anaknya) */
+.jrow.is-done > time { filter: none; opacity: 1; color: var(--grey-2); }
+.jdur .jcard.is-done:not(.is-piled) > .jopen { filter: none; opacity: 1; }
+.jrow.is-seq.is-done::after, .jdur .jcard.is-done .jstop i { background: var(--grey); }
+/* Durasi: kartu yang sedang berjalan */
+.jdur .jcard.is-live:not(.is-piled) { background: #edf1ff; }
+.jdur .jcard.is-live.is-pink:not(.is-piled) { background: #fdeef5; }
+.jdur .jcard.is-live .jstop i { animation: live-pulse 1.4s ease-out infinite; }
+.jdur .jcard.is-live.is-pink .jstop i { animation-name: live-pulse-pink; }
+/* tinggi = tepi atas kartu → bawah garis waktu (menutupinya): padding-top 18 + ½ titik 7 + ½ garis 1 */
+.jdur .jcard > .jlive { position: absolute; top: 0; right: 0; z-index: 2; box-sizing: border-box; height: 26px; gap: 5px; padding: 0 6px; font-size: 10px; letter-spacing: .02em; }
+.jdur .jcard.is-piled > .jlive { display: none; }
+/* hover tetap menang atas sorotan "sedang berlangsung" (kartu & latar jam) */
+.jdur .jcard.is-live:not(.is-piled):hover, .jdur .jcard.is-live:hover .jstop time { background: var(--lime-3); }
+.jdur .jcard.is-live.is-pink:not(.is-piled):hover, .jdur .jcard.is-live.is-pink:hover .jstop time { background: #fdeef5; }
+.jdur .jcard.is-live .jstop time { background: #edf1ff; }
+.jdur .jcard.is-live.is-pink .jstop time { background: #fdeef5; }
+@media (prefers-reduced-motion: reduce) { .jrow.is-live::after, .jdur .jcard.is-live .jstop i { animation: none; } }
 /* Tabel: acara yang berjalan bersamaan (field group di data.js) → garis biru kiri */
-.jrow.is-grp { box-shadow: inset 4px 0 0 var(--blue); background: var(--paper); }
-.jrow.is-grp:hover { background: var(--lime-3); }
-.jrow.is-grp.is-pink:hover { background: #fdeef5; }
+/* latar putih (abu-abu khusus untuk acara yang sudah lewat) — paralel cukup ditandai garis biru */
+.jrow.is-grp { box-shadow: inset 4px 0 0 var(--blue); }
 .jrow time { font: 700 15px/1 var(--mono); color: var(--blue); }
 .jrow h3 { font: 700 17px/1.3 var(--sans); }
 .jrow p { margin: 2px 0 0; padding-left: 30px; font-size: 14px; color: var(--ink-3); }
@@ -789,7 +839,11 @@ html:not(.js) .preloader { display: none; }
    di atas kartu dengan titik di tiap jam selesai */
 .jrail { --card-min: 260px; --sliver: 38px; overflow: hidden; background: var(--white); }
 .jrail__track { display: flex; }
-.jdur .jcard { position: relative; flex: 1 1 0; min-width: 0; min-height: 120px; border-right: 1px solid var(--grey-2); padding-top: 18px; transition: background .25s, flex-basis .3s cubic-bezier(.22, .9, .24, 1); }
+.jdur .jcard { position: relative; flex: 1 1 0; min-width: 0; border-right: 1px solid var(--grey-2); padding-top: 18px; transition: background .25s, flex-basis .3s cubic-bezier(.22, .9, .24, 1); }
+/* tinggi minimum: cukup untuk jam tegak di strip (140px); grup >2 kartu
+   lebih tinggi karena strip-nya juga memuat badge "+N" */
+.jdur .jcard { min-height: 140px; }
+.jrail--many .jcard { min-height: 160px; }
 .jdur .jcard > * { transition: opacity .14s linear .17s; }
 .jrail.no-flex-anim .jcard { transition: none; }
 .jrail__track { position: relative; }
@@ -872,7 +926,7 @@ html:not(.js) .preloader { display: none; }
 
 /* ---------- Layanan (pinned horizontal) ---------- */
 .layanan { background: var(--ink); color: var(--white); position: relative; overflow: hidden; }
-.layanan::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px); background-size: 64px 64px; pointer-events: none; }
+.layanan::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px); background-size: 64px 64px; background-position: calc(50% + 32px) 0; pointer-events: none; }
 /* Section ini di-pin: selama pin aktif isinya TIDAK bisa di-scroll vertikal,
    dan .layanan memotong luapannya (overflow: hidden). Karena itu semua ukuran
    vertikalnya harus ikut tinggi layar, bukan angka tetap — kalau tidak, di
@@ -1303,6 +1357,7 @@ html:not(.js) .preloader { display: none; }
   .jrow time { grid-column: 1; grid-row: 1; }
   .jrow .tag { grid-column: 2; grid-row: 1; justify-self: end; padding: 3px 8px; }
   .jrow > div { grid-column: 1 / -1; grid-row: 2; }
+  .jrow.is-live time, .jrow:has(.jopen) time, .jrow:has(.jnext) time { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
   .jgrid { grid-template-columns: 1fr; }
   .footer__grid { grid-template-columns: 1fr; }
   /* layanan tetap horizontal di mobile — dipadatkan agar muat 1 layar */
