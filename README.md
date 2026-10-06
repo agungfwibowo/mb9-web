@@ -12,7 +12,7 @@ index.html              Halaman utama (satu halaman, semua section)
 privasi/index.html      Kebijakan Privasi → diakses di /privasi/
 assets/css/style.css    Seluruh gaya halaman utama
 assets/js/data-prod.js  Data konten produksi (jadwal, tenant, sponsor, dll.)
-assets/js/data-dev.js   Data uji, hanya aktif di localhost (menimpa data-prod.js)
+assets/js/data-dev.js   Data uji, aktif selain di muslimberdedikasi.com (menimpa data-prod.js)
 assets/js/main.js       Interaksi, animasi, menu bagikan, registrasi service worker
 assets/fonts/           Font self-hosted (Public Sans, Roboto Mono, subset Noto Sans Mono)
 assets/img/             Gambar & logo (org/, sponsor/, tenant/, logo/)
