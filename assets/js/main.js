@@ -2813,9 +2813,9 @@
     return true;
   };
   // Snap hanya di hero: hero jadi satu "layar" yang menempel — berhenti menggulir
-  // (roda/trackpad diam 160ms) selagi posisi tujuan masih di dalam hero → halaman
-  // meluncur ke tepi hero sesuai arah: turun → tepi bawah hero (awal Tentang),
-  // naik → atas hero. Di luar hero gulir bebas. Dihitung dari roda (bukan dari
+  // (roda/trackpad diam 260ms) selagi posisi tujuan masih di dalam hero → halaman
+  // meluncur ke tepi hero sesuai arah bila sudah terdorong ≥25% (turun → tepi bawah
+  // hero, naik → atas hero); kurang dari itu kembali ke tepi asal. Di luar hero gulir bebas. Dihitung dari roda (bukan dari
   // luncuran Lenis yang masih ±1 dtk) agar snap terasa segera. HP memakai CSS
   // scroll-snap proximity (lihat .snap-hero di CSS).
   // hanya bila isi hero muat satu layar — kalau lebih tinggi (layar pendek/landscape)
@@ -2833,11 +2833,12 @@
         const end = hero.offsetHeight;
         const y = lenis.targetScroll ?? lenis.scroll; // posisi tujuan luncuran saat ini
         if (snapping || navLocked || y <= 2 || y >= end - 2) return;
-        const to = dir > 0 ? end : 0;
+        // butuh dorongan cukup (≥25% hero) ke arah itu; kurang dari itu kembali ke tepi asal
+        const to = dir > 0 ? (y > end * 0.25 ? end : 0) : (y < end * 0.75 ? 0 : end);
         snapping = true;
         // easeInOutSine: berangkat & mendarat pelan
-        lenis.scrollTo(to, { duration: 1, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2, lock: true, force: true, onComplete: () => { snapping = false; } });
-      }, 160);
+        lenis.scrollTo(to, { duration: 1.2, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2, lock: true, force: true, onComplete: () => { snapping = false; } });
+      }, 260);
     }, { passive: true });
   }
   const syncSnap = () => root.classList.toggle('snap-hero', !finePointer && !reduced && heroFits());
