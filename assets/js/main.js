@@ -590,6 +590,32 @@
     qr: '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
     more: '<path d="M5 12h.01M12 12h.01M19 12h.01"/>',
   };
+  // Simpan file hasil buatan halaman (QR/poster). Di HP: lembar Bagikan bawaan
+  // dengan file terlampir (Simpan Gambar / Simpan ke File / kirim) — unduhan lewat
+  // <a download> sering tanpa notifikasi atau gagal di PWA terpasang (terutama
+  // iOS). Desktop / perangkat tanpa dukungan: unduhan biasa. iOS menolak share bila
+  // ketukan sudah "kedaluwarsa" (menunggu pembuatan file) → file disimpan di
+  // tombolnya dan pengunjung diminta mengetuk sekali lagi. Mengembalikan label status.
+  const saveFile = async (blob, name, btnEl) => {
+    const file = new File([blob], name, { type: blob.type });
+    const touch = matchMedia('(pointer: coarse)').matches;
+    if (touch && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: name });
+        return 'Tersimpan ✓';
+      } catch (err) {
+        if (err && err.name === 'AbortError') return 'Dibatalkan';
+        if (err && err.name === 'NotAllowedError' && btnEl) { btnEl._pending = { blob, name }; return 'Ketuk lagi untuk simpan'; }
+        // selain itu → jatuh ke unduhan biasa
+      }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    return 'Terunduh ✓';
+  };
   // modal: true → kartu yang sama, tapi di TENGAH layar dengan latar gelap,
   // halaman dikunci & ada tombol tutup (dipakai logo footer). Di HP (≤860px)
   // semua menu Bagikan otomatis tampil sebagai modal ini — ditentukan saat dibuka.
@@ -628,7 +654,8 @@
       lab.textContent = m;
       b.classList.add('is-done');
       clearTimeout(b._t);
-      b._t = setTimeout(() => { lab.textContent = b.dataset.label; b.classList.remove('is-done'); }, 1800);
+      // "Ketuk lagi untuk simpan" (file menunggu) bertahan lebih lama, lalu dibatalkan
+      b._t = setTimeout(() => { lab.textContent = b.dataset.label; b.classList.remove('is-done'); b._pending = null; }, b._pending ? 8000 : 1800);
     };
     // Posisi (koordinat layar, ikut tombol saat digulir/diputar):
     // - Denah desktop: di KANAN panel samping, sejajar bawah tombol.
@@ -770,31 +797,23 @@
       }
       if (b.dataset.act === 'copy') {
         try { await navigator.clipboard.writeText(data.url); say(b, 'Tersalin ✓'); } catch (_) { say(b, 'Gagal menyalin'); }
+      } else if (b._pending) {
+        // file sudah disiapkan tapi lembar share butuh ketukan baru (iOS) → kirim sekarang
+        const f = b._pending; b._pending = null;
+        say(b, await saveFile(f.blob, f.name, b));
       } else if (b.dataset.act === 'qr') {
         // file unduhan persegi beresolusi tinggi (1200px) — layak cetak untuk
         // booth: judul di atas, QR di tengah, tautan di bawah
         const qrc = document.createElement('canvas');
         if (!(await drawQR(qrc, 900, data.url, data.logo))) { say(b, 'QR belum siap'); return; }
         const big = await qrCard(qrc, data.title, data.url);
-        big.toBlob((blob) => {
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = `${data.file}-qr.png`;
-          document.body.appendChild(a); a.click(); a.remove();
-          setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-          say(b, 'Terunduh ✓');
-        }, 'image/png');
+        big.toBlob(async (blob) => say(b, await saveFile(blob, `${data.file}-qr.png`, b)), 'image/png');
       } else if (b.dataset.act === 'poster') {
         say(b, 'Menyiapkan…');
         const cv = await drawPoster(data.url);
         cv.toBlob(async (blob) => {
           const jpg = new Uint8Array(await blob.arrayBuffer());
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(jpegToPdf(jpg, cv.width, cv.height));
-          a.download = `${data.file}-poster-a4.pdf`;
-          document.body.appendChild(a); a.click(); a.remove();
-          setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-          say(b, 'Terunduh ✓');
+          say(b, await saveFile(jpegToPdf(jpg, cv.width, cv.height), `${data.file}-poster-a4.pdf`, b));
         }, 'image/jpeg', 0.9);
       } else if (b.dataset.act === 'native') {
         // fungsi tombol Bagikan sebelumnya: lembar share bawaan perangkat,
