@@ -21,6 +21,7 @@ import './denah.js';
 import './countdown.js';
 import './menu.js';
 import './lenis.js';
+import './totop.js';
 import './cursor.js';
 import './teks.js';
 import './intro.js';

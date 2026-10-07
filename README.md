@@ -9,17 +9,18 @@ Produksi: <https://www.muslimberdedikasi.com/>
 
 ```
 index.html              Halaman utama (satu halaman, semua section)
-privasi/index.html      Kebijakan Privasi → diakses di /privasi/
+privasi/index.html      Ketentuan Layanan & Kebijakan Privasi → diakses di /privasi/
 assets/css/style.css    Seluruh gaya halaman utama
 assets/js/data-prod.js  Data konten produksi (jadwal, tenant, sponsor, dll.)
 assets/js/data-dev.js   Data uji, aktif selain di muslimberdedikasi.com (menimpa data-prod.js)
 assets/js/main.js       HASIL BUILD dari src/js (jangan diedit langsung) + main.js.map
+assets/js/privasi.js    Penanda tombol navigasi di halaman Ketentuan & Privasi (tidak dibundel)
 src/js/                 Sumber JS per fitur (ES module), entry: src/js/main.js
   core.js               Helper DOM ($, esc, …), data hari, state lintas modul (lenis)
   navbar.js             Sembunyi/tampil navbar, progress bar, lockNav
   konten.js kalender.js bagikan.js a2hs.js koneksi.js
   jadwal.js asatidz.js tenant.js marquee.js denah.js countdown.js
-  menu.js lenis.js cursor.js teks.js intro.js hemat.js grain.js sw-register.js
+  menu.js lenis.js totop.js cursor.js teks.js intro.js hemat.js grain.js sw-register.js
 assets/fonts/           Font self-hosted (Public Sans, Roboto Mono, subset Noto Sans Mono)
 assets/img/             Gambar & logo (org/, sponsor/, tenant/, logo/)
 sw.js                   Service worker — cache offline untuk dipakai di lokasi acara
@@ -80,7 +81,7 @@ Catatan: GitHub Pages gratis untuk repo **public**. Untuk repo private butuh aku
 0. Bila mengubah `src/js`: `npm run build`.
 1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.312` → `mb9-1.1.313`).
 2. Samakan semua `?v=` di [index.html](index.html) dengan angka versi tersebut
-   (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`). Cache lama otomatis dibuang saat worker baru aktif.
+   (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`) dan `privasi.js` di [privasi/index.html](privasi/index.html). Cache lama otomatis dibuang saat worker baru aktif.
 3. Perbarui `<lastmod>` di [sitemap.xml](sitemap.xml) bila konten berubah.
 
 Menambah halaman baru: buat sebagai `nama/index.html` (agar URL-nya `/nama/` tanpa `.html`),

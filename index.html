@@ -88,7 +88,7 @@
     @font-face { font-family: 'Roboto Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(assets/fonts/roboto-mono-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     @font-face { font-family: 'Noto Sans Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(assets/fonts/noto-sans-mono-blocks.woff2) format('woff2'); unicode-range: U+2591-2593; }
   </style>
-  <link rel="stylesheet" href="assets/css/style.css?v=1.1.338">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.1.340">
   <script>document.documentElement.classList.add('js');
     // Kunjungan ulang dalam sesi yang sama → preloader mode cepat (hanya 3 panel
     // terangkat). Diputuskan di sini, sebelum halaman digambar, agar layar lime
@@ -290,7 +290,7 @@
         <div class="tema__copy">
           <p class="kicker mono" data-scramble>Tumbuh Berdedikasi, Mengukir Masa Depan</p>
           <h2 class="title split-words" data-hl="Berdedikasi">Generasi Berdedikasi Di Masa Depan</h2>
-          <p class="lead reveal-up">Muslim Berdedikasi 9 adalah <em>Islamic Family Festival</em> 5 hari berturut-turut yang dirancang sebagai oase ilmu, kesehatan, dan kebersamaan di penghujung tahun 2026. Mengusung tema “Generasi Berdedikasi Di Masa Depan”, kegiatan ini hadir untuk mendorong lahirnya generasi yang berilmu, peduli, dan memiliki semangat dedikasi dalam memberikan manfaat bagi keluarga, masyarakat, dan masa depan.</p>
+          <p class="reveal-up">Muslim Berdedikasi 9 adalah <em>Islamic Family Festival</em> 5 hari berturut-turut yang dirancang sebagai oase ilmu, kesehatan, dan kebersamaan di penghujung tahun 2026. Mengusung tema “Generasi Berdedikasi Di Masa Depan”, kegiatan ini hadir untuk mendorong lahirnya generasi yang berilmu, peduli, dan memiliki semangat dedikasi dalam memberikan manfaat bagi keluarga, masyarakat, dan masa depan.</p>
           <p class="reveal-up">Ajak seluruh anggota keluarga Anda untuk merasakan paduan sempurna antara <b>Kajian Ilmiah</b> intensif, <b>Layanan Sosial GRATIS</b> berskala besar, kompetisi inspiratif, dan pengalaman kuliner terbaik di satu tempat. Jadikan momen liburan ini sebagai investasi terbesar untuk iman, ilmu, dan kesehatan keluarga Anda.</p>
 
           <ul class="stats">
@@ -511,18 +511,23 @@
       </div>
     </div>
     <div class="container footer__bottom">
-      <span>© 2026 Muslim Berdedikasi 9. All rights reserved. · <a href="privasi/" class="to-top">Kebijakan Privasi</a></span>
-      <a href="#home" class="mono to-top">Kembali ke atas ↑</a>
+      <span>© 2026 Muslim Berdedikasi 9. All rights reserved.</span>
+      <a href="privasi/" class="to-top">Ketentuan &amp; Kebijakan Privasi</a>
     </div>
   </footer>
+
+  <!-- tombol kembali ke atas (mengambang) — hanya muncul saat footer terlihat, lihat totop.js -->
+  <a href="#home" class="totop" id="toTop" aria-label="Kembali ke atas" title="Kembali ke atas" tabindex="-1">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </a>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
   <!-- QR untuk menu Bagikan (ikut di-precache SW → tetap jalan offline) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
-  <script src="assets/js/data-prod.js?v=1.1.338" defer></script>
-  <script src="assets/js/data-dev.js?v=1.1.338" defer></script>
-  <script src="assets/js/main.js?v=1.1.338" defer></script>
+  <script src="assets/js/data-prod.js?v=1.1.340" defer></script>
+  <script src="assets/js/data-dev.js?v=1.1.340" defer></script>
+  <script src="assets/js/main.js?v=1.1.340" defer></script>
 </body>
 </html>
