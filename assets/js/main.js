@@ -95,6 +95,9 @@
     const mark = () => { userScrolled = true; };
     addEventListener('wheel', mark, { passive: true, once: true });
     addEventListener('touchmove', mark, { passive: true, once: true });
+    // klik/ketuk apa pun (mis. tautan jadwal di tooltip tenda) = pengunjung mengambil
+    // alih → koreksi posisi saat load tidak boleh menarik balik ke tujuan awal
+    addEventListener('pointerdown', mark, { passive: true, once: true });
     addEventListener('keydown', (e) => { if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(e.key)) mark(); });
   }
 
@@ -1222,6 +1225,21 @@
   const ustadzById = Object.fromEntries((D.asatidz || []).filter((u) => u.id).map((u) => [u.id, u.name]));
   // id pengisi di elemen jadwal → badge asatidz bisa menemukan acaranya
   const ustAttr = (r) => (r.ustadz ? ` data-ustadz="${esc([].concat(r.ustadz).join(' '))}"` : '');
+  // Tenda acara di denah: nama pemilik tenda (D.placements) = r.tenda, atau
+  // judul acara yang sama persis (mis. "Donor Darah") → label "Tenda 33".
+  const tendaOf = {};
+  (D.placements || []).forEach(([name, from, to = from]) => {
+    const p2 = (n) => String(n).padStart(2, '0');
+    (tendaOf[name] = tendaOf[name] || []).push(from === to ? p2(from) : `${p2(from)}–${p2(to)}`);
+  });
+  const tendaName = (r) => (r.tenda && tendaOf[r.tenda] ? r.tenda : tendaOf[r.title] ? r.title : null);
+  // versi HTML: nama asatidz jadi tautan ke kartunya di section Asatidz,
+  // tenda jadi tautan ke denah (tendanya dipilih — handler data-tenant-link)
+  const noteHtml = (r) => [
+    [].concat(r.ustadz || []).filter((id) => ustadzById[id]).map((id) => `<a href="#asatidz" class="jnote-ust" data-ust="${esc(id)}">${esc(ustadzById[id])}</a>`).join(' &amp; '),
+    r.note ? esc(r.note) : '',
+    tendaName(r) ? `<a href="#denah" class="jnote-ust" data-tenant-link="${esc(tendaName(r))}" data-cursor="Lokasi">Tenda ${tendaOf[tendaName(r)].join(', ')}</a>` : '',
+  ].filter(Boolean).join(' · ');
   const noteOf = (r) => [[].concat(r.ustadz || []).map((id) => ustadzById[id]).filter(Boolean).join(' & '), r.note]
     .filter(Boolean).join(' · ');
   // Tampilan Tabel dinonaktifkan sementara → selalu Durasi & tombol Tabel/Durasi
@@ -1316,7 +1334,7 @@
     const rowHtml = (r) => `
         <div class="jrow${pinkCls(r)}${jView === 'tabel' && r.group ? ' is-grp' : ''}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}${ustAttr(r)}>
           <time>${esc(r.time)}</time>
-          <div><h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>${noteOf(r) ? `<p>${esc(noteOf(r))}</p>` : ''}</div>
+          <div><h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>${noteHtml(r) ? `<p>${noteHtml(r)}</p>` : ''}</div>
           ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : '<span></span>'}
         </div>`;
     // kolom diurut kiri→kanan menurut jam selesai (lalu jam mulai) — yang
@@ -1383,7 +1401,7 @@
           <div class="jstop"><i aria-hidden="true"></i><time>${c.label}</time></div>${c.items.map((r) => `
           <div class="jcard__item${pinkCls(r)}" data-t="${esc(r.time)}"${r.group ? '' : ' data-seq'}${ustAttr(r)}>
             <h3>${iconOf(r)}<span>${esc(r.title)}</span></h3>
-            ${noteOf(r) ? `<p>${esc(noteOf(r))}</p>` : ''}
+            ${noteHtml(r) ? `<p>${noteHtml(r)}</p>` : ''}
             ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : ''}
           </div>`).join('')}
         </div>`)).join('')}</div></div></div>`;
@@ -1964,18 +1982,16 @@
   // klik badge → pilih tab hari itu dulu (gulir ke #jadwal oleh handler anchor
   // umum), lalu acara ustadz itu berkedip di tampilan yang sedang terbuka:
   // Tabel → barisnya; Durasi → kartunya (baris kartu digeser ke sana dulu).
+  // Buka sebuah acara di jadwal: pilih tab hari itu, cari elemennya (find(panel)),
+  // buka kartunya di Durasi bila tertutup, gulir hingga di tengah layar, lalu
+  // berkedip 4×. Dipakai badge asatidz & tooltip tenda di denah. false = tak ketemu.
   let flashTimer = 0;
-  agrid.addEventListener('click', (e) => {
-    const a = e.target.closest('.ustadz__badge[data-day]');
-    const btn = a && $(`#tab-${a.dataset.day}`);
-    if (!btn) return;
+  const focusSession = (dayKey, find) => {
+    const btn = $(`#tab-${dayKey}`);
+    if (!btn) return false;
     selectDay(btn);
-    const id = a.closest('.ustadz').dataset.id;
-    const el = $$('[data-ustadz]', panel).find((x) => x.dataset.ustadz.split(' ').includes(id) && x.dataset.t === a.dataset.t);
-    if (!el) return; // acara tak ditemukan → cukup gulir ke #jadwal (handler anchor umum)
-    // gulir sendiri langsung ke acaranya (bukan ke awal section) agar kedipnya terlihat
-    e.preventDefault();
-    e.stopPropagation();
+    const el = find(panel);
+    if (!el) return false;
     const card = el.closest('.jcard');
     const rail = el.closest('.jrail');
     if (rail && card) {
@@ -1988,7 +2004,8 @@
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const r = target.getBoundingClientRect();
       const y = Math.max(0, scrollY + r.top - (innerHeight - r.height) / 2);
-      if (lenis) lenis.scrollTo(y, { duration: 1 });
+      lockNav(1400);
+      if (lenis) lenis.scrollTo(y, { duration: 1, onComplete: () => lockNav(250) });
       else scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
     }));
     // mulai setelah gulirnya kurang lebih selesai; 4× nyala-padam
@@ -2002,6 +2019,17 @@
         if (++n >= 8) { clearInterval(flashTimer); target.classList.remove('is-flashing'); }
       }, 450);
     }, 1100);
+    return true;
+  };
+  agrid.addEventListener('click', (e) => {
+    const a = e.target.closest('.ustadz__badge[data-day]');
+    if (!a) return;
+    const id = a.closest('.ustadz').dataset.id;
+    // tak ketemu → biarkan handler anchor umum menggulir ke #jadwal
+    if (focusSession(a.dataset.day, (pn) => $$('[data-ustadz]', pn).find((x) => x.dataset.ustadz.split(' ').includes(id) && x.dataset.t === a.dataset.t))) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   });
   if (agrid.querySelector('.ustadz[data-id]')) { markAsatidzLive(); everyMinute(markAsatidzLive); }
   // Deretan kartu yang di-pin GSAP (Layanan & Asatidz) di HP: kartu digerakkan
@@ -2031,6 +2059,39 @@
     el.addEventListener('click', (e) => { if (Date.now() - draggedAt < 400) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
   };
   swipeToScroll(agrid, 'asatidz');
+  // Nama asatidz di jadwal → gulir ke kartunya (section Asatidz di-pin: posisi
+  // gulir dihitung agar kartu itu berada di tengah deretan), lalu kartunya berkedip.
+  const goToUstadz = (id) => {
+    const card = $(`.ustadz[data-id="${CSS.escape(id)}"]`, agrid);
+    if (!card) return false;
+    const flash = () => {
+      card.classList.remove('is-flash');
+      void card.offsetWidth; // ulang animasi bila diklik lagi
+      card.classList.add('is-flash');
+      card.addEventListener('animationend', () => card.classList.remove('is-flash'), { once: true });
+    };
+    const ps = pinSwipe.asatidz;
+    let y;
+    if (ps && ps.perPx()) {
+      // geser track yang dibutuhkan agar tengah kartu = tengah layar
+      // posisi kartu di dalam deretan (selisih rect → bebas dari geseran saat ini)
+      const inTrack = card.getBoundingClientRect().left - agrid.getBoundingClientRect().left;
+      const need = Math.max(0, inTrack + card.offsetWidth / 2 - innerWidth / 2);
+      y = ps.start() + need * ps.perPx() + 2;
+    } else {
+      // tanpa pin (layar pendek / tanpa animasi): deretan digeser native ke kartunya
+      agrid.scrollTo?.({ left: card.offsetLeft - (agrid.clientWidth - card.offsetWidth) / 2, behavior: reduced ? 'auto' : 'smooth' });
+      y = $('#asatidz').getBoundingClientRect().top + scrollY - 20;
+    }
+    lockNav(1600);
+    if (lenis) lenis.scrollTo(y, { duration: 1.2, onComplete: () => { lockNav(250); flash(); } });
+    else { scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' }); setTimeout(flash, reduced ? 0 : 900); }
+    return true;
+  };
+  panel.addEventListener('click', (e) => {
+    const a = e.target.closest('.jnote-ust[data-ust]');
+    if (a && goToUstadz(a.dataset.ust)) { e.preventDefault(); e.stopPropagation(); }
+  });
   if (track) swipeToScroll(track, 'layanan');
 
   // Tenant marquee + grid
@@ -2175,7 +2236,8 @@
   const tenantAt = {};
   const owners = [...D.tenants, ...(D.boothOwners || [])];
   const tenantNames = new Set(owners.map((t) => t[0]));
-  const tenantLogo = Object.fromEntries(owners.map(([name, file, tone]) => [name, { src: `assets/img/tenant/${file}`, dark: tone === 'dark' }]));
+  // pemilik tanpa file logo (mis. layanan Donor Darah) → tooltip memakai ikon layanan
+  const tenantLogo = Object.fromEntries(owners.filter(([, file]) => file).map(([name, file, tone]) => [name, { src: `assets/img/tenant/${file}`, dark: tone === 'dark' }]));
   (D.placements || []).forEach(([name, from, to = from]) => {
     if (!tenantNames.has(name)) console.warn(`[denah] tenant "${name}" tidak ada di daftar tenants`);
     for (let n = from; n <= to; n++) tenantAt[n] = name;
@@ -2259,15 +2321,41 @@
     const host = new URL(url).hostname.replace(/^www\./, '');
     return `<a class="booth-tip__link" href="${esc(url)}" target="_blank" rel="noopener" data-cursor="Buka">${esc(host)} <span aria-hidden="true">↗</span></a>`;
   };
+  // Jam buka–tutup HARI INI (WIB) untuk tenda yang punya jadwal (judul / r.tenda
+  // sama dengan nama pemilik tenda), dengan status Buka / Tutup / Buka jam ….
+  const hoursOf = (who) => {
+    const day = openDayAt(Date.now());
+    const rs = ((day && D.jadwal && D.jadwal[day.key]) || []).filter((r) => tendaName(r) === who);
+    if (!rs.length) return '';
+    const now = wibNow().min;
+    return rs.map((r) => {
+      const [a, b] = r.time.split(' - ').map(toMin);
+      const st = now < a ? `Buka ${fmtMin(a)}` : now >= b ? 'Tutup' : 'Buka';
+      const cls = now < a ? 'is-wait' : now >= b ? 'is-closed' : 'is-open';
+      // tautan ke jadwal hari ini: dibuka & dikedipkan lewat focusSession (handler di tip)
+      return `<span class="booth-tip__hrs mono"><a href="#jadwal" data-day="${day.key}" data-t="${esc(r.time)}" data-title="${esc(r.title)}">Hari ini ${fmtMin(a)}–${fmtMin(b)} <span aria-hidden="true">→</span></a> <em class="${cls}">${st}</em></span>`;
+    }).join('');
+  };
+  // klik jam di tooltip → buka acaranya di jadwal (tab hari ini, gulir, kedip)
+  tip.addEventListener('click', (e) => {
+    const a = e.target.closest('.booth-tip__hrs a[data-day]');
+    if (!a) return;
+    const hit = focusSession(a.dataset.day, (pn) => $$('.jrow[data-t], .jcard__item[data-t]', pn)
+      .find((x) => x.dataset.t === a.dataset.t && $('h3 span', x)?.textContent === a.dataset.title));
+    if (hit) { e.preventDefault(); e.stopPropagation(); }
+  });
   const fillTip = (g) => {
     if (tipFor === g) return;
     tipFor = g;
     const meta = `Tenda ${pad(g.dataset.n)} · ${CATS[g.dataset.cat].label.replace('Tenda ', '')}`;
-    const logo = g.dataset.tenant && tenantLogo[g.dataset.tenant];
-    tip.classList.toggle('has-logo', !!logo);
-    tip.innerHTML = logo
+    const who = g.dataset.tenant;
+    const logo = who && tenantLogo[who];
+    tip.classList.toggle('has-logo', !!who);
+    const mark = logo
       ? `<span class="booth-tip__logo${logo.dark ? ' is-dark' : ''}"><img src="${esc(logo.src)}" alt="" decoding="async"></span>`
-        + `<span class="booth-tip__txt"><small>${esc(meta)}</small><b>${esc(g.dataset.tenant)}</b>${linkOf(g)}</span>`
+      : `<span class="booth-tip__logo is-icon"><svg class="jico" viewBox="0 0 24 24" aria-hidden="true"><path d="${JICONS[iconKey({ title: who || '' })]}"/></svg></span>`;
+    tip.innerHTML = who
+      ? `${mark}<span class="booth-tip__txt"><small>${esc(meta)}</small><b>${esc(who)}</b>${hoursOf(who)}${linkOf(g)}</span>`
       : esc(meta);
   };
   // Koordinat layar (clientX/Y). Kartu di atas titik `top`; kalau ruang di
@@ -3106,7 +3194,7 @@
         })
           .to(agridTrack, { x: () => -adist(), ease: 'none', duration: 1 })
           .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
-        pinSwipe.asatidz = { perPx: perPx(atl, adist) };
+        pinSwipe.asatidz = { perPx: perPx(atl, adist), start: () => atl.scrollTrigger.start };
       }
       const dist = () => Math.max(0, track.scrollWidth - innerWidth);
       const ltl = gsap.timeline({

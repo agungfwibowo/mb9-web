@@ -35,6 +35,32 @@
     { time: '19.00 - 20.00', title: 'Kajian Ilmiah', ustadz: 'abu-aliyah', tag: 'kajian' },
     { time: '20.00 - 21.00', title: 'Talkshow: Umroh Mandiri atau Pakai Travel?', note: 'Gratis', tag: 'talkshow' },  ];
 
+  // Layanan di tenda (uji): tenda contoh dikosongkan dari tenant lalu diisi
+  // layanan. Nama sama dengan judul jadwal → baris jadwal mendapat tautan
+  // "Tenda xx" & tooltip tenda di denah menampilkan jam buka hari ini.
+  const SERVICE_AT = {
+    // tenda sekolah (33) sengaja tidak dipakai
+    1: 'Bekam', 2: '7/8 Cut', 3: "Konsultasi Syar'i",
+    4: 'Pemeriksaan Kesehatan Umum & Dermatologis', 5: 'Donor Darah',
+  };
+  D.boothOwners = [...(D.boothOwners || []), ...Object.values(SERVICE_AT).map((n) => [n, ''])];
+  const taken = (from, to) => Object.keys(SERVICE_AT).some((n) => n >= from && n <= to);
+  const displaced = (D.placements || []).filter(([, from, to = from]) => taken(from, to)).map(([name]) => name);
+  D.placements = (D.placements || [])
+    .filter(([, from, to = from]) => !taken(from, to))
+    .concat(Object.entries(SERVICE_AT).map(([n, name]) => [name, Number(n)]));
+  // Tenant yang tendanya terpakai layanan tetap dapat tenda: tenda terakhir dari
+  // tenant yang menyewa ≥3 tenda berderet (urut daftar) diberikan ke mereka —
+  // tidak ada tenant yang kehilangan semua tendanya.
+  const owners = new Set((D.boothOwners || []).map(([n]) => n));
+  const placed = new Set(D.placements.map(([n]) => n));
+  displaced.filter((name) => !placed.has(name)).forEach((name) => {
+    const donor = D.placements.find(([n, from, to = from]) => !owners.has(n) && to - from >= 2);
+    if (!donor) return;
+    D.placements.push([name, donor[2]]);
+    donor[2] -= 1;
+  });
+
   // Sementara: pengisi kajian contoh jadwal di atas (edisi lalu), tanpa foto.
   // `id` dirujuk jadwal lewat `ustadz:` → nama tampil sebagai keterangan acara.
   D.asatidz = [
