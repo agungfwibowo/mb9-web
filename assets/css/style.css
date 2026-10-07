@@ -1041,7 +1041,7 @@ html:not(.js) .preloader { display: none; }
 .asatidz .container { position: relative; z-index: 1; }
 /* satu baris; jika melebihi layar → digeser horizontal saat scroll */
 .asatidz__grid { flex: none; align-items: flex-start; display: flex; flex-wrap: nowrap; justify-content: center; gap: 0; width: max-content; min-width: 100%; padding: 0 var(--gutter); will-change: transform; }
-.asatidz__grid > .ustadz { flex: 0 0 min(232px, 30vh); min-width: 0; margin-left: -2px; }
+.asatidz__grid > .ustadz { flex: 0 0 min(280px, 32vh); min-width: 0; margin-left: -2px; }
 .asatidz__grid > .ustadz:first-child { margin-left: 0; }
 @media (max-width: 860px) { .asatidz__grid, .layanan__track { touch-action: pan-y; } } /* HP: geser horizontal ditangani JS (→ gulir halaman) */
 .ustadz { position: relative; aspect-ratio: 3/4; background: var(--paper); border: 2px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
@@ -1387,7 +1387,7 @@ html:not(.js) .preloader { display: none; }
   .asatidz__pin { padding: clamp(40px, 6vh, 90px) 0; }
   .asatidz .sec-head { margin-bottom: clamp(14px, 2.8vh, 48px); }
   .asatidz .sec-head .title { font-size: clamp(24px, 3.6vh, 42px); }
-  .asatidz__grid > .ustadz { flex-basis: min(232px, 26vh); }
+  .asatidz__grid > .ustadz { flex-basis: min(280px, 27vh); }
   .asatidz__note { margin-top: clamp(10px, 2vh, 26px); }
 }
 
