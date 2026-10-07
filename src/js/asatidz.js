@@ -5,15 +5,20 @@ import { everyMinute, fmtMin, moveRail, openDayAt, panel, selectDay, toMin, wibN
 
 // Asatidz
 const agrid = $('#asatidzGrid');
-const SIL = '<svg class="sil" viewBox="0 0 100 120" fill="currentColor" aria-hidden="true"><circle cx="50" cy="34" r="22"/><path d="M8 120c0-26 19-44 42-44s42 18 42 44Z"/></svg>';
+const SIL = '<svg class="sil" viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet" fill="currentColor" aria-hidden="true"><path d="M50 12c-12 0-21 9-21 22 0 8 2 14 5 19 4 6 10 10 16 10s12-4 16-10c3-5 5-11 5-19 0-13-9-22-21-22Z"/><path d="M8 120c0-28 19-48 42-48s42 20 42 48Z"/></svg>';
+// siluet akhwat: khimar panjang lurus (wajah & garis lipatan = lubang, tampak warna latar kartu)
+const SIL_AKHWAT = '<svg class="sil" viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M50 6C38 6 30 16 29 32 28 46 26 56 22 70 17 88 12 104 10 120h80c-2-16-7-32-12-50-4-14-6-24-7-38C70 16 62 6 50 6ZM50 19c-7 0-12 8-12 18 0 12 6 22 12 22s12-10 12-22c0-10-5-18-12-18ZM53 65c10 7 18 15 20 27l-2 28h-2l2-28c-2-11-9-19-18-26Z"/></svg>';
 // Selalu minimal 6 kartu: asatidz yang sudah ada tampil duluan, sisanya
 // kartu "InsyaAllah menyusul" sampai daftarnya lengkap.
 const ASATIDZ_MIN = 6;
 const asatidz = D.asatidz || [];
 const soonN = Math.max(0, ASATIDZ_MIN - asatidz.length);
+// Pemateri akhwat (ustadzah): kartu berlatar pink. Ditandai `akhwat: true` di
+// data; tanpa field itu dikenali dari namanya ("Ustadzah ...").
+const isAkhwat = (u) => u.akhwat ?? /^ustadzah\b/i.test(u.name || '');
 agrid.innerHTML = asatidz.map((u) => `
-      <article class="ustadz"${u.id ? ` data-id="${esc(u.id)}"` : ''}>
-        ${u.photo ? `<img class="lazy-img" data-src="${esc(u.photo)}" alt="${esc(u.name)}" decoding="async">` : SIL}
+      <article class="ustadz${isAkhwat(u) ? ' ustadz--akhwat' : ''}"${u.id ? ` data-id="${esc(u.id)}"` : ''}>
+        ${u.photo ? `<img class="lazy-img" data-src="${esc(u.photo)}" alt="${esc(u.name)}" decoding="async">` : isAkhwat(u) ? SIL_AKHWAT : SIL}
         <div class="ustadz__body"><h3>${esc(u.name)}</h3>${u.role ? `<small>${esc(u.role)}</small>` : ''}</div>
       </article>`).join('') + Array.from({ length: soonN }, (_, k) => {
   const i = asatidz.length + k;
@@ -31,13 +36,13 @@ if (soonN) agrid.insertAdjacentHTML('afterend', '<p class="asatidz__note">Daftar
 const markAsatidzLive = () => {
   const now = wibNow();
   const day = openDayAt(Date.now());
-  const st = new Map(); // id → { live, next (menit mulai terdekat), ladies }
+  const st = new Map(); // id → { live, next (menit mulai terdekat), akhwat }
   ((day && D.jadwal && D.jadwal[day.key]) || []).forEach((r) => {
     const [a, b] = r.time.split(' - ').map(toMin);
     [].concat(r.ustadz || []).forEach((id) => {
       // t = jam sesi yang dituju badge: yang berjalan › terdekat › terakhir selesai
-      const o = st.get(id) || { live: false, next: null, ladies: false, t: '', tNext: '', tDone: '' };
-      if (now.min >= a && now.min < b) { o.live = true; o.ladies = !!r.ladies; o.t = r.time; }
+      const o = st.get(id) || { live: false, next: null, akhwat: false, t: '', tNext: '', tDone: '' };
+      if (now.min >= a && now.min < b) { o.live = true; o.akhwat = !!r.akhwat; o.t = r.time; }
       else if (now.min < a) { if (o.next === null || a < o.next) { o.next = a; o.tNext = r.time; } }
       else o.tDone = r.time;
       st.set(id, o);
@@ -47,7 +52,7 @@ const markAsatidzLive = () => {
     const o = st.get(card.dataset.id);
     const live = !!o && o.live;
     card.classList.toggle('is-live', live);
-    card.classList.toggle('is-pink', live && o.ladies);
+    card.classList.toggle('is-pink', live && o.akhwat);
     // badge = tautan ke jadwal hari ini (tab dipilih di handler klik agrid)
     const t = !o ? '' : live ? o.t : o.next !== null ? o.tNext : o.tDone;
     const badge = (cls, text) => `<a href="#jadwal" class="ustadz__badge ${cls} mono" data-day="${day.key}" data-t="${esc(t)}" aria-label="${text} — buka jadwal hari ini">${text}<span class="ustadz__go" aria-hidden="true">→</span></a>`;
@@ -60,6 +65,30 @@ const markAsatidzLive = () => {
     if (old) old.remove();
     if (html) card.insertAdjacentHTML('beforeend', html);
   });
+  sortAsatidz(st);
+};
+// Urutan kartu: Berlangsung › hari ini belum mulai (jam terdekat dulu) › hari ini
+// sudah selesai › tanpa jadwal hari ini (urutan data) › "InsyaAllah menyusul" ›
+// akhwat tanpa jadwal hari ini (selalu paling kanan).
+// DOM-nya yang dipindah (bukan CSS order) agar margin kartu pertama/terakhir &
+// urutan Tab tetap benar. Hanya disentuh bila urutannya memang berubah.
+const baseOrder = $$('.ustadz', agrid);
+const sortAsatidz = (st) => {
+  const rank = (card) => {
+    const o = card.dataset.id && st.get(card.dataset.id);
+    if (card.classList.contains('ustadz--soon')) return [4, 0];
+    if (!o) return card.classList.contains('ustadz--akhwat') ? [5, 0] : [3, 0];
+    return o.live ? [0, 0] : o.next !== null ? [1, o.next] : [2, 0];
+  };
+  const sorted = baseOrder.map((card, i) => ({ card, i, r: rank(card) }))
+    .sort((x, y) => x.r[0] - y.r[0] || x.r[1] - y.r[1] || x.i - y.i)
+    .map((x) => x.card);
+  const now = [...agrid.children].filter((c) => c.classList.contains('ustadz'));
+  if (sorted.every((c, i) => c === now[i])) return;
+  sorted.forEach((c) => agrid.appendChild(c));
+  // kartu terdepan terlihat — tapi jangan ganggu yang sedang menggeser deretan
+  const r = agrid.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > innerHeight) agrid.scrollLeft = 0;
 };
 // klik badge → pilih tab hari itu dulu (gulir ke #jadwal oleh handler anchor
 // umum), lalu acara ustadz itu berkedip di tampilan yang sedang terbuka:
@@ -114,7 +143,7 @@ agrid.addEventListener('click', (e) => {
   }
 });
 if (agrid.querySelector('.ustadz[data-id]')) { markAsatidzLive(); everyMinute(markAsatidzLive); }
-// Deretan kartu yang di-pin GSAP (Layanan & Asatidz) di HP: kartu digerakkan
+// Deretan kartu Layanan yang di-pin GSAP di HP: kartu digerakkan
 // gulir halaman (lihat scrollAnims). Geser jari ke kiri/kanan diterjemahkan jadi
 // gulir halaman yang setara → kartu ikut bergeser & tetap sinkron dengan gulir
 // atas/bawah. pinSwipe[key] diisi blok GSAP selama pin aktif (perPx = px gulir
@@ -140,9 +169,51 @@ const swipeToScroll = (el, key) => {
   // klik bawaan di akhir geseran (mis. badge / tombol kartu) diabaikan
   el.addEventListener('click', (e) => { if (Date.now() - draggedAt < 400) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
 };
-swipeToScroll(agrid, 'asatidz');
-// Nama asatidz di jadwal → gulir ke kartunya (section Asatidz di-pin: posisi
-// gulir dihitung agar kartu itu berada di tengah deretan), lalu kartunya berkedip.
+// Asatidz: deretan digeser biasa (overflow-x, scrollbar disembunyikan). Sentuh &
+// trackpad sudah bisa; mouse tidak (roda hanya vertikal) → bisa diseret.
+const dragScroll = (el) => {
+  let d = null, draggedAt = 0;
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || el.scrollWidth <= el.clientWidth) return;
+    d = { x: e.clientX, left: el.scrollLeft, moved: false };
+  });
+  addEventListener('pointermove', (e) => {
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    if (!d.moved && Math.abs(dx) > 5) { d.moved = true; el.classList.add('is-dragging'); }
+    if (d.moved) el.scrollLeft = d.left - dx;
+  });
+  addEventListener('pointerup', () => {
+    if (!d) return;
+    if (d.moved) draggedAt = Date.now();
+    d = null;
+    el.classList.remove('is-dragging'); // snap aktif lagi → kartu berlabuh
+  });
+  // klik di akhir seretan (mis. badge kartu) diabaikan
+  el.addEventListener('click', (e) => { if (Date.now() - draggedAt < 300) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+  el.addEventListener('dragstart', (e) => e.preventDefault()); // gambar tidak ikut terseret
+};
+dragScroll(agrid);
+// Jarak sisi deretan (--ast-pad) agar kartu yang muat penuh (1/2/3…) berada tepat
+// di tengah layar saat berlabuh. Hanya bila deretan meluber; kalau semua muat,
+// kartu sudah rata tengah lewat margin auto. Saat meluber, lebar kartu sudah
+// tetap (HP) atau sudah di batas susutnya (desktop), jadi padding baru tidak
+// mengubah ukurannya lagi.
+const centerSnap = () => {
+  agrid.style.removeProperty('--ast-pad');
+  if (agrid.scrollWidth <= agrid.clientWidth) return;
+  const cards = $$('.ustadz', agrid);
+  const gap = parseFloat(getComputedStyle(agrid).columnGap) || 0; // jarak antar kartu
+  const cw = cards[0].offsetWidth, step = cw + gap;
+  const W = agrid.clientWidth;
+  const k = Math.max(1, Math.floor((W - 32 + gap) / step)); // sisakan ≥16px tiap sisi
+  agrid.style.setProperty('--ast-pad', `${Math.round((W - (k * step - gap)) / 2)}px`);
+};
+centerSnap();
+addEventListener('resize', centerSnap);
+addEventListener('load', centerSnap);
+// Nama asatidz di jadwal → gulir ke section Asatidz, deretan kartunya digeser
+// sampai kartu itu di tengah, lalu kartunya berkedip.
 const goToUstadz = (id) => {
   const card = $(`.ustadz[data-id="${CSS.escape(id)}"]`, agrid);
   if (!card) return false;
@@ -152,19 +223,8 @@ const goToUstadz = (id) => {
     card.classList.add('is-flash');
     card.addEventListener('animationend', () => card.classList.remove('is-flash'), { once: true });
   };
-  const ps = pinSwipe.asatidz;
-  let y;
-  if (ps && ps.perPx()) {
-    // geser track yang dibutuhkan agar tengah kartu = tengah layar
-    // posisi kartu di dalam deretan (selisih rect → bebas dari geseran saat ini)
-    const inTrack = card.getBoundingClientRect().left - agrid.getBoundingClientRect().left;
-    const need = Math.max(0, inTrack + card.offsetWidth / 2 - innerWidth / 2);
-    y = ps.start() + need * ps.perPx() + 2;
-  } else {
-    // tanpa pin (layar pendek / tanpa animasi): deretan digeser native ke kartunya
-    agrid.scrollTo?.({ left: card.offsetLeft - (agrid.clientWidth - card.offsetWidth) / 2, behavior: reduced ? 'auto' : 'smooth' });
-    y = $('#asatidz').getBoundingClientRect().top + scrollY - 20;
-  }
+  agrid.scrollTo?.({ left: card.offsetLeft - (agrid.clientWidth - card.offsetWidth) / 2, behavior: reduced ? 'auto' : 'smooth' });
+  const y = $('#asatidz').getBoundingClientRect().top + scrollY - 20;
   lockNav(1600);
   if (lenis) lenis.scrollTo(y, { duration: 1.2, onComplete: () => { lockNav(250); flash(); } });
   else { scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' }); setTimeout(flash, reduced ? 0 : 900); }

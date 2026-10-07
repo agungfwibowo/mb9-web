@@ -79,22 +79,6 @@ export const scrollAnims = () => {
   gsap.matchMedia().add('(min-height: 521px)', () => {
     // geser jari (HP) → gulir halaman setara; 1.42 = durasi geser + jeda di timeline
     const perPx = (tl, d) => () => (d() ? ((tl.scrollTrigger.end - tl.scrollTrigger.start) / 1.42) / d() : 0);
-    // asatidz: satu baris, geser horizontal saat overflow (mirip layanan)
-    const pinAsatidz = () => {
-      const agridTrack = $('#asatidzGrid');
-      if (!agridTrack) return;
-      const adist = () => Math.max(0, agridTrack.scrollWidth - innerWidth);
-      const atl = gsap.timeline({
-        scrollTrigger: {
-          trigger: '.asatidz__pin', start: 'top top',
-          end: () => `+=${adist() ? adist() * 1.45 + innerHeight * .25 : 1}`,
-          pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
-        },
-      })
-        .to(agridTrack, { x: () => -adist(), ease: 'none', duration: 1 })
-        .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
-      pinSwipe.asatidz = { perPx: perPx(atl, adist), start: () => atl.scrollTrigger.start };
-    };
     const pinLayanan = () => {
       const dist = () => Math.max(0, track.scrollWidth - innerWidth);
       const ltl = gsap.timeline({
@@ -111,15 +95,10 @@ export const scrollAnims = () => {
         .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
       pinSwipe.layanan = { perPx: perPx(ltl, dist) };
     };
-    // Pin WAJIB dibuat sesuai urutan section di halaman: ScrollTrigger menghitung
-    // posisi pin berikutnya dari ruang pin sebelumnya. Salah urut → start pin yang
-    // di bawah meleset sepanjang pin di atasnya → kartunya meloncat. Urutan dibaca
-    // dari DOM, jadi section boleh dipindah di index.html tanpa menyentuh ini.
-    const lay = $('#layanan'), ast = $('#asatidz');
-    const layFirst = !ast || (lay && lay.compareDocumentPosition(ast) & Node.DOCUMENT_POSITION_FOLLOWING);
-    (layFirst ? [pinLayanan, pinAsatidz] : [pinAsatidz, pinLayanan]).forEach((f) => f());
+    // Asatidz tidak lagi di-pin: deretan kartunya digeser biasa (lihat asatidz.js)
+    pinLayanan();
 
-    return () => { pinSwipe.layanan = null; pinSwipe.asatidz = null; };
+    return () => { pinSwipe.layanan = null; };
 
   });
 

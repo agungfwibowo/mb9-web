@@ -31,7 +31,7 @@ window.MB9 = {
   /* JADWAL — InsyaAllah menyusul.
      Isi per hari dengan format:
      d1: [ { time: '08.00 - 21.00', title: 'Open Gate Bazar & Foodcourt', note: '', tag: 'kajian|layanan|lomba|talkshow' }, ... ]
-     ladies (opsional): true → acara khusus muslimah, ditandai warna pink.
+     akhwat (opsional): true → acara khusus muslimah, ditandai warna pink.
      ustadz (opsional): id dari ASATIDZ (atau daftar id: ['a', 'b']) → nama pengisi
        tampil sebagai keterangan; bila note juga diisi, keduanya disambung ' · '.
      Tampilan Tabel mengikuti URUTAN BARIS di sini (per periode Pagi/Siang/…),
@@ -47,7 +47,9 @@ window.MB9 = {
 
   /* ASATIDZ — InsyaAllah menyusul.
      Format: { id: 'nama-singkat', name: 'Ustadz ...', role: 'Kajian Ilmiah', photo: 'assets/img/asatidz/nama.webp' }
-     id dipakai jadwal (field ustadz) untuk merujuk pengisi acara. */
+     id dipakai jadwal (field ustadz) untuk merujuk pengisi acara.
+     Ustadzah/akhwat: tambahkan akhwat: true → kartu berlatar pink & bila tidak
+     ada jadwal hari ini ditaruh paling kanan. */
   asatidz: [],
 
   layanan: [
