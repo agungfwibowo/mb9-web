@@ -591,18 +591,22 @@
     more: '<path d="M5 12h.01M12 12h.01M19 12h.01"/>',
   };
   // modal: true → kartu yang sama, tapi di TENGAH layar dengan latar gelap,
-  // halaman dikunci & ada tombol tutup (dipakai logo footer).
-  const shareMenu = (btn, getData, { modal = false } = {}) => {
+  // halaman dikunci & ada tombol tutup (dipakai logo footer). Di HP (≤860px)
+  // semua menu Bagikan otomatis tampil sebagai modal ini — ditentukan saat dibuka.
+  const shareMenu = (btn, getData, { modal: alwaysModal = false } = {}) => {
     const pop = document.createElement('div');
-    pop.className = `share-pop${modal ? ' share-pop--modal' : ''}`;
-    let shade = null;
-    if (modal) {
-      pop.setAttribute('aria-modal', 'true');
-      shade = document.createElement('div');
-      shade.className = 'share-shade';
-      shade.hidden = true;
-      document.body.appendChild(shade);
-    }
+    pop.className = 'share-pop';
+    let modal = alwaysModal;
+    const shade = document.createElement('div');
+    shade.className = 'share-shade';
+    shade.hidden = true;
+    document.body.appendChild(shade);
+    const setModal = () => {
+      modal = alwaysModal || matchMedia('(max-width: 860px)').matches;
+      pop.classList.toggle('share-pop--modal', modal);
+      if (modal) pop.setAttribute('aria-modal', 'true'); else pop.removeAttribute('aria-modal');
+    };
+    setModal();
     pop.hidden = true;
     pop.setAttribute('role', 'dialog');
     pop.setAttribute('aria-label', 'Bagikan');
@@ -710,6 +714,7 @@
     const open = () => {
       data = getData();
       if (!data) return;
+      setModal();
       const opt = (act, icon, label, wide) => `<button type="button" class="share-pop__opt${wide ? ' share-pop__opt--wide' : ''}" data-act="${act}"><svg class="is-line" viewBox="0 0 24 24" aria-hidden="true">${OPT_ICON[icon]}</svg><span aria-live="polite">${label}</span></button>`;
       pop.innerHTML = `${modal ? '<button type="button" class="share-pop__x" data-act="close" aria-label="Tutup">✕</button>' : ''}<div class="share-pop__body">
         <canvas class="share-pop__qr" role="img" aria-label="Kode QR: ${esc(data.title)}"></canvas>
