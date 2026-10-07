@@ -15,7 +15,7 @@
   // Hari ke-1 selalu = hari ini (WIB) agar status Hari ini / Selesai / Tutup bisa diuji
   D.days[0].iso = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
   // D.hours.open = '22:00'; // jam buka harian (WIB)
-  D.hours.close = '23:30'; // jam tutup harian (WIB)
+  // D.hours.close = '22:30'; // jam tutup harian (WIB)
 
   // Contoh tampilan — mengikuti pola susunan acara Hari ke-1–5 Muslim
   // Berdedikasi 8 (edisi tahun lalu) sebagai referensi, BUKAN jadwal resmi MB9.
@@ -24,15 +24,15 @@
     { time: '08.00 - 17.00', title: 'Khitanan Massal', note: 'Gratis', tag: 'layanan', group: 'g1' },
     { time: '08.00 - 09.30', title: "Babak Grand Final Musabaqah Hifzhul Qur'an", note: 'Kategori Ikhwan', tag: 'lomba', group: 'g1' },
     { time: '08.00 - 10.00', title: 'Talkshow: Pelatihan Tour Leader Umroh', note: 'Gratis', tag: 'talkshow' },
-    { time: '05.00 - 23.30', title: 'Kajian Ilmiah', ustadz: 'ali-nur', tag: 'kajian' },
+    { time: '10.00 - 11.30', title: 'Kajian Ilmiah', ustadz: 'ali-nur', tag: 'kajian' },
     { time: '10.00 - 15.00', title: 'Donor Darah', note: 'Gratis', tag: 'layanan', group: 'g2' },
     { time: '10.00 - 16.00', title: 'Pemeriksaan Kesehatan Umum & Dermatologis', note: 'Ikhwan & Akhwat, Gratis', tag: 'layanan', group: 'g2' },
     { time: '10.00 - 17.00', title: 'Bekam', note: 'Ikhwan, Gratis', tag: 'layanan', group: 'g2' },
     { time: '10.00 - 17.00', title: '7/8 Cut', note: 'Ikhwan, Gratis', tag: 'layanan', group: 'g2' },
     { time: '14.00 - 17.30', title: "Konsultasi Syar'i", note: 'Gratis', tag: 'layanan', group: 'g2' },
     { time: '14.00 - 15.30', title: 'Kajian Muslimah', ustadz: 'ummu-hany', tag: 'kajian', akhwat: true },
-    { time: '23.00 - 23.25', title: 'Kajian Ilmiah', ustadz: 'abu-saif', tag: 'kajian' },
-    { time: '23.00 - 23.15', title: 'Kajian Ilmiah', ustadz: 'abu-aliyah', tag: 'kajian' },
+    { time: '16.00 - 18.00', title: 'Kajian Ilmiah', ustadz: 'abu-saif', tag: 'kajian' },
+    { time: '19.00 - 20.00', title: 'Kajian Ilmiah', ustadz: 'abu-aliyah', tag: 'kajian' },
     { time: '20.00 - 21.00', title: 'Talkshow: Umroh Mandiri atau Pakai Travel?', note: 'Gratis', tag: 'talkshow' },  ];
   D.jadwal.d2 = [
     { time: '08.00 - 21.00', title: 'Open Gate Bazar & Foodcourt', note: 'Berlangsung sepanjang hari', tag: 'layanan', group: 'g1' },
