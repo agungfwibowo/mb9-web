@@ -749,7 +749,7 @@ html:not(.js) .preloader { display: none; }
 .jrow.is-seq-first::before { top: var(--dot-y); }
 .jrow.is-seq-last::before { bottom: calc(100% - var(--dot-y)); }
 .jrow.is-seq-first.is-seq-last::before { display: none; }
-.jrow.is-seq::after { content: ""; position: absolute; left: 14px; top: var(--dot-y); width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 3px var(--white); }
+.jrow.is-seq::after { content: ""; position: absolute; left: 14px; top: var(--dot-y); width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 3px var(--white); transition: box-shadow .25s; }
 .jrow.is-seq:hover::after { box-shadow: 0 0 0 3px var(--lime-3); }
 .jrow.is-seq.is-pink::after { background: var(--pink); }
 .jrow.is-seq.is-pink:hover::after { box-shadow: 0 0 0 3px #fdeef5; }
@@ -917,8 +917,8 @@ html:not(.js) .preloader { display: none; }
 .jdur .jcard:last-child { border-right: 0; }
 .jstop { position: relative; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .jstop::before { content: ""; position: absolute; left: -20px; right: -20px; top: 50%; height: 2px; transform: translateY(-50%); background: var(--grey-2); }
-.jstop i { position: relative; flex-shrink: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px var(--white); }
-.jstop time { position: relative; padding: 0 6px; background: var(--white); }
+.jstop i { position: relative; flex-shrink: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px var(--white); transition: background .25s, box-shadow .25s; }
+.jstop time { position: relative; padding: 0 6px; background: var(--white); transition: background .25s; } /* sama dengan .jcard → latar, cincin & jam berubah serempak saat hover */
 .jcard:hover .jstop i { box-shadow: 0 0 0 4px var(--lime-3); }
 .jcard:hover .jstop time { background: var(--lime-3); }
 .is-pink .jstop i { background: var(--pink); }
