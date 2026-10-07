@@ -631,7 +631,7 @@ html.snap-hero .hero { scroll-snap-align: start; }
   /* dropdown diposisikan terhadap bar (lebar penuh), bukan tombolnya — sejak
      ada toggle Tabel/Durasi tombol kalender bergeser ke kanan dan dropdown
      292px-nya meluber keluar layar */
-  .jadwal__bar { position: relative; }
+  .jadwal__bar { position: relative; margin-bottom: 16px; } /* badge tab (top:-11px) masih punya ruang ±5px */
   .cal { position: static; }
   .cal__opts { left: 0; right: 0; min-width: 0; max-width: 420px; }
   .cal > summary > span, #shareBtn > span { display: none; }
@@ -664,21 +664,19 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .days-nav button:disabled { color: var(--grey); cursor: not-allowed; background: var(--paper); }
 .days-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; }
 
-/* Tab hari versi ringkas: menempel di atas (di bawah navbar; naik saat navbar
-   sembunyi) selama tab asli sudah tergulir lewat dan daftar acara masih terlihat.
-   --dstick-top diisi jadwal.js dari tinggi navbar. */
+/* Tab hari versi ringkas: menempel di bawah layar selama tab asli sudah
+   tergulir lewat dan daftar acara masih terlihat (lihat jadwal.js). */
 .dstick {
-  position: fixed; left: 50%; top: 14px; z-index: 8800;
+  position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom, 0px) + 8px); z-index: 8800;
   width: calc(100% - 2 * var(--gutter)); max-width: var(--maxw);
   display: flex; align-items: stretch; background: var(--ink); color: var(--white); border: 2px solid var(--ink);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
-  /* muncul/hilang cukup memudar (tanpa meluncur); translate hanya untuk
-     mengikuti navbar yang tampil/sembunyi */
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, .18);
+  /* muncul/hilang cukup memudar (tanpa meluncur) */
   translate: -50% 0; opacity: 0; visibility: hidden; pointer-events: none;
-  transition: translate .5s var(--ease), opacity .35s var(--ease), visibility 0s .35s;
+  transition: opacity .35s var(--ease), visibility 0s .35s;
 }
 .dstick.is-in { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
-.nav:not(.is-hidden) ~ main .dstick { translate: -50% var(--dstick-top, 0px); }
+@media (min-width: 861px) { .dstick { display: none; } } /* khusus HP/tablet */
 .menu-open .dstick { visibility: hidden; opacity: 0; }
 .dstick button { flex: 0 0 44px; height: 44px; display: grid; place-items: center; cursor: pointer; background: var(--white); color: var(--ink); border: 0; transition: background .2s, color .2s; }
 /* putih = bisa ditekan, abu = mentok; hover (hanya perangkat berkursor) lime */
@@ -693,8 +691,9 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .dstick__label em.is-past { background: #555; }
 @media (max-width: 560px) {
   /* HP: dua baris seperti kartu hari — "HARI KE-1" di atas, hari + badge di bawah */
-  .dstick__label { display: grid; grid-template-columns: auto auto; justify-content: center; align-content: center; gap: 2px 6px; letter-spacing: .06em; line-height: 1.15; }
-  .dstick__label small { grid-column: 1 / -1; text-align: center; font-size: 10px; }
+  /* flex-wrap (bukan grid 2 kolom): tanpa badge, baris bawah tetap tepat di tengah */
+  .dstick__label { flex-wrap: wrap; align-content: center; gap: 2px 6px; letter-spacing: .06em; line-height: 1.15; }
+  .dstick__label small { flex: 0 0 100%; text-align: center; font-size: 10px; }
   .dstick__label em { font-size: 9px; padding: 2px 5px; align-self: center; }
 }
 
@@ -1073,17 +1072,30 @@ html.snap-hero .hero { scroll-snap-align: start; }
 
 /* ---------- Asatidz ---------- */
 .asatidz { background: var(--white); padding: 0; }
-/* sama seperti .layanan__pin — di-pin, jadi ukurannya diikat ke tinggi layar */
+/* ukurannya masih diikat ke tinggi layar (tampilan sama seperti saat dulu di-pin) */
 .asatidz__pin { position: relative; z-index: 1; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: clamp(84px, 9vh, 150px) 0 clamp(40px, 6vh, 90px); }
 .asatidz .sec-head .title { font-size: clamp(24px, min(5vw, 5.5vh), 60px); }
 .asatidz .sec-head { margin-bottom: min(64px, 5vh); }
 .asatidz .container { position: relative; z-index: 1; }
-/* satu baris; jika melebihi layar → digeser horizontal saat scroll */
-.asatidz__grid { flex: none; align-items: flex-start; display: flex; flex-wrap: nowrap; justify-content: center; gap: 0; width: max-content; min-width: 100%; padding: 0 var(--gutter); will-change: transform; }
-.asatidz__grid > .ustadz { flex: 0 0 min(280px, 32vh); min-width: 0; margin-left: -2px; }
-.asatidz__grid > .ustadz:first-child { margin-left: 0; }
-@media (max-width: 860px) { .asatidz__grid, .layanan__track { touch-action: pan-y; } } /* HP: geser horizontal ditangani JS (→ gulir halaman) */
-.ustadz { position: relative; aspect-ratio: 3/4; background: var(--paper); border: 2px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+/* satu baris; jika melebihi layar → digeser mendatar biasa (jari/trackpad, mouse:
+   seret — lihat asatidz.js). Scrollbar disembunyikan. Margin auto di kartu
+   pertama/terakhir = rata tengah bila muat, tanpa memotong sisi kiri bila tidak. */
+.asatidz__grid {
+  flex: none; align-items: flex-start; display: flex; flex-wrap: nowrap; gap: var(--ast-gap); --ast-gap: 16px; padding: 0 var(--ast-pad, var(--gutter));
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior: contain; scrollbar-width: none; /* tak ada gulir vertikal di dalamnya */
+  /* snap: kartu berlabuh di --ast-pad (dihitung asatidz.js) → 1/2/3 kartu yang muat
+     penuh selalu pas di tengah layar, tetangganya mengintip sama lebar */
+  scroll-snap-type: x mandatory; scroll-padding-inline: var(--ast-pad, var(--gutter));
+  cursor: grab; user-select: none; -webkit-user-select: none;
+}
+.asatidz__grid::-webkit-scrollbar { display: none; }
+.asatidz__grid.is-dragging { cursor: grabbing; scroll-snap-type: none; } /* seret mouse: snap menyusul saat dilepas */
+/* boleh menyusut s/d 85% → bila hampir muat, semua kartu pas di tengah tanpa digeser */
+.asatidz__grid > .ustadz { --ust-w: min(280px, 32vh); flex: 0 1 var(--ust-w); min-width: calc(var(--ust-w) * .85); scroll-snap-align: start; }
+.asatidz__grid > .ustadz:first-child { margin-left: auto; }
+.asatidz__grid > .ustadz:last-child { margin-right: auto; }
+@media (max-width: 860px) { .layanan__track { touch-action: pan-y; } } /* HP: geser horizontal ditangani JS (→ gulir halaman) */
+.ustadz { position: relative; aspect-ratio: 1; background: var(--paper); border: 2px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
 .ustadz img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: transform .8s var(--ease), filter .6s; }
 .ustadz:hover img { transform: scale(1.06); filter: grayscale(0); }
 /* min-height = padding + nama 2 baris + peran → kotak nama sama tinggi, teks rata atas */
@@ -1127,12 +1139,26 @@ html.snap-hero .hero { scroll-snap-align: start; }
 @keyframes dot-pulse { 0% { box-shadow: 0 0 0 0 rgba(197, 250, 1, .95); transform: scale(1); } 50% { transform: scale(1.25); } 100% { box-shadow: 0 0 0 9px rgba(197, 250, 1, 0); transform: scale(1); } }
 /* punya jadwal hari ini (belum mulai / sudah selesai) — gaya sama dengan badge tab hari */
 .ustadz__badge--today, .ustadz__badge--done { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,.18); }
-.ustadz__badge--today { background: #dfe7ff; color: var(--blue); } /* lebih terang dari Berlangsung (biru pekat) */
-.ustadz__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--blue); animation: blink 1s steps(2) infinite; }
+.ustadz__badge--today { background: var(--blue); color: var(--white); } /* biru polos (Berlangsung: gradien + titik berdenyut) */
+.ustadz__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--lime); animation: blink 1s steps(2) infinite; }
 .ustadz__badge--done { background: var(--grey-2); color: var(--ink-2); }
 .ustadz--soon { background: repeating-linear-gradient(-45deg, var(--paper) 0 14px, #e2e2df 14px 28px); }
-.ustadz .sil { position: absolute; left: 50%; top: 18%; width: 58%; transform: translateX(-50%); color: var(--grey-2); transition: color .4s, transform .6s var(--ease); }
+/* siluet ikut alur flex (bukan absolute) → selalu menempel di atas kotak nama, setinggi apa pun kotaknya.
+   Mengisi sisa tinggi kartu di bawah jarak atas (ruang badge + padding); gambarnya
+   rata bawah (preserveAspectRatio xMidYMax) → tak tertutup badge. */
+.ustadz .sil { display: block; flex: 1 1 0; min-height: 0; width: 100%; margin-top: 44px; color: var(--grey-2); transition: color .4s, transform .6s var(--ease); }
 .ustadz--soon:hover .sil { color: var(--grey); }
+/* pemateri ikhwan yang kajiannya sedang berlangsung: latar & siluet biru muda */
+.ustadz.is-live:not(.ustadz--akhwat) { background: #dfe7ff; }
+.ustadz.is-live:not(.ustadz--akhwat) .sil { color: #a9bcf3; }
+.ustadz.is-live:not(.ustadz--akhwat) .ustadz__body { background: var(--blue); }
+.ustadz.is-live:not(.ustadz--akhwat) .ustadz__body small { color: #dfe7ff; }
+/* pemateri akhwat: latar & siluet pink */
+.ustadz--akhwat { background: var(--pink-3); }
+.ustadz--akhwat .sil { color: #f3a9cc; }
+/* kotak nama ikut berwarna hanya saat kajiannya berlangsung */
+.ustadz--akhwat.is-live .ustadz__body { background: var(--pink); }
+.ustadz--akhwat.is-live .ustadz__body small { color: var(--pink-3); }
 .ustadz--soon .q { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; display: grid; place-items: center; background: var(--lime); font: 700 20px/1 var(--mono); color: var(--ink); }
 .asatidz__note { margin-top: 30px; padding: 0 var(--gutter); display: flex; justify-content: center; align-items: center; gap: 14px; text-align: left; flex-wrap: nowrap; font: 700 14px/1.4 var(--mono); text-transform: uppercase; }
 .asatidz__note::before { content: ''; width: 12px; height: 12px; background: var(--blue); animation: blink 1s steps(2) infinite; }
@@ -1457,7 +1483,7 @@ html.snap-hero .hero { scroll-snap-align: start; }
   .asatidz__pin { padding: clamp(40px, 6vh, 90px) 0; }
   .asatidz .sec-head { margin-bottom: clamp(14px, 2.8vh, 48px); }
   .asatidz .sec-head .title { font-size: clamp(24px, 3.6vh, 42px); }
-  .asatidz__grid > .ustadz { flex-basis: min(280px, 27vh); }
+  .asatidz__grid > .ustadz { --ust-w: min(280px, 27vh); }
   .asatidz__note { margin-top: clamp(10px, 2vh, 26px); }
 }
 
@@ -1563,7 +1589,7 @@ html.snap-hero .hero { scroll-snap-align: start; }
   .asatidz .sec-head .title { font-size: clamp(24px, min(7vw, 4.4vh), 34px); }
   .asatidz .sec-head .sec-sub { margin-top: 10px; font-size: 14.5px; line-height: 1.5; }
   /* aspect-ratio 3/4 → tinggi = basis x 1.33; 34vh menahannya di ~45vh */
-  .asatidz__grid > .ustadz { flex: 0 0 min(62vw, 34vh); }
+  .asatidz__grid > .ustadz { flex: 0 0 min(62vw, 34vh); min-width: 0; } /* HP: ukuran tetap, digeser */
   .ustadz__body { padding: 12px; min-height: 73px; }
   .ustadz__body h3 { font-size: 14px; }
   .ustadz__body small { font-size: 11px; }
@@ -1861,7 +1887,7 @@ img.lazy-img.is-loaded.is-seen { opacity: 1; translate: none; }
   }
   .lcard, .asatidz__grid > .ustadz { flex: 0 0 auto; scroll-snap-align: center; }
   .lcard { width: min(72vw, 360px); min-height: 0; }
-  .asatidz__grid > .ustadz { flex-basis: min(30vw, 200px); }
+  .asatidz__grid > .ustadz { flex-basis: min(30vw, 200px); min-width: 0; scroll-snap-align: start; }
 }
 
 /* Lightbox gambar asli denah */
