@@ -828,7 +828,7 @@ html:not(.js) .preloader { display: none; }
 .jdur .jcard.is-live.is-pink:not(.is-piled):hover, .jdur .jcard.is-live.is-pink:hover .jstop time { background: #fdeef5; }
 .jdur .jcard.is-live .jstop time { background: #edf1ff; }
 .jdur .jcard.is-live.is-pink .jstop time { background: #fdeef5; }
-@media (prefers-reduced-motion: reduce) { .jrow.is-live::after, .jdur .jcard.is-live .jstop i, .jdur .jcard.is-piled.is-live .jcard__edge i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ustadz > .jlive, .ustadz > .jlive .ustadz__go, .ustadz > .jlive::before, .jrow.is-live::after, .jdur .jcard.is-live .jstop i, .jdur .jcard.is-piled.is-live .jcard__edge i { animation: none; } }
 /* Tabel: acara yang berjalan bersamaan (field group di data-prod.js) → garis biru kiri */
 /* latar putih (abu-abu khusus untuk acara yang sudah lewat) — paralel cukup ditandai garis biru */
 .jrow.is-grp { box-shadow: inset 4px 0 0 var(--blue); }
@@ -1071,12 +1071,20 @@ html:not(.js) .preloader { display: none; }
 #jadwalPanel .jrow.is-seq.is-flash::before, #jadwalPanel .jcard.is-flash .jstop::before { background: var(--ink-3); }
 .ustadz__go { margin-left: auto; padding-left: 8px; font-size: 13px; line-height: 1; transition: transform .25s var(--ease); }
 .ustadz__badge:hover .ustadz__go, .ustadz__badge:focus-visible .ustadz__go { transform: translateX(3px); }
-.ustadz > .jlive { animation: live-pulse 1.4s ease-out infinite; }
-.ustadz.is-pink > .jlive { animation-name: live-pulse-pink; }
+/* denyut di titik badge (cincin di luar badge terpotong tepi kartu) */
+.ustadz > .jlive::before { width: 8px; height: 8px; animation: dot-pulse 1.2s ease-out infinite; }
+/* latar badge Berlangsung: kilau terang menyapu kiri → kanan */
+.ustadz > .jlive { background: linear-gradient(100deg, var(--blue) 35%, #5a80ff 50%, var(--blue) 65%) 100% 0 / 260% 100%; animation: badge-shine 2.4s linear infinite; }
+.ustadz.is-pink > .jlive { background-image: linear-gradient(100deg, var(--pink) 35%, #f37ab8 50%, var(--pink) 65%); }
+@keyframes badge-shine { to { background-position: -160% 0; } }
+/* panah badge Berlangsung bergerak maju-mundur → mengajak membuka jadwal */
+.ustadz > .jlive .ustadz__go { animation: go-nudge 1.2s ease-in-out infinite; }
+@keyframes go-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+@keyframes dot-pulse { 0% { box-shadow: 0 0 0 0 rgba(197, 250, 1, .95); transform: scale(1); } 50% { transform: scale(1.25); } 100% { box-shadow: 0 0 0 9px rgba(197, 250, 1, 0); transform: scale(1); } }
 /* punya jadwal hari ini (belum mulai / sudah selesai) — gaya sama dengan badge tab hari */
 .ustadz__badge--today, .ustadz__badge--done { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,.18); }
-.ustadz__badge--today { background: var(--blue); color: var(--white); }
-.ustadz__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--lime); animation: blink 1s steps(2) infinite; }
+.ustadz__badge--today { background: #dfe7ff; color: var(--blue); } /* lebih terang dari Berlangsung (biru pekat) */
+.ustadz__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--blue); animation: blink 1s steps(2) infinite; }
 .ustadz__badge--done { background: var(--grey-2); color: var(--ink-2); }
 .ustadz--soon { background: repeating-linear-gradient(-45deg, var(--paper) 0 14px, #e2e2df 14px 28px); }
 .ustadz .sil { position: absolute; left: 50%; top: 18%; width: 58%; transform: translateX(-50%); color: var(--grey-2); transition: color .4s, transform .6s var(--ease); }
@@ -1410,9 +1418,11 @@ html:not(.js) .preloader { display: none; }
     display: grid; gap: 8px; padding: 8px; background: var(--ink); border: 2px solid var(--ink); box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
     user-select: none; -webkit-user-select: none;
   }
-  .denah__side .seg { border-color: var(--white); background: var(--ink); }
-  .denah__side .seg button { color: var(--white); padding: 9px; }
-  .denah__side .seg button[aria-selected="true"] { background: var(--lime); color: var(--ink); }
+  .denah__side .seg { border-color: var(--white); background: var(--white); }
+  .denah__side .seg button { color: var(--ink); padding: 9px; }
+  .denah__side .seg button[aria-selected="true"] { background: var(--ink); color: var(--lime); }
+  /* tombol Bagikan di bar gelap: garis & teks putih (gaya .btn--line), hover isi putih */
+  .denah-share { --bg: transparent; --fg: var(--white); --edge: var(--white); border-color: var(--white); }
   .denah__hint { display: none; }
   .legend { grid-template-columns: repeat(6, 1fr); gap: 5px; }
   .chip { position: relative; justify-content: center; height: 32px; padding: 0; background: var(--c); border: 2px solid var(--c); color: var(--t); }
@@ -1503,8 +1513,9 @@ html:not(.js) .preloader { display: none; }
   .day span { font-size: 13px; }
   .hero { padding-top: 104px; }
   .hero__visual { max-width: 210px; }
-  .stats { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
-  .stats span { box-shadow: none; }
+  /* tetap 3 kolom satu baris di HP — angka & keterangan dirapatkan */
+  .stats b { padding: 14px 12px 12px; font-size: clamp(24px, 8vw, 32px); }
+  .stats span { padding: 9px 12px; font-size: 12px; }
   .soon { grid-template-columns: 1fr; }
   .logo-tile { width: 112px; height: 112px; }
   .marquee__track { font-size: 13px; }
