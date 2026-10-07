@@ -53,6 +53,21 @@ toggle.addEventListener('click', () => {
     else scrollTo({ top: target.getBoundingClientRect().top + scrollY + offset, behavior: reduced ? 'auto' : 'smooth' });
   });
 });
+// Tombol "Sembunyikan Brand" mengambang: tampil selama daftar brand terlihat
+// tapi tombol aslinya (di kepala section) sudah tergulir lewat
+const hideBtn = $('#tenantHide');
+if (hideBtn) {
+  let allIn = false, toggleIn = true;
+  const sync = () => {
+    const on = !all.hidden && allIn && !toggleIn;
+    hideBtn.classList.toggle('is-in', on);
+    hideBtn.tabIndex = on ? 0 : -1; // tersembunyi = tidak bisa difokus Tab
+  };
+  new IntersectionObserver(([en]) => { allIn = en.isIntersecting; sync(); }).observe(all);
+  new IntersectionObserver(([en]) => { toggleIn = en.isIntersecting; sync(); }).observe(toggle);
+  toggle.addEventListener('click', () => requestAnimationFrame(sync));
+  hideBtn.addEventListener('click', () => { if (!all.hidden) toggle.click(); });
+}
 $('#tenantSearch').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
   let shown = 0;
