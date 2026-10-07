@@ -838,6 +838,9 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .jrow time { font: 700 15px/1 var(--mono); color: var(--blue); }
 .jrow h3 { font: 700 17px/1.3 var(--sans); }
 .jrow p { margin: 2px 0 0; padding-left: 30px; font-size: 14px; color: var(--ink-3); }
+/* nama asatidz di jadwal → tautan ke kartunya */
+.jnote-ust { color: inherit; text-decoration: underline; text-decoration-color: var(--grey-2); text-underline-offset: 3px; transition: color .2s, text-decoration-color .2s; }
+.jnote-ust:hover, .jnote-ust:focus-visible { color: var(--blue); text-decoration-color: currentColor; }
 .jrow .tag { justify-self: end; }
 .jrow h3, .jcard h3 { display: flex; align-items: flex-start; gap: 10px; }
 .is-pink .jico { stroke: var(--pink); }
@@ -1055,6 +1058,11 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .ustadz__body h3 { font: 700 15px/1.25 var(--mono); }
 .ustadz__body small { display: block; color: var(--lime); font: 12px/1.25 var(--mono); }
 /* Kajiannya sedang berlangsung (markAsatidzLive di main.js) */
+/* dibuka dari nama di jadwal: kotak nama berkedip lime (teks jadi gelap) */
+.ustadz.is-flash .ustadz__body { animation: ust-flash .9s steps(1) 3; }
+.ustadz.is-flash .ustadz__body small { animation: ust-flash-sub .9s steps(1) 3; }
+@keyframes ust-flash { 0% { background: var(--lime); color: var(--ink); } 50% { background: var(--ink); color: var(--white); } }
+@keyframes ust-flash-sub { 0% { color: var(--ink); } 50% { color: var(--lime); } }
 .ustadz.is-live { z-index: 1; border-color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); }
 .ustadz.is-live.is-pink { border-color: var(--pink); box-shadow: inset 0 0 0 2px var(--pink); }
 .ustadz__badge { position: absolute; top: 0; left: 0; right: 0; z-index: 1; display: flex; align-items: center; width: auto; box-sizing: border-box; padding: 6px 10px; }
@@ -1247,7 +1255,21 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .booth-tip__logo { flex: none; width: 52px; height: 52px; padding: 4px; display: grid; place-items: center; background: var(--white); border: 1px solid var(--grey-2); }
 .booth-tip__logo.is-dark { background: var(--ink); border-color: var(--ink); }
 .booth-tip__logo img { width: 100%; height: 100%; object-fit: contain; }
-.booth-tip__txt { display: grid; gap: 3px; }
+.booth-tip__logo.is-icon .jico { width: 28px; height: 28px; margin: 0; fill: none; stroke: var(--blue); stroke-width: 1.8; }
+.booth-tip__hrs { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--ink-2); }
+.booth-tip__hrs a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--grey-2); }
+.booth-tip__hrs a:hover, .booth-tip__hrs a:focus-visible { background: var(--lime); text-decoration: none; }
+.booth-tip__hrs em { font-style: normal; padding: 2px 6px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+.booth-tip__hrs .is-open { background: var(--lime); color: var(--ink); }
+.booth-tip__hrs .is-closed { background: var(--ink-3); color: var(--white); }
+.booth-tip__hrs .is-wait { background: var(--white); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--grey-2); }
+.booth-tip__txt { display: grid; gap: 3px; min-width: 0; }
+/* selebar isinya (satu baris), tapi maks. selebar layar browser (sisa 16px tiap
+   sisi) — hanya nama yang terlalu panjang yang turun baris, per kata */
+.booth-tip.has-logo { width: max-content; max-width: calc(100vw - 32px); white-space: normal; }
+.booth-tip__txt small { white-space: nowrap; }
+.booth-tip__txt b { overflow-wrap: break-word; }
+.booth-tip__hrs { white-space: nowrap; }
 .booth-tip__txt small { font: 700 11px/1.2 var(--mono); color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; }
 .booth-tip__txt b { font: 700 14px/1.25 var(--mono); }
 /* Tooltip tenda terpilih yang punya tautan: bisa diklik. ::after menjembatani
