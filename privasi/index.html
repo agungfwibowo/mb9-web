@@ -5,16 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>Kebijakan Privasi — Muslim Berdedikasi 9</title>
-  <meta name="description" content="Kebijakan privasi situs informasi Muslim Berdedikasi 9: data apa yang (tidak) dikumpulkan, penyimpanan lokal, dan layanan pihak ketiga.">
+  <title>Ketentuan Layanan &amp; Kebijakan Privasi — Muslim Berdedikasi 9</title>
+  <meta name="description" content="Ketentuan layanan dan kebijakan privasi Muslim Berdedikasi 9: ketentuan umum kegiatan, jadwal, layanan gratis, lomba, dan bazar, serta data yang (tidak) dikumpulkan.">
   <!-- Samakan dengan index.html: hapus noindex saat situs siap tayang. -->
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#c5fa01">
+  <script src="../assets/js/privasi.js?v=1.1.340" defer></script>
   <link rel="icon" type="image/png" href="../assets/img/logo/favicon.png?v=2">
   <link rel="canonical" href="https://www.muslimberdedikasi.com/privasi/">
   <link rel="preload" href="../assets/fonts/public-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
   <!-- Halaman ringan dan mandiri: tidak memuat style.css/main.js (preloader,
-       animasi) — cukup font & warna yang sama dengan halaman utama. -->
+       animasi) — cukup font & warna yang sama dengan halaman utama, plus
+       privasi.js untuk penanda tombol navigasi. -->
   <style>
     @font-face { font-family: 'Public Sans'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(../assets/fonts/public-sans-latin.woff2) format('woff2'); }
     @font-face { font-family: 'Roboto Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../assets/fonts/roboto-mono-latin.woff2) format('woff2'); }
@@ -40,12 +42,63 @@
     h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.05; font-weight: 800; letter-spacing: -.02em; margin: 0 0 20px; }
     .lead { font-size: 19px; margin: 0 0 12px; }
     .lead mark { background: var(--lime); padding: 0 4px; }
-    h2 { font: 700 14px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .08em; margin: 48px 0 12px; padding-top: 20px; border-top: 1px solid #2b2b2b33; }
+    h2 { scroll-margin-top: 72px; font: 700 14px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .08em; margin: 48px 0 12px; padding-top: 20px; border-top: 1px solid #2b2b2b33; }
     p, ul { margin: 0 0 14px; }
     ul { padding-left: 20px; }
     li { margin-bottom: 8px; }
     code { font: 14px var(--mono); background: var(--white); padding: 1px 5px; }
     .meta { font: 13px/1.5 var(--mono); color: var(--grey); }
+    /* Daftar isi (pohon). Penanda diatur privasi.js: .is-active = judul yang
+       sedang dibaca, .is-open = bagian induknya, .is-expanded = panel HP terbuka. */
+    .toc ol { list-style: none; margin: 0; padding: 0; }
+    .toc li { margin: 0; }
+    .toc a { display: block; position: relative; text-decoration: none; }
+    .toc a:hover { background: none; }
+    @media (max-width: 959px) {
+      /* HP: garis-garis di tepi kanan (satu garis per judul). Ketukan pertama
+         membuka panel pohon; pilih judul → panel menutup lagi. */
+      main { padding-right: calc(var(--gutter) + 20px); }
+      .toc { position: fixed; z-index: 5; right: 0; top: 50%; transform: translateY(-50%); padding: 10px 8px 10px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+      .toc a { width: 22px; height: 11px; font-size: 0; color: transparent; overflow: hidden; }
+      .toc a::after { content: ''; position: absolute; right: 0; top: 50%; width: 9px; height: 2px; margin-top: -1px; background: #2b2b2b4d; transition: width .2s, background-color .2s; }
+      .toc > ol > li > a::after { width: 15px; background: #2b2b2b99; }
+      .toc > ol > li > a { margin-top: 6px; }
+      .toc > ol > li:first-child > a { margin-top: 0; }
+      .toc a.is-open::after { background: var(--ink); }
+      .toc a.is-active::after { width: 22px; height: 4px; margin-top: -2px; background: var(--ink); box-shadow: 0 0 0 1px var(--lime); }
+      .toc.is-expanded { cursor: auto; top: 50%; right: 8px; width: min(300px, calc(100vw - 32px)); max-height: 72vh; overflow-y: auto; padding: 16px 18px; background: var(--white); border: 1px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+      .toc.is-expanded a { width: auto; height: auto; font: 400 14px/1.35 var(--sans); color: var(--grey); padding: 7px 0; overflow: visible; }
+      .toc.is-expanded a::after { content: none; }
+      .toc.is-expanded > ol > li > a { font-weight: 700; color: var(--ink); margin-top: 8px; }
+      .toc.is-expanded > ol > li:first-child > a { margin-top: 0; }
+      .toc.is-expanded ol ol { margin-left: 4px; padding-left: 12px; border-left: 1px solid #2b2b2b22; }
+      .toc.is-expanded a.is-active { color: var(--ink); font-weight: 700; }
+      .toc.is-expanded a.is-active::before { content: ''; position: absolute; left: -15px; top: 6px; bottom: 6px; width: 3px; background: var(--lime); box-shadow: 0 0 0 1px var(--ink); }
+      .toc.is-expanded > ol > li > a.is-active::before { left: -18px; }
+    }
+    @media (min-width: 960px) {
+      /* judul selebar halaman; isi di kiri, daftar isi di kanan sejajar awal isi */
+      .bar__in { max-width: 1080px; }
+      main { max-width: 1080px; display: grid; grid-template-columns: minmax(0, 760px) 240px; column-gap: 64px; justify-content: space-between; align-items: start; }
+      .intro { grid-column: 1 / -1; margin-bottom: 56px; }
+      .intro .lead { max-width: 760px; }
+      .doc, main > footer { grid-column: 1; }
+      .toc { grid-column: 2; grid-row: 2; position: sticky; top: 24px; padding-left: 20px; border-left: 1px solid #2b2b2b33; max-height: calc(100vh - 48px); overflow-y: auto; }
+      .toc a { padding: 5px 0; font-size: 14px; line-height: 1.4; color: var(--grey); }
+      .toc > ol > li { margin-top: 10px; }
+      .toc > ol > li:first-child { margin-top: 0; }
+      .toc > ol > li > a { font-weight: 700; color: var(--ink); }
+      .toc ol ol { margin: 2px 0 0 14px; padding-left: 12px; border-left: 1px solid #2b2b2b22; }
+      .toc a:hover { color: var(--ink); text-decoration: underline; }
+      .toc a.is-active { color: var(--ink); font-weight: 700; }
+      /* penanda lime di garis kiri untuk judul yang sedang dibaca */
+      .toc a.is-active::before { content: ''; position: absolute; left: -21px; top: 4px; bottom: 4px; width: 3px; background: var(--lime); box-shadow: 0 0 0 1px var(--ink); }
+      .toc ol ol a.is-active::before { left: -14px; }
+    }
+    .part { scroll-margin-top: 72px; font-size: clamp(24px, 4vw, 34px); line-height: 1.1; font-weight: 800; letter-spacing: -.01em; margin: 72px 0 16px; padding-top: 28px; border-top: 3px solid var(--ink); }
+    .part + h2 { margin-top: 24px; border-top: 0; padding-top: 0; }
+    .doc > .part:first-child { margin-top: 0; }
+    .intro { margin-bottom: 40px; }
     footer { border-top: 1px solid #2b2b2b33; margin-top: 56px; padding-top: 20px; }
   </style>
 </head>
@@ -58,15 +111,92 @@
   </header>
 
   <main>
-    <p class="eyebrow">Kebijakan Privasi</p>
-    <h1>Privasi Anda di situs ini</h1>
-    <p class="lead">Situs ini <mark>murni berisi informasi acara</mark>. Kami tidak meminta, mengumpulkan, atau menyimpan data pribadi Anda.</p>
-    <p class="meta">Berlaku sejak 6 Oktober 2026</p>
+    <div class="intro">
+      <p class="eyebrow">Ketentuan Layanan &amp; Kebijakan Privasi</p>
+      <h1>Ketentuan acara &amp; privasi Anda</h1>
+      <p class="lead">Situs ini <mark>murni berisi informasi acara</mark>. Kami tidak meminta, mengumpulkan, atau menyimpan data pribadi Anda.</p>
+      <p class="meta">Berlaku sejak 6 Oktober 2026 · Diperbarui 7 Oktober 2026</p>
+    </div>
+    <nav class="toc" aria-label="Isi halaman">
+      <ol>
+        <li><a href="#ketentuan">Ketentuan Layanan</a>
+          <ol>
+            <li><a href="#ketentuan-1">1. Informasi di situs</a></li>
+            <li><a href="#ketentuan-2">2. Kegiatan &amp; jadwal</a></li>
+            <li><a href="#ketentuan-3">3. Layanan &amp; fasilitas gratis</a></li>
+            <li><a href="#ketentuan-4">4. Lomba</a></li>
+            <li><a href="#ketentuan-5">5. Bazar &amp; tenant</a></li>
+            <li><a href="#ketentuan-6">6. Tata tertib</a></li>
+            <li><a href="#ketentuan-7">7. Dokumentasi</a></li>
+            <li><a href="#ketentuan-8">8. Merek &amp; konten</a></li>
+            <li><a href="#ketentuan-9">9. Perubahan ketentuan</a></li>
+          </ol>
+        </li>
+        <li><a href="#privasi">Kebijakan Privasi</a>
+          <ol>
+            <li><a href="#privasi-1">1. Data yang kami kumpulkan</a></li>
+            <li><a href="#privasi-2">2. Penyimpanan di perangkat Anda</a></li>
+            <li><a href="#privasi-3">3. Layanan pihak ketiga</a></li>
+            <li><a href="#privasi-4">4. Log server</a></li>
+            <li><a href="#privasi-5">5. Keamanan</a></li>
+            <li><a href="#privasi-6">6. Perubahan kebijakan</a></li>
+          </ol>
+        </li>
+        <li class="toc__solo"><a href="#kontak">Kontak</a></li>
+      </ol>
+    </nav>
+    <div class="doc">
 
-    <h2>1. Data yang kami kumpulkan</h2>
+    <h2 class="part" id="ketentuan">Ketentuan Layanan</h2>
+    <p>Ketentuan umum berikut berlaku bagi setiap pengunjung Muslim Berdedikasi 9 dan pengguna situs ini. Dengan menghadiri acara atau menggunakan layanan yang disediakan, Anda dianggap memahami dan menyetujui ketentuan ini.</p>
+
+    <h2 id="ketentuan-1">1. Informasi di situs</h2>
+    <p>Seluruh informasi di situs ini (kegiatan, jadwal, pengisi acara, layanan, tenant, dan denah) disediakan panitia sebagai panduan. Kami berupaya menjaganya tetap akurat, namun informasi dapat berubah sewaktu-waktu. Bila ada perbedaan, pengumuman resmi panitia di lokasi acara yang berlaku.</p>
+
+    <h2 id="ketentuan-2">2. Kegiatan &amp; jadwal</h2>
+    <ul>
+      <li>Seluruh waktu menggunakan <strong>WIB</strong>. Jam operasional, urutan, waktu, maupun pengisi acara dapat berubah tanpa pemberitahuan sebelumnya.</li>
+      <li>Kegiatan dijeda saat masuk waktu shalat. Pengunjung diimbau mengikuti pengumuman di lokasi.</li>
+      <li>Jadwal yang belum diumumkan ditandai <em>InsyaAllah menyusul</em> dan akan dilengkapi di situs ini.</li>
+      <li>Panitia berhak menunda, memindahkan, mempersingkat, atau membatalkan kegiatan karena cuaca, alasan keamanan, atau keadaan lain di luar kendali.</li>
+    </ul>
+
+    <h2 id="ketentuan-3">3. Layanan &amp; fasilitas gratis</h2>
+    <ul>
+      <li>Layanan bertanda <strong>GRATIS</strong> tidak dipungut biaya. Kuota dan waktunya terbatas, dilayani sesuai urutan dan ketentuan petugas, dan dapat ditutup lebih awal bila kuota terpenuhi.</li>
+      <li>Layanan tertentu memiliki syarat sendiri (misalnya pendaftaran, kelengkapan dokumen, batas usia, atau khusus ikhwan/akhwat). Syarat tersebut diumumkan panitia dan wajib dipenuhi.</li>
+      <li>Layanan kesehatan bersifat pemeriksaan dan pelayanan dasar, bukan pengganti perawatan medis lanjutan. Tindakan dilakukan oleh petugas yang ditunjuk dengan persetujuan peserta (atau orang tua/wali bagi anak), dan dapat ditolak bila kondisi peserta tidak memungkinkan.</li>
+    </ul>
+
+    <h2 id="ketentuan-4">4. Lomba</h2>
+    <p>Syarat, tata cara, dan penilaian tiap lomba diumumkan panitia. Peserta wajib mengikuti ketentuan tersebut, dan keputusan dewan juri bersifat final.</p>
+
+    <h2 id="ketentuan-5">5. Bazar &amp; tenant</h2>
+    <p>Area bazar dan foodcourt bukan bagian dari layanan gratis. Transaksi terjadi langsung antara pengunjung dan tenant; harga, mutu, dan kehalalan produk menjadi tanggung jawab masing-masing tenant. Penempatan tenda pada denah dapat berubah.</p>
+
+    <h2 id="ketentuan-6">6. Tata tertib</h2>
+    <ul>
+      <li>Menjaga adab Islami, kebersihan, dan ketertiban, serta mengikuti arahan panitia dan petugas keamanan.</li>
+      <li>Menghormati area dan sesi yang dikhususkan bagi ikhwan atau akhwat.</li>
+      <li>Anak-anak berada dalam pengawasan orang tua/pendamping selama di lokasi.</li>
+      <li>Barang bawaan menjadi tanggung jawab masing-masing pengunjung.</li>
+    </ul>
+
+    <h2 id="ketentuan-7">7. Dokumentasi</h2>
+    <p>Panitia dapat mendokumentasikan kegiatan (foto dan video) untuk keperluan publikasi dakwah. Bila Anda keberatan tampil dalam dokumentasi, sampaikan kepada panitia atau petugas di lokasi.</p>
+
+    <h2 id="ketentuan-8">8. Merek &amp; konten</h2>
+    <p>Logo dan nama tenant, sponsor, maupun mitra adalah milik pemiliknya masing-masing dan ditampilkan sebagai informasi partisipasi dalam acara.</p>
+
+    <h2 id="ketentuan-9">9. Perubahan ketentuan</h2>
+    <p>Ketentuan ini dapat diperbarui sewaktu-waktu. Tanggal pembaruan di atas akan ikut disesuaikan.</p>
+
+    <h2 class="part" id="privasi">Kebijakan Privasi</h2>
+
+    <h2 id="privasi-1">1. Data yang kami kumpulkan</h2>
     <p>Tidak ada. Situs ini tidak memiliki formulir, pendaftaran, akun, atau kolom isian apa pun. Kami juga tidak memasang alat analitik, pelacak iklan (seperti Google Analytics atau Meta Pixel), maupun cookie milik kami sendiri.</p>
 
-    <h2>2. Penyimpanan di perangkat Anda</h2>
+    <h2 id="privasi-2">2. Penyimpanan di perangkat Anda</h2>
     <p>Agar situs nyaman dipakai, beberapa catatan kecil disimpan <strong>hanya di browser Anda</strong> (<code>localStorage</code>/<code>sessionStorage</code>) dan tidak pernah dikirim ke kami:</p>
     <ul>
       <li>pilihan tampilan jadwal acara;</li>
@@ -75,7 +205,7 @@
     </ul>
     <p>Situs juga menyimpan salinan halaman, gambar, dan font di <em>cache</em> perangkat (service worker) agar tetap bisa dibuka saat sinyal lemah di lokasi acara. Semua ini dapat dihapus kapan saja melalui pengaturan browser (<em>Hapus data situs</em>).</p>
 
-    <h2>3. Layanan pihak ketiga</h2>
+    <h2 id="privasi-3">3. Layanan pihak ketiga</h2>
     <p>Beberapa bagian situs memakai layanan pihak lain. Saat bagian tersebut dimuat atau diklik, penyedia layanan dapat menerima data teknis seperti alamat IP dan jenis browser, sesuai kebijakan privasi masing-masing:</p>
     <ul>
       <li><strong>Google Maps</strong> — peta lokasi acara yang tertanam di halaman. Google dapat memasang cookie miliknya. <a href="https://policies.google.com/privacy?hl=id" target="_blank" rel="noopener">Kebijakan Privasi Google</a>.</li>
@@ -84,18 +214,19 @@
       <li><strong>Tautan keluar</strong> — media sosial, Google Calendar, dan situs mitra/sponsor. Setelah Anda berpindah ke situs tersebut, kebijakan privasi mereka yang berlaku.</li>
     </ul>
 
-    <h2>4. Log server</h2>
+    <h2 id="privasi-4">4. Log server</h2>
     <p>Seperti situs web pada umumnya, penyedia hosting dapat mencatat log teknis (alamat IP, waktu akses, halaman yang diminta) untuk keamanan dan menjaga layanan tetap berjalan. Log ini tidak kami gunakan untuk mengenali atau memprofilkan pengunjung.</p>
 
-    <h2>5. Keamanan</h2>
+    <h2 id="privasi-5">5. Keamanan</h2>
     <p>Seluruh situs dilayani melalui HTTPS. Jika Anda menemukan celah keamanan, mohon laporkan secara bertanggung jawab melalui kontak di <a href="../.well-known/security.txt">security.txt</a>.</p>
 
-    <h2>6. Perubahan kebijakan</h2>
+    <h2 id="privasi-6">6. Perubahan kebijakan</h2>
     <p>Kebijakan ini dapat diperbarui bila fitur situs berubah. Tanggal berlaku di atas akan ikut disesuaikan.</p>
 
-    <h2>7. Kontak</h2>
-    <p>Pertanyaan seputar privasi dapat disampaikan ke panitia melalui WhatsApp hotline <a href="https://wa.me/6281255557120" target="_blank" rel="noopener">0812-5555-7120</a>.</p>
+    <h2 id="kontak">Kontak</h2>
+    <p>Pertanyaan seputar privasi, kegiatan, maupun layanan dapat disampaikan ke panitia melalui WhatsApp hotline <a href="https://wa.me/6281255557120" target="_blank" rel="noopener">0812-5555-7120</a>.</p>
 
+    </div>
     <footer class="meta">© 2026 Muslim Berdedikasi 9 · <a href="../">Kembali ke beranda</a></footer>
   </main>
 </body>
