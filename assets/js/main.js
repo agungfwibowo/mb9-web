@@ -1175,10 +1175,11 @@
     obrolan: 'M4 5h11v8H8l-4 3zM15 9h5v8l-3-2h-6v-2',
     muslimah: 'M4.5 21C5 18 5 15 5 10a7 7 0 0 1 14 0c0 5 0 8 .5 11-5 1-10 1-15 0zM12 7a3.5 4.5 0 1 1 0 9 3.5 4.5 0 0 1 0-9zM8.7 10.2c2.1-.8 4.5-.8 6.6 0',
     titik: 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z',
+    grup: 'M12 4a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM6.5 20v-1a5.5 5.5 0 0 1 11 0v1M5 8.5a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM1.5 19v-.5A3.5 3.5 0 0 1 5 15M19 8.5a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM22.5 19v-.5A3.5 3.5 0 0 0 19 15',
   };
   // Ikon dipilih dari kata kunci judul; r.icon di data-prod.js bisa menimpanya.
   const ICON_RULES = [
-    [/bazar|foodcourt/, 'toko'], [/khitan/, 'medis'], [/lomba|musabaqah|grand final/, 'piala'],
+    [/bazar|foodcourt/, 'toko'], [/khitan/, 'grup'], [/lomba|musabaqah|grand final/, 'piala'],
     [/donor/, 'tetes'], [/periksa|kesehatan/, 'nadi'], [/bekam/, 'hati'], [/cut|cukur/, 'gunting'],
     [/konsultasi/, 'obrolan'], [/muslimah/, 'muslimah'], [/talkshow|kajian/, 'mic'],
   ];
