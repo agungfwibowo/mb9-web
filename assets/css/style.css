@@ -952,6 +952,7 @@ html:not(.js) .preloader { display: none; }
 .jbar { position: relative; display: block; height: 6px; margin: 4px 0 6px; background: var(--paper); }
 .jbar i { position: absolute; top: 0; bottom: 0; background: var(--blue); }
 .view-toggle { display: inline-flex; border: 3px solid var(--ink); }
+.view-toggle[hidden] { display: none; }
 .view-toggle button { padding: 10px 14px; font: 700 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink); background: transparent; border: 0; cursor: pointer; transition: background .25s, color .25s; }
 .view-toggle button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; }
 .view-toggle button span { display: none; } /* ikon saja di semua ukuran layar; nama ada di aria-label & title */
