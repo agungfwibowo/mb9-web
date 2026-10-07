@@ -664,6 +664,40 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .days-nav button:disabled { color: var(--grey); cursor: not-allowed; background: var(--paper); }
 .days-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; }
 
+/* Tab hari versi ringkas: menempel di atas (di bawah navbar; naik saat navbar
+   sembunyi) selama tab asli sudah tergulir lewat dan daftar acara masih terlihat.
+   --dstick-top diisi jadwal.js dari tinggi navbar. */
+.dstick {
+  position: fixed; left: 50%; top: 14px; z-index: 8800;
+  width: calc(100% - 2 * var(--gutter)); max-width: var(--maxw);
+  display: flex; align-items: stretch; background: var(--ink); color: var(--white); border: 2px solid var(--ink);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
+  /* muncul/hilang cukup memudar (tanpa meluncur); translate hanya untuk
+     mengikuti navbar yang tampil/sembunyi */
+  translate: -50% 0; opacity: 0; visibility: hidden; pointer-events: none;
+  transition: translate .5s var(--ease), opacity .35s var(--ease), visibility 0s .35s;
+}
+.dstick.is-in { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+.nav:not(.is-hidden) ~ main .dstick { translate: -50% var(--dstick-top, 0px); }
+.menu-open .dstick { visibility: hidden; opacity: 0; }
+.dstick button { flex: 0 0 44px; height: 44px; display: grid; place-items: center; cursor: pointer; background: var(--white); color: var(--ink); border: 0; transition: background .2s, color .2s; }
+/* putih = bisa ditekan, abu = mentok; hover (hanya perangkat berkursor) lime */
+@media (hover: hover) { .dstick button:hover:not(:disabled) { background: var(--lime); } }
+.dstick button:disabled { background: #3a3a3a; color: #777; cursor: not-allowed; }
+.dstick button.is-today { background: var(--blue); color: var(--white); } /* menuju hari ini */
+.dstick svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; }
+.dstick__label { flex: 1; min-width: 0; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 10px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; overflow: hidden; }
+.dstick__label small { font-size: inherit; color: var(--lime); }
+.dstick__label span { overflow: hidden; text-overflow: ellipsis; }
+.dstick__label em { font-style: normal; font-size: 10px; padding: 3px 6px; background: var(--blue); color: var(--white); }
+.dstick__label em.is-past { background: #555; }
+@media (max-width: 560px) {
+  /* HP: dua baris seperti kartu hari — "HARI KE-1" di atas, hari + badge di bawah */
+  .dstick__label { display: grid; grid-template-columns: auto auto; justify-content: center; align-content: center; gap: 2px 6px; letter-spacing: .06em; line-height: 1.15; }
+  .dstick__label small { grid-column: 1 / -1; text-align: center; font-size: 10px; }
+  .dstick__label em { font-size: 9px; padding: 2px 5px; align-self: center; }
+}
+
 .days {
   /* ukuran tumpukan — dibaca JS lewat getComputedStyle, jadi titik responsifnya
      cukup diatur di media query di bawah */

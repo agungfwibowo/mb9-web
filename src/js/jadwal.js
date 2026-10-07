@@ -1,4 +1,5 @@
 import { $, $$, D, esc, hasGsap, lenis, reduced, stripIndex } from './core.js';
+import { nav } from './navbar.js';
 
 // Jadwal tabs
 const TAGS = { kajian: 'Kajian', layanan: 'Layanan', lomba: 'Lomba', talkshow: 'Talkshow' };
@@ -716,7 +717,59 @@ const layoutDays = () => {
     b.style.flexBasis = `${piled ? sliver : normalW}px`;
     b.style.zIndex = !stack ? '' : i < start ? i + 1 : i >= end ? n - i : n + 1;
   });
+  syncStick();
 };
+
+// Tab hari versi ringkas (‹ HARI KE-2 · KAMIS, 24 DES ›): menempel di atas selama
+// tab asli sudah tergulir lewat tapi daftar acara hari itu masih terlihat.
+// Label & tombol mengikuti tab aktif (dipanggil dari layoutDays).
+const stick = $('#dayStick');
+const stickLabel = $('.dstick__label', stick);
+function syncStick() {
+  const list = $$('.day', tabs);
+  const a = activeIdx(list);
+  const d = D.days[a];
+  if (!d) return;
+  const badge = a === todayIdx ? '<em>Hari ini</em>' : isPast(d) ? '<em class="is-past">Selesai</em>' : '';
+  stickLabel.innerHTML = `<small>Hari ke-${a + 1}</small><span>${esc(d.short)}, ${esc(d.date)}</span>${badge}`;
+  $$('button', stick).forEach((b) => {
+    const j = a + Number(b.dataset.dir);
+    b.disabled = j < 0 || j >= list.length;
+    // panah yang menuju hari ini ikut biru (warna badge "Hari ini")
+    const toToday = j === todayIdx;
+    b.classList.toggle('is-today', toToday);
+    b.setAttribute('aria-label', `${b.dataset.dir < 0 ? 'Hari sebelumnya' : 'Hari berikutnya'}${toToday ? ' (hari ini)' : ''}`);
+  });
+}
+// jarak dari atas layar saat navbar tampil = bawah navbar + 8px
+const measureStick = () => stick.style.setProperty('--dstick-top', `${nav.offsetHeight + 8}px`);
+let stickOn = false, stickTick = false;
+const updateStick = () => {
+  stickTick = false;
+  const top = 14 + (nav.classList.contains('is-hidden') ? 0 : nav.offsetHeight + 8);
+  // tampil begitu awal daftar acara sampai di bawah bar (tab asli sudah lewat)
+  const edge = top + stick.offsetHeight + 16;
+  const p = panel.getBoundingClientRect();
+  const on = p.top <= edge && p.bottom > edge + 44;
+  if (on === stickOn) return;
+  stickOn = on;
+  stick.classList.toggle('is-in', on);
+};
+addEventListener('scroll', () => { if (!stickTick) { stickTick = true; requestAnimationFrame(updateStick); } }, { passive: true });
+addEventListener('resize', () => { measureStick(); updateStick(); });
+measureStick();
+stick.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b || b.disabled) return;
+  const list = $$('.day', tabs);
+  selectDay(list[activeIdx(list) + Number(b.dataset.dir)]);
+  // naik ke tab hari asli (hari baru terpilih), tepat di bawah navbar yang
+  // muncul lagi saat menggulir naik — bar ringkas memudar dengan sendirinya
+  requestAnimationFrame(() => {
+    const y = tabs.getBoundingClientRect().top + scrollY - (14 + nav.offsetHeight + 16);
+    if (y < scrollY) lenis ? lenis.scrollTo(y, { duration: 0.9 }) : scrollTo({ top: y, behavior: reduced ? 'instant' : 'smooth' });
+  });
+});
 
 export let chosenDay = null; // hari yang DIPILIH pengunjung (bukan bawaan saat load)
 export const selectDay = (btn, focus) => {
