@@ -3058,23 +3058,9 @@
     // (lihat aturan overflow-x di CSS). matchMedia dipakai agar ikut berubah
     // saat layar diputar, tanpa perlu reload.
     gsap.matchMedia().add('(min-height: 521px)', () => {
-      const dist = () => Math.max(0, track.scrollWidth - innerWidth);
-      const ltl = gsap.timeline({
-        scrollTrigger: {
-          trigger: '.layanan__pin', start: 'top top',
-          end: () => `+=${dist() ? dist() * 1.45 + innerHeight * .3 : 1}`,
-          pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
-          // kartu CTA "aktif" (= tampilan hover) saat track sudah mentok di ujung kanan
-          onUpdate: (self) => { const c = $('.lcard--cta'); if (c) c.classList.toggle('is-active', self.progress > .68); },
-          onLeaveBack: () => { const c = $('.lcard--cta'); if (c) c.classList.remove('is-active'); },
-        },
-      })
-        .to(track, { x: () => -dist(), ease: 'none', duration: 1 })
-        .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
+      // pin dibuat sesuai urutan halaman (Asatidz di atas Layanan) agar jarak pin benar
       // geser jari (HP) → gulir halaman setara; 1.42 = durasi geser + jeda di timeline
       const perPx = (tl, d) => () => (d() ? ((tl.scrollTrigger.end - tl.scrollTrigger.start) / 1.42) / d() : 0);
-      pinSwipe.layanan = { perPx: perPx(ltl, dist) };
-
       // asatidz: satu baris, geser horizontal saat overflow (mirip layanan)
       const agridTrack = $('#asatidzGrid');
       if (agridTrack) {
@@ -3090,6 +3076,21 @@
           .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
         pinSwipe.asatidz = { perPx: perPx(atl, adist) };
       }
+      const dist = () => Math.max(0, track.scrollWidth - innerWidth);
+      const ltl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '.layanan__pin', start: 'top top',
+          end: () => `+=${dist() ? dist() * 1.45 + innerHeight * .3 : 1}`,
+          pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
+          // kartu CTA "aktif" (= tampilan hover) saat track sudah mentok di ujung kanan
+          onUpdate: (self) => { const c = $('.lcard--cta'); if (c) c.classList.toggle('is-active', self.progress > .68); },
+          onLeaveBack: () => { const c = $('.lcard--cta'); if (c) c.classList.remove('is-active'); },
+        },
+      })
+        .to(track, { x: () => -dist(), ease: 'none', duration: 1 })
+        .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
+      pinSwipe.layanan = { perPx: perPx(ltl, dist) };
+
       return () => { pinSwipe.layanan = null; pinSwipe.asatidz = null; };
 
     });
