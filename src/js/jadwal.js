@@ -770,7 +770,7 @@ stick.addEventListener('click', (e) => {
   if (y >= scrollY) { selectDay(next); return; }
   stickBusy = true;
   const go = () => setTimeout(() => { stickBusy = false; selectDay(next); }, reduced ? 0 : 150);
-  if (lenis) lenis.scrollTo(y, { duration: 0.6, onComplete: go });
+  if (lenis) lenis.scrollTo(y, { duration: 0.4, onComplete: go });
   else {
     scrollTo({ top: y, behavior: reduced ? 'instant' : 'smooth' });
     setTimeout(go, reduced ? 0 : 700);
