@@ -88,7 +88,7 @@
     @font-face { font-family: 'Roboto Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(assets/fonts/roboto-mono-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     @font-face { font-family: 'Noto Sans Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(assets/fonts/noto-sans-mono-blocks.woff2) format('woff2'); unicode-range: U+2591-2593; }
   </style>
-  <link rel="stylesheet" href="assets/css/style.css?v=1.1.337">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.1.338">
   <script>document.documentElement.classList.add('js');
     // Kunjungan ulang dalam sesi yang sama → preloader mode cepat (hanya 3 panel
     // terangkat). Diputuskan di sini, sebelum halaman digambar, agar layar lime
@@ -163,8 +163,8 @@
     <button type="button" class="nav__status" id="navStatus" aria-label="Mode offline — tampilkan detail" disabled></button>
     <nav class="nav__links" aria-label="Navigasi utama">
       <a href="#tentang">Tentang</a>
-      <a href="#jadwal">Jadwal<i class="nav__flag" id="navToday" title="Ada jadwal hari ini" hidden></i></a>
       <a href="#layanan">Layanan Gratis</a>
+      <a href="#jadwal">Jadwal<i class="nav__flag" id="navToday" title="Ada jadwal hari ini" hidden></i></a>
       <a href="#denah">Denah</a>
       <a href="#tenant">Tenant</a>
     </nav>
@@ -175,9 +175,9 @@
   <div class="mmenu" id="mobileMenu" aria-hidden="true" data-lenis-prevent>
     <nav>
       <a href="#tentang"><small>01</small>Tentang</a>
-      <a href="#jadwal"><small>02</small>Jadwal<em class="mmenu__flag mono" id="menuToday" hidden>Hari ini</em></a>
-      <a href="#asatidz"><small>03</small>Asatidz</a>
-      <a href="#layanan"><small>04</small>Layanan Gratis</a>
+      <a href="#layanan"><small>02</small>Layanan Gratis</a>
+      <a href="#jadwal"><small>03</small>Jadwal<em class="mmenu__flag mono" id="menuToday" hidden>Hari ini</em></a>
+      <a href="#asatidz"><small>04</small>Asatidz</a>
       <a href="#denah"><small>05</small>Denah</a>
       <a href="#tenant"><small>06</small>Tenant</a>
       <a href="#lokasi"><small>07</small>Lokasi</a>
@@ -302,11 +302,24 @@
       </div>
     </section>
 
-    <!-- ============ 3. JADWAL ============ -->
+    <!-- ============ 3. LAYANAN ============ -->
+    <section class="layanan" id="layanan">
+      <div class="layanan__pin">
+        <div class="container layanan__head">
+          <svg class="deco deco--blocks" viewBox="88 91 334 150" aria-hidden="true"><polygon fill="#c5fa01" points="88,112 125,91 200,91 200,112 237,91 311,91 311,112 348,91 422,91 422,220 385,241 311,241 311,220 274,241 200,241 200,220 163,241 88,241"/></svg>
+          <span class="sec-num mono">02</span>
+          <h2 class="title title--light">Layanan &amp; Fasilitas <span class="hl-block">Serba GRATIS</span></h2>
+          <p class="sec-sub">Ini adalah kesempatan Anda untuk mendapatkan layanan profesional berkualitas gratis.</p>
+        </div>
+        <div class="layanan__track" id="layananTrack"></div>
+      </div>
+    </section>
+
+    <!-- ============ 4. JADWAL ============ -->
     <section class="section jadwal" id="jadwal">
       <div class="container">
         <header class="sec-head">
-          <span class="sec-num mono">02</span>
+          <span class="sec-num mono">03</span>
           <h2 class="title"><span class="notch" data-scramble>Jadwal Acara Lengkap</span></h2>
           <p class="sec-sub">Open Gate Bazar &amp; Foodcourt: <span data-mb9="hours">08.00 – 21.00 WIB</span></p>
         </header>
@@ -350,30 +363,17 @@
       </div>
     </section>
 
-    <!-- ============ 4. ASATIDZ ============ -->
+    <!-- ============ 5. ASATIDZ ============ -->
     <section class="section asatidz" id="asatidz">
       <div class="asatidz__pin">
         <div class="container">
           <header class="sec-head">
-            <span class="sec-num mono">03</span>
+            <span class="sec-num mono">04</span>
             <h2 class="title"><span class="notch" data-scramble>Hadirkan Para Asatidz Kompeten</span></h2>
           </header>
         </div>
         <div class="asatidz__grid" id="asatidzGrid"></div>
         <svg class="deco deco--sq deco--sq-b" viewBox="0 0 170 145" aria-hidden="true"><rect x="62" y="0" width="105" height="90" fill="#afc3f8"/><rect x="31" y="18" width="105" height="90" fill="#628af6"/><path d="M0 38h105v90H28L0 145Z" fill="#2150f5"/></svg>
-      </div>
-    </section>
-
-    <!-- ============ 5. LAYANAN ============ -->
-    <section class="layanan" id="layanan">
-      <div class="layanan__pin">
-        <div class="container layanan__head">
-          <svg class="deco deco--blocks" viewBox="88 91 334 150" aria-hidden="true"><polygon fill="#c5fa01" points="88,112 125,91 200,91 200,112 237,91 311,91 311,112 348,91 422,91 422,220 385,241 311,241 311,220 274,241 200,241 200,220 163,241 88,241"/></svg>
-          <span class="sec-num mono">04</span>
-          <h2 class="title title--light">Layanan &amp; Fasilitas <span class="hl-block">Serba GRATIS</span></h2>
-          <p class="sec-sub">Ini adalah kesempatan Anda untuk mendapatkan layanan profesional berkualitas gratis.</p>
-        </div>
-        <div class="layanan__track" id="layananTrack"></div>
       </div>
     </section>
 
@@ -521,8 +521,8 @@
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
   <!-- QR untuk menu Bagikan (ikut di-precache SW → tetap jalan offline) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
-  <script src="assets/js/data-prod.js?v=1.1.337" defer></script>
-  <script src="assets/js/data-dev.js?v=1.1.337" defer></script>
-  <script src="assets/js/main.js?v=1.1.337" defer></script>
+  <script src="assets/js/data-prod.js?v=1.1.338" defer></script>
+  <script src="assets/js/data-dev.js?v=1.1.338" defer></script>
+  <script src="assets/js/main.js?v=1.1.338" defer></script>
 </body>
 </html>

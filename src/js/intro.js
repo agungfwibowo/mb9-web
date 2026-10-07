@@ -77,12 +77,12 @@ export const scrollAnims = () => {
   // (lihat aturan overflow-x di CSS). matchMedia dipakai agar ikut berubah
   // saat layar diputar, tanpa perlu reload.
   gsap.matchMedia().add('(min-height: 521px)', () => {
-    // pin dibuat sesuai urutan halaman (Asatidz di atas Layanan) agar jarak pin benar
     // geser jari (HP) → gulir halaman setara; 1.42 = durasi geser + jeda di timeline
     const perPx = (tl, d) => () => (d() ? ((tl.scrollTrigger.end - tl.scrollTrigger.start) / 1.42) / d() : 0);
     // asatidz: satu baris, geser horizontal saat overflow (mirip layanan)
-    const agridTrack = $('#asatidzGrid');
-    if (agridTrack) {
+    const pinAsatidz = () => {
+      const agridTrack = $('#asatidzGrid');
+      if (!agridTrack) return;
       const adist = () => Math.max(0, agridTrack.scrollWidth - innerWidth);
       const atl = gsap.timeline({
         scrollTrigger: {
@@ -94,21 +94,30 @@ export const scrollAnims = () => {
         .to(agridTrack, { x: () => -adist(), ease: 'none', duration: 1 })
         .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
       pinSwipe.asatidz = { perPx: perPx(atl, adist), start: () => atl.scrollTrigger.start };
-    }
-    const dist = () => Math.max(0, track.scrollWidth - innerWidth);
-    const ltl = gsap.timeline({
-      scrollTrigger: {
-        trigger: '.layanan__pin', start: 'top top',
-        end: () => `+=${dist() ? dist() * 1.45 + innerHeight * .3 : 1}`,
-        pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
-        // kartu CTA "aktif" (= tampilan hover) saat track sudah mentok di ujung kanan
-        onUpdate: (self) => { const c = $('.lcard--cta'); if (c) c.classList.toggle('is-active', self.progress > .68); },
-        onLeaveBack: () => { const c = $('.lcard--cta'); if (c) c.classList.remove('is-active'); },
-      },
-    })
-      .to(track, { x: () => -dist(), ease: 'none', duration: 1 })
-      .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
-    pinSwipe.layanan = { perPx: perPx(ltl, dist) };
+    };
+    const pinLayanan = () => {
+      const dist = () => Math.max(0, track.scrollWidth - innerWidth);
+      const ltl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '.layanan__pin', start: 'top top',
+          end: () => `+=${dist() ? dist() * 1.45 + innerHeight * .3 : 1}`,
+          pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
+          // kartu CTA "aktif" (= tampilan hover) saat track sudah mentok di ujung kanan
+          onUpdate: (self) => { const c = $('.lcard--cta'); if (c) c.classList.toggle('is-active', self.progress > .68); },
+          onLeaveBack: () => { const c = $('.lcard--cta'); if (c) c.classList.remove('is-active'); },
+        },
+      })
+        .to(track, { x: () => -dist(), ease: 'none', duration: 1 })
+        .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
+      pinSwipe.layanan = { perPx: perPx(ltl, dist) };
+    };
+    // Pin WAJIB dibuat sesuai urutan section di halaman: ScrollTrigger menghitung
+    // posisi pin berikutnya dari ruang pin sebelumnya. Salah urut → start pin yang
+    // di bawah meleset sepanjang pin di atasnya → kartunya meloncat. Urutan dibaca
+    // dari DOM, jadi section boleh dipindah di index.html tanpa menyentuh ini.
+    const lay = $('#layanan'), ast = $('#asatidz');
+    const layFirst = !ast || (lay && lay.compareDocumentPosition(ast) & Node.DOCUMENT_POSITION_FOLLOWING);
+    (layFirst ? [pinLayanan, pinAsatidz] : [pinAsatidz, pinLayanan]).forEach((f) => f());
 
     return () => { pinSwipe.layanan = null; pinSwipe.asatidz = null; };
 
