@@ -76,6 +76,7 @@ export const JICONS = {
   gunting: 'M9 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM8.2 7.8L20 19M8.2 16.2L20 5',
   obrolan: 'M4 5h11v8H8l-4 3zM15 9h5v8l-3-2h-6v-2',
   muslimah: 'M4.5 21C5 18 5 15 5 10a7 7 0 0 1 14 0c0 5 0 8 .5 11-5 1-10 1-15 0zM12 7a3.5 4.5 0 1 1 0 9 3.5 4.5 0 0 1 0-9zM8.7 10.2c2.1-.8 4.5-.8 6.6 0',
+  cincin: 'M12 21a6 6 0 1 1 0-12 6 6 0 0 1 0 12zM12 9l-2-2.5L12 4l2 2.5z',
   titik: 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z',
   masjid: 'M3 21h18M5 21v-8h14v8M12 3c-3.2 2-5 4.2-5 7h10c0-2.8-1.8-5-5-7zM12 3V1M10 21v-3a2 2 0 0 1 4 0v3',
   jam: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zM12 7v5l3 2',
@@ -85,7 +86,7 @@ export const JICONS = {
 const ICON_RULES = [
   [/bazar|foodcourt/, 'toko'], [/khitan/, 'grup'], [/lomba|musabaqah|grand final/, 'piala'],
   [/donor/, 'tetes'], [/periksa|kesehatan/, 'nadi'], [/bekam/, 'hati'], [/cut|cukur/, 'gunting'],
-  [/konsultasi/, 'obrolan'], [/muslimah/, 'muslimah'], [/talkshow|kajian/, 'mic'],
+  [/konsultasi/, 'obrolan'], [/nikah/, 'cincin'], [/muslimah/, 'muslimah'], [/talkshow|kajian/, 'mic'],
 ];
 const TAG_ICON = { lomba: 'piala', kajian: 'mic', talkshow: 'mic' };
 export const iconKey = (r) => {
@@ -239,7 +240,8 @@ const renderDay = (key, quiet) => {
     const rg = rs.map((r) => r.time.split(' - ').map(toMin));
     const gs = Math.min(...rg.map((x) => x[0])), ge = Math.max(...rg.map((x) => x[1]));
     const same = rg.every((x) => x[0] === gs);
-    const head = same ? `Mulai <b>${fmtMin(gs)}</b>` : `<b>${fmtMin(gs)}</b> – <b>${fmtMin(ge)}</b>`;
+    // kepala = rentang seluruh deretan; diberi kata agar tak terbaca sebagai jam kartu pertama
+    const head = same ? `Mulai <b>${fmtMin(gs)}</b>` : `Rentang <b>${fmtMin(gs)}</b> – <b>${fmtMin(ge)}</b>`;
     // acara dengan jam (selesai) yang sama → satu kartu, isinya berderet
     let cards = [];
     rs.forEach((r, i) => {
