@@ -1200,12 +1200,16 @@
   const ustAttr = (r) => (r.ustadz ? ` data-ustadz="${esc([].concat(r.ustadz).join(' '))}"` : '');
   const noteOf = (r) => [[].concat(r.ustadz || []).map((id) => ustadzById[id]).filter(Boolean).join(' & '), r.note]
     .filter(Boolean).join(' · ');
-  let jView = 'tabel';
+  // Tampilan Tabel dinonaktifkan sementara → selalu Durasi & tombol Tabel/Durasi
+  // disembunyikan. Ubah ke true untuk mengaktifkan lagi (kode Tabel tetap utuh).
+  const TABEL_ON = false;
+  let jView = TABEL_ON ? 'tabel' : 'durasi';
   // pilihan Kartu/Daftar per blok di tampilan Durasi (kunci: 'panggung', 'pagi', …)
   let secModes = {};
   try { secModes = JSON.parse(localStorage.getItem('mb9-jsec') || '{}') || {}; } catch (e) { /* storage diblokir */ }
-  const secMode = (key) => (secModes[key] === 'list' ? 'list' : 'card');
-  try { if (localStorage.getItem('mb9-jview') === 'durasi') jView = 'durasi'; } catch (e) { /* storage diblokir */ }
+  // bawaan Daftar; Kartu hanya bila pengunjung memilihnya
+  const secMode = (key) => (secModes[key] === 'card' ? 'card' : 'list');
+  try { if (TABEL_ON && localStorage.getItem('mb9-jview') === 'durasi') jView = 'durasi'; } catch (e) { /* storage diblokir */ }
   let currentKey = null;
   const fmtMin = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}.${String(m % 60).padStart(2, '0')}`;
   // "Sedang berlangsung": hanya untuk acara di rangkaian bertitik (Tabel,
@@ -1373,7 +1377,7 @@
     const secHead = (key, label) => {
       const mode = secMode(key);
       const btn = (m, title, d) => `<button type="button" data-sec="${key}" data-mode="${m}" aria-pressed="${mode === m}" aria-label="Tampilkan sebagai ${title}" title="${title}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg></button>`;
-      return `<div class="jperiode" data-sec-head="${key}"><span>${label}</span><span class="jperiode__view" role="group" aria-label="Tampilan ${esc(label.replace(/<[^>]+>/g, ''))}">${btn('card', 'Kartu', 'M3 5h8v14H3zM13 5h8v14h-8z')}${btn('list', 'Daftar', 'M4 6h16M4 12h16M4 18h16')}</span></div>`;
+      return `<div class="jperiode" data-sec-head="${key}"><span>${label}</span><span class="jperiode__view" role="group" aria-label="Tampilan ${esc(label.replace(/<[^>]+>/g, ''))}">${btn('list', 'Daftar', 'M4 6h16M4 12h16M4 18h16')}${btn('card', 'Kartu', 'M3 5h8v14H3zM13 5h8v14h-8z')}</span></div>`;
     };
     // gaps: rangkaian panggung → sela kosong jadi baris jeda/istirahat (seperti kartu jeda)
     const asList = (list, gaps) => {
@@ -1738,7 +1742,8 @@
     }
   }
   const viewBox = $('#jadwalView');
-  if (viewBox) {
+  if (viewBox && !TABEL_ON) viewBox.hidden = true;
+  if (viewBox && TABEL_ON) {
     const syncView = () => $$('button', viewBox).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === jView)));
     syncView();
     viewBox.addEventListener('click', (e) => {
