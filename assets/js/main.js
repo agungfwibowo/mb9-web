@@ -2812,39 +2812,37 @@
     history.replaceState(null, '', url);
     return true;
   };
-  // Snap hero ↔ section kedua (#tentang). Desktop (Lenis): setelah menggulir
-  // ±18% layar dari salah satu titik, halaman meluncur ke titik berikutnya
-  // (turun → Tentang, naik → hero); berhenti sebelum ambang → kembali ke titik
-  // terdekat. Di luar rentang itu gulir bebas. HP (sentuh) memakai CSS scroll-snap (lihat .snap-hero di CSS)
-  // karena lebih mulus mengikuti momentum jari.
+  // Snap hanya di hero: hero jadi satu "layar" yang menempel — berhenti menggulir
+  // (roda/trackpad diam 160ms) selagi posisi tujuan masih di dalam hero → halaman
+  // meluncur ke tepi hero sesuai arah: turun → tepi bawah hero (awal Tentang),
+  // naik → atas hero. Di luar hero gulir bebas. Dihitung dari roda (bukan dari
+  // luncuran Lenis yang masih ±1 dtk) agar snap terasa segera. HP memakai CSS
+  // scroll-snap proximity (lihat .snap-hero di CSS).
+  // hanya bila isi hero muat satu layar — kalau lebih tinggi (layar pendek/landscape)
+  // snap akan melompati sebagian isinya, jadi dimatikan
+  const heroEl = $('#home');
+  const heroFits = () => !!heroEl && heroEl.offsetHeight <= innerHeight + 2;
   if (lenis && finePointer && !reduced) {
-    const sec2 = $('#tentang');
-    let lastY = scrollY, snapping = false, idleT = 0;
-    const snapTo = (to) => {
-      snapping = true;
+    const hero = heroEl;
+    let snapping = false, idleT = 0, dir = 0;
+    addEventListener('wheel', (e) => {
+      if (!hero || snapping || navLocked || root.classList.contains('menu-open') || lenis.isStopped || !heroFits()) return;
+      if (e.deltaY) dir = Math.sign(e.deltaY);
       clearTimeout(idleT);
-      // easeInOutSine: berangkat & mendarat pelan (bawaan Lenis expo-out terasa menyentak di awal)
-      lenis.scrollTo(to, { duration: 1.4, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2, lock: true, force: true, onComplete: () => { snapping = false; lastY = lenis.scroll; } });
-    };
-    lenis.on('scroll', () => {
-      const y = lenis.scroll;
-      const dir = Math.sign(y - lastY);
-      lastY = y;
-      clearTimeout(idleT);
-      // navLocked: sedang meluncur lewat anchor/menu → jangan dibajak
-      if (!sec2 || snapping || navLocked || root.classList.contains('menu-open')) return;
-      const top2 = sec2.getBoundingClientRect().top + scrollY;
-      if (y <= 24 || y >= top2 - 24) return;
-      // tidak langsung: baru meluncur setelah menggulir cukup jauh (±18% layar)
-      // dari titik awal ke arah titik lain
-      const need = innerHeight * 0.18;
-      if (dir > 0 && y > need) { snapTo(top2); return; }
-      if (dir < 0 && y < top2 - need) { snapTo(0); return; }
-      // berhenti di tengah jalan (belum melewati ambang) → kembali ke titik terdekat
-      idleT = setTimeout(() => { if (!snapping && !navLocked) snapTo(lenis.scroll < top2 / 2 ? 0 : top2); }, 220);
-    });
+      idleT = setTimeout(() => {
+        const end = hero.offsetHeight;
+        const y = lenis.targetScroll ?? lenis.scroll; // posisi tujuan luncuran saat ini
+        if (snapping || navLocked || y <= 2 || y >= end - 2) return;
+        const to = dir > 0 ? end : 0;
+        snapping = true;
+        // easeInOutSine: berangkat & mendarat pelan
+        lenis.scrollTo(to, { duration: 1, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2, lock: true, force: true, onComplete: () => { snapping = false; } });
+      }, 160);
+    }, { passive: true });
   }
-  root.classList.toggle('snap-hero', !finePointer && !reduced);
+  const syncSnap = () => root.classList.toggle('snap-hero', !finePointer && !reduced && heroFits());
+  syncSnap();
+  addEventListener('resize', syncSnap, { passive: true });
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#"]');
     if (!a) return;

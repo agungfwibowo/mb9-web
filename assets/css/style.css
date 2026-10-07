@@ -374,9 +374,9 @@ html:not(.js) .preloader { display: none; }
 .lqip.is-loaded img { opacity: 1; }
 
 /* ---------- Hero ---------- */
-/* HP: snap hero ↔ Tentang (class dipasang JS hanya di perangkat sentuh) */
+/* HP: hanya hero yang jadi titik snap (class dipasang JS hanya di perangkat sentuh) */
 html.snap-hero { scroll-snap-type: y proximity; }
-html.snap-hero .hero, html.snap-hero #tentang { scroll-snap-align: start; }
+html.snap-hero .hero { scroll-snap-align: start; }
 .hero { position: relative; min-height: 100svh; padding: 116px 0 32px; display: flex; flex-direction: column; overflow: hidden; background: var(--paper); }
 .hero__bg { position: absolute; inset: 0; z-index: 0; }
 .hero__photo {
