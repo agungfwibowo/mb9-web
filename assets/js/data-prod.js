@@ -6,6 +6,10 @@ window.MB9 = {
   // Jam buka harian (WIB). Countdown otomatis: mulai = hari pertama jam open, selesai = hari terakhir jam close
   hours: { open: '08:00', close: '21:00' },
 
+  // Waktu sholat (WIB, Medan) — untuk keterangan kartu jeda di jadwal (Durasi).
+  // PERKIRAAN akhir Desember; samakan dengan jadwal resmi Kemenag/masjid setempat.
+  sholat: { dzuhur: '12.15', ashar: '15.40', maghrib: '18.20', isya: '19.35' },
+
   // Dipakai tombol "Simpan ke Kalender" (.ics & Google Calendar)
   event: {
     title: 'Muslim Berdedikasi 9',
