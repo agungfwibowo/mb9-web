@@ -1201,6 +1201,10 @@
   const noteOf = (r) => [[].concat(r.ustadz || []).map((id) => ustadzById[id]).filter(Boolean).join(' & '), r.note]
     .filter(Boolean).join(' · ');
   let jView = 'tabel';
+  // pilihan Kartu/Daftar per blok di tampilan Durasi (kunci: 'panggung', 'pagi', …)
+  let secModes = {};
+  try { secModes = JSON.parse(localStorage.getItem('mb9-jsec') || '{}') || {}; } catch (e) { /* storage diblokir */ }
+  const secMode = (key) => (secModes[key] === 'list' ? 'list' : 'card');
   try { if (localStorage.getItem('mb9-jview') === 'durasi') jView = 'durasi'; } catch (e) { /* storage diblokir */ }
   let currentKey = null;
   const fmtMin = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}.${String(m % 60).padStart(2, '0')}`;
@@ -1272,7 +1276,8 @@
     });
   };
   let panelH = 0;
-  const renderDay = (key) => {
+  // quiet: render ulang tanpa animasi masuk (mis. ganti Kartu/Daftar satu blok)
+  const renderDay = (key, quiet) => {
     currentKey = key;
     const day = D.days.find((d) => d.key === key);
     const rows = (D.jadwal && D.jadwal[key]) || [];
@@ -1363,8 +1368,37 @@
     // judul dari tag yang ada di rangkaian (urutan TAGS): mis. "Kajian & Talkshow"
     const chainTags = Object.keys(TAGS).filter((k) => chainRows.some((r) => r.tag === k)).map((k) => TAGS[k]);
     const chainTitle = chainTags.length ? chainTags.join(', ').replace(/, ([^,]*)$/, ' & $1') : 'Acara Panggung';
+    // Durasi: tiap bar hitam punya pilihan tampilan Kartu / Daftar (per blok,
+    // disimpan di localStorage). Daftar = baris biasa seperti Tabel, urut jam mulai.
+    const secHead = (key, label) => {
+      const mode = secMode(key);
+      const btn = (m, title, d) => `<button type="button" data-sec="${key}" data-mode="${m}" aria-pressed="${mode === m}" aria-label="Tampilkan sebagai ${title}" title="${title}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg></button>`;
+      return `<div class="jperiode" data-sec-head="${key}"><span>${label}</span><span class="jperiode__view" role="group" aria-label="Tampilan ${esc(label.replace(/<[^>]+>/g, ''))}">${btn('card', 'Kartu', 'M3 5h8v14H3zM13 5h8v14h-8z')}${btn('list', 'Daftar', 'M4 6h16M4 12h16M4 18h16')}</span></div>`;
+    };
+    // gaps: rangkaian panggung → sela kosong jadi baris jeda/istirahat (seperti kartu jeda)
+    const asList = (list, gaps) => {
+      const sp = (r) => r.time.split(' - ').map(toMin);
+      const rs = [...list].sort((a, b) => sp(a)[0] - sp(b)[0] || sp(a)[1] - sp(b)[1]);
+      let end = -1;
+      return rs.map((r) => {
+        const [a, b] = sp(r);
+        let gap = '';
+        if (gaps && end >= 0 && a > end) {
+          const info = gapInfo(end, a);
+          const t = `${fmtMin(end)} - ${fmtMin(a)}`;
+          gap = `
+        <div class="jrow jrow--gap" data-t="${t}" data-gap>
+          <time>${t}</time>
+          <div><h3><svg class="jico" viewBox="0 0 24 24" aria-hidden="true"><path d="${JICONS[info.icon]}"/></svg><span>${info.title}</span></h3>${info.note ? `<p>${esc(info.note)}</p>` : ''}</div>
+          <span></span>
+        </div>`;
+        }
+        end = Math.max(end, b);
+        return gap + rowHtml(r);
+      }).join('');
+    };
     const chain = chainRows.length
-      ? `<div class="jperiode"><span>${esc(chainTitle)}</span></div>${chainRows.length > 1 ? durHtml({ rows: chainRows }, true) : rowHtml(chainRows[0])}`
+      ? `${secHead('panggung', esc(chainTitle))}${secMode('panggung') === 'list' || chainRows.length < 2 ? `<div class="jchain">${asList(chainRows, true)}</div>` : durHtml({ rows: chainRows }, true)}`
       : '';
     let lastP = null;
     const sections = [];
@@ -1379,6 +1413,17 @@
       const [bs, be] = b.time.split(' - ').map(toMin);
       return as - bs || ae - be;
     };
+    // Judul periode menjangkau acara terlama di dalamnya: mulai Pagi tapi ada yang
+    // sampai 21.00 → "Pagi s/d Malam". Jam selesai tepat di batas (mis. 12.00)
+    // masih dihitung periode sebelumnya.
+    const perLabel = (sec) => {
+      const end = Math.max(...sec.rows.map((r) => toMin(r.time.split(' - ')[1]))) - 1;
+      const to = PERIODE.find((p) => end < p.to) || PERIODE[PERIODE.length - 1];
+      return to === sec.p ? sec.p.label : `${sec.p.label} <small>s/d</small> ${to.label}`;
+    };
+    // Tabel (& Daftar di Durasi): urut sesuai susunan di data-prod.js (atau `order`
+    // bila diisi: kecil duluan, default 0); sort() stabil → yang setara tetap urutan data
+    const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0);
     const body = sections.map((sec) => {
       if (jView === 'durasi') {
         const starts = new Map();
@@ -1387,17 +1432,22 @@
           if (!starts.has(s)) starts.set(s, []);
           starts.get(s).push(r);
         });
-        const html = [...starts.entries()].sort((a, b) => a[0] - b[0])
+        // Daftar: urutan sama dengan Tabel (susunan data / field order)
+        const html = secMode(sec.p.key) === 'list' ? [...sec.rows].sort(byOrder).map(rowHtml).join('') : [...starts.entries()].sort((a, b) => a[0] - b[0])
           .map(([, list]) => (list.length > 1 ? durHtml({ rows: list }) : rowHtml(list[0]))).join('');
-        return `<div class="jperiode"><span>${sec.p.label}</span></div>${html}`;
+        return `${secHead(sec.p.key, perLabel(sec))}${html}`;
       }
-      // Tabel: urut sesuai susunan di data-prod.js (atau `order` bila diisi:
-      // kecil duluan, default 0); sort() stabil → yang setara tetap urutan data
-      const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0);
-      return `<div class="jperiode"><span>${sec.p.label}</span></div>${[...sec.rows].sort(byOrder).map(rowHtml).join('')}`;
+      return `<div class="jperiode"><span>${perLabel(sec)}</span></div>${[...sec.rows].sort(byOrder).map(rowHtml).join('')}`;
     }).join('');
+    // Durasi: dua blok berbingkai sendiri (tanpa jarak) — Kajian & Talkshow di atas,
+    // layanan/stan per periode di bawah dengan judul blok "Layanan Gratis & Kegiatan". Blok baru (mis. tenant) tinggal ditambah sebagai .jblock.
+    const grpTitle = 'Layanan Gratis & Kegiatan';
+    const content = jView === 'durasi'
+      ? [chain && `<div class="jblock">${chain}</div>`, body && `<div class="jblock"><div class="jblock__title">${esc(grpTitle)}</div>${body}</div>`].filter(Boolean).join('')
+      : chain + body;
+    panel.classList.toggle('has-blocks', rows.length > 0 && content.includes('class="jblock"'));
     panel.innerHTML = banner + (rows.length
-      ? chain + body
+      ? content
       : past
         ? `<div class="soon">
           <div class="soon__icon" aria-hidden="true"><svg viewBox="0 0 56 56"><path d="M16 29l8 8 16-18"/></svg></div>
@@ -1414,6 +1464,14 @@
             <div class="soon__fixed"><b>${D.hours.open.replace(':', '.')} – ${D.hours.close.replace(':', '.')}</b> Open Gate Bazar &amp; Foodcourt</div>
           </div>
         </div>`);
+    // Durasi, mode Daftar Kajian & Talkshow: garis waktu bertitik seperti Tabel;
+    // baris istirahat → garis putus-putus dengan titik kosong
+    const chainEls = $$('.jchain > .jrow', panel);
+    chainEls.forEach((el, i) => {
+      el.classList.add('is-seq');
+      el.classList.toggle('is-seq-first', i === 0);
+      el.classList.toggle('is-seq-last', i === chainEls.length - 1);
+    });
     // Tabel: acara tanpa group = rangkaian berurutan (satu selesai, lanjut
     // berikutnya) → disambung garis waktu bertitik di depan jamnya
     if (jView === 'tabel') {
@@ -1440,7 +1498,7 @@
       panelH = panel.offsetHeight;
       requestAnimationFrame(() => ScrollTrigger.refresh());
     }
-    if (hasGsap && !reduced) {
+    if (hasGsap && !reduced && !quiet) {
       gsap.fromTo(panel.children, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: .5, stagger: .04, ease: 'power3.out', clearProps: 'transform,opacity' });
     }
   };
@@ -1567,6 +1625,78 @@
   window.addEventListener('online', resumeLive);
   window.addEventListener('pageshow', (e) => { if (e.persisted) resumeLive(); });
   if (!document.hidden) startLive();
+  // Swipe kartu Durasi di layar sentuh: geser horizontal ≥40px (dan jelas lebih
+  // horizontal daripada vertikal) → satu kartu ke kiri/kanan. Selama jari menggeser,
+  // kartu terbuka di sisi itu MELEBAR mengikuti jari (margin negatif; kartu flex
+  // mengisi ruangnya) — strip tertutup diam, garis waktu di kartu ikut memanjang
+  // sehingga tidak putus. Di ujung terasa berat (karet). Saat dilepas: pindah kartu
+  // atau memantul kembali. Gulir vertikal tetap normal (.jrail touch-action: pan-y).
+  // Klik sesudah swipe diabaikan agar strip yang tersentuh tidak ikut terbuka.
+  let swipe = null, swipedAt = 0;
+  const railMax = (rail) => $$('.jcard', rail).length - (rail._m || 1);
+  const EASE_BACK = 'margin .3s cubic-bezier(.22, .9, .24, 1)';
+  const setStretch = (sw, off, anim) => {
+    const first = sw.cards[0], last = sw.cards[sw.cards.length - 1];
+    [first, last].forEach((c) => { c.style.transition = anim ? EASE_BACK : 'none'; });
+    // geser ke kiri → tepi kiri kartu pertama melebar ke kiri; ke kanan → tepi kanan kartu terakhir
+    first.style.marginLeft = off < 0 ? `${off}px` : '';
+    last.style.marginRight = off > 0 ? `${-off}px` : '';
+    if (anim) [first, last].forEach((c) => c.addEventListener('transitionend', () => { c.style.transition = ''; }, { once: true }));
+  };
+  panel.addEventListener('pointerdown', (e) => {
+    const rail = e.pointerType !== 'mouse' && e.target.closest('.jrail');
+    const cards = rail ? $$('.jcard', rail).filter((c) => !c.classList.contains('is-piled') && !c.classList.contains('is-gone')) : [];
+    swipe = cards.length ? { rail, cards, x: e.clientX, y: e.clientY, lock: null, off: 0 } : null;
+  });
+  panel.addEventListener('pointermove', (e) => {
+    if (!swipe || reduced) return;
+    const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    // arah dikunci setelah gerakan pertama yang jelas
+    if (!swipe.lock && Math.max(Math.abs(dx), Math.abs(dy)) > 8) swipe.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    if (swipe.lock !== 'x') return;
+    const cur = Number(swipe.rail.dataset.start) || 0;
+    const edge = (dx > 0 && cur <= 0) || (dx < 0 && cur >= railMax(swipe.rail));
+    const lim = swipe.rail.clientWidth * 0.4;
+    swipe.off = Math.max(-lim, Math.min(lim, edge ? dx * 0.25 : dx * 0.6));
+    setStretch(swipe, swipe.off, false);
+  });
+  panel.addEventListener('pointercancel', () => { if (swipe && swipe.off) setStretch(swipe, 0, true); swipe = null; });
+  panel.addEventListener('pointerup', (e) => {
+    if (!swipe) return;
+    const sw = swipe;
+    swipe = null;
+    const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+    const cur = Number(sw.rail.dataset.start) || 0;
+    const to = Math.abs(dx) >= 40 && Math.abs(dx) >= Math.abs(dy) * 1.5
+      ? Math.min(Math.max(cur + (dx < 0 ? 1 : -1), 0), railMax(sw.rail)) : cur;
+    if (Math.abs(dx) >= 40) swipedAt = Date.now();
+    // pindah dulu (FLIP mengukur dari bentuk melebar saat ini), lalu lebar kembali
+    // normal bersamaan; kartu yang kini jadi strip langsung dirapikan tanpa transisi
+    if (to !== cur) moveRail(sw.rail, to);
+    if (!sw.off) return;
+    setStretch(sw, 0, true);
+    sw.cards.forEach((c) => { if (c.classList.contains('is-piled') || c.classList.contains('is-gone')) c.style.transition = 'none'; });
+  });
+  // tombol Kartu/Daftar di bar hitam: render ulang, bar yang diklik tetap di posisi layarnya
+  panel.addEventListener('click', (e) => {
+    const t = e.target.closest('.jperiode__view button');
+    if (!t || t.getAttribute('aria-pressed') === 'true') return;
+    const key = t.dataset.sec;
+    const y0 = t.closest('.jperiode').getBoundingClientRect().top;
+    secModes[key] = t.dataset.mode;
+    try { localStorage.setItem('mb9-jsec', JSON.stringify(secModes)); } catch (err) { /* abaikan */ }
+    renderDay(currentKey, true);
+    const head = $(`[data-sec-head="${key}"]`, panel);
+    if (head) {
+      // hanya isi bagian ini yang muncul halus (sampai bar berikutnya)
+      const part = [];
+      for (let n = head.nextElementSibling; n && !n.matches('.jperiode, .jblock__title'); n = n.nextElementSibling) part.push(n);
+      if (hasGsap && !reduced && part.length) gsap.fromTo(part, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: .4, stagger: .03, ease: 'power3.out', clearProps: 'transform,opacity' });
+      const dy = head.getBoundingClientRect().top - y0;
+      if (Math.abs(dy) >= 1) { if (lenis) lenis.scrollTo(scrollY + dy, { immediate: true, force: true }); else scrollTo({ top: scrollY + dy, behavior: 'instant' }); }
+      $(`.jperiode__view button[data-mode="${secModes[key]}"]`, head)?.focus({ preventScroll: true });
+    }
+  });
   panel.addEventListener('click', (e) => {
     const b = e.target.closest('.jdur__nav button');
     if (b) {
@@ -1574,6 +1704,7 @@
       moveRail(rail, Number(rail.dataset.start) + Number(b.dataset.dir));
       return;
     }
+    if (Date.now() - swipedAt < 400) return; // klik bawaan dari akhir swipe
     // klik strip → buka kartu itu (jendela bergeser seperlunya)
     const c = e.target.closest('.jcard.is-piled');
     if (!c) return;
