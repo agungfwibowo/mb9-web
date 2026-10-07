@@ -760,6 +760,8 @@ html:not(.js) .preloader { display: none; }
 /* Tabel: rangkaian acara berurutan (tanpa group) → titik + garis vertikal
    yang menyambung antar baris, di sisi kiri jam */
 .jrow { position: relative; padding-left: 40px; --dot-y: 50%; }
+/* tanpa garis waktu (mis. Daftar layanan) → tidak perlu ruang kiri untuk titik */
+.jrow:not(.is-seq):not(.is-thru) { padding-left: 24px; }
 .jrow.is-seq::before, .jrow.is-thru::before { content: ""; position: absolute; left: 19px; top: 0; bottom: 0; width: 2px; background: var(--grey); }
 .jrow.is-thru::before { background: repeating-linear-gradient(to bottom, var(--grey) 0 5px, transparent 5px 10px); }
 .jrow.is-seq-first::before { top: var(--dot-y); }
