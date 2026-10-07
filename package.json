@@ -1,0 +1,12 @@
+{
+  "name": "mb9-web",
+  "private": true,
+  "description": "Situs Muslim Berdedikasi 9 — sumber JS di src/js, dibundel ke assets/js/main.js",
+  "scripts": {
+    "build": "esbuild src/js/main.js --bundle --format=iife --minify --sourcemap --legal-comments=none --banner:js=\"/* MB9 — hasil build dari src/js (npm run build). Jangan diedit langsung. */\" --outfile=assets/js/main.js",
+    "watch": "npm run build -- --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

@@ -13,7 +13,13 @@ privasi/index.html      Kebijakan Privasi → diakses di /privasi/
 assets/css/style.css    Seluruh gaya halaman utama
 assets/js/data-prod.js  Data konten produksi (jadwal, tenant, sponsor, dll.)
 assets/js/data-dev.js   Data uji, aktif selain di muslimberdedikasi.com (menimpa data-prod.js)
-assets/js/main.js       Interaksi, animasi, menu bagikan, registrasi service worker
+assets/js/main.js       HASIL BUILD dari src/js (jangan diedit langsung) + main.js.map
+src/js/                 Sumber JS per fitur (ES module), entry: src/js/main.js
+  core.js               Helper DOM ($, esc, …), data hari, state lintas modul (lenis)
+  navbar.js             Sembunyi/tampil navbar, progress bar, lockNav
+  konten.js kalender.js bagikan.js a2hs.js koneksi.js
+  jadwal.js asatidz.js tenant.js marquee.js denah.js countdown.js
+  menu.js lenis.js cursor.js teks.js intro.js hemat.js grain.js sw-register.js
 assets/fonts/           Font self-hosted (Public Sans, Roboto Mono, subset Noto Sans Mono)
 assets/img/             Gambar & logo (org/, sponsor/, tenant/, logo/)
 sw.js                   Service worker — cache offline untuk dipakai di lokasi acara
@@ -28,7 +34,19 @@ Library pihak ketiga dimuat dari CDN: GSAP + ScrollTrigger, qrcode-generator (cd
 
 ## Menjalankan secara lokal
 
-Tidak ada proses build. Cukup jalankan server statis dari root proyek, misalnya:
+JS ditulis per modul di `src/js/` lalu dibundel [esbuild](https://esbuild.github.io/) menjadi satu
+file `assets/js/main.js` (diminify + source map). Sekali saja: `npm install`. Lalu:
+
+```bash
+npm run build   # sekali
+npm run watch   # build ulang otomatis tiap file src/js berubah
+```
+
+Urutan import di `src/js/main.js` = urutan eksekusi; modul hanya boleh meng-import modul yang
+dimuat lebih awal. `assets/js/main.js` ikut di-commit (agar bisa dibuka lokal tanpa build), dan
+workflow deploy selalu mem-build ulang dari `src/js`.
+
+Jalankan server statis dari root proyek, misalnya:
 
 ```bash
 python3 -m http.server 5501
@@ -59,6 +77,7 @@ Catatan: GitHub Pages gratis untuk repo **public**. Untuk repo private butuh aku
 
 ## Merilis perubahan
 
+0. Bila mengubah `src/js`: `npm run build`.
 1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.312` → `mb9-1.1.313`).
 2. Samakan semua `?v=` di [index.html](index.html) dengan angka versi tersebut
    (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`). Cache lama otomatis dibuang saat worker baru aktif.

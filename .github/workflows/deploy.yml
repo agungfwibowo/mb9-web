@@ -25,6 +25,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # JS ditulis per modul di src/js → dibundel ulang ke assets/js/main.js,
+      # jadi yang terbit selalu sesuai sumber walau lupa `npm run build`.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Build JS
+        run: npm ci && npm run build
+
       # Hanya file situs yang ikut terbit (README, _headers, .github tidak).
       - name: Siapkan folder situs
         run: |
