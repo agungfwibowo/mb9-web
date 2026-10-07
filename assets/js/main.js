@@ -2004,6 +2004,34 @@
     }, 1100);
   });
   if (agrid.querySelector('.ustadz[data-id]')) { markAsatidzLive(); everyMinute(markAsatidzLive); }
+  // Deretan kartu yang di-pin GSAP (Layanan & Asatidz) di HP: kartu digerakkan
+  // gulir halaman (lihat scrollAnims). Geser jari ke kiri/kanan diterjemahkan jadi
+  // gulir halaman yang setara → kartu ikut bergeser & tetap sinkron dengan gulir
+  // atas/bawah. pinSwipe[key] diisi blok GSAP selama pin aktif (perPx = px gulir
+  // halaman per 1px geser kartu).
+  const pinSwipe = {};
+  const swipeToScroll = (el, key) => {
+    let sw = null, draggedAt = 0;
+    el.addEventListener('pointerdown', (e) => {
+      // khusus HP (layar ≤860px, sentuh)
+      sw = e.pointerType === 'touch' && pinSwipe[key] && matchMedia('(max-width: 860px)').matches ? { x: e.clientX, y: e.clientY, y0: scrollY, lock: null } : null;
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (!sw || !pinSwipe[key]) return;
+      const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+      if (!sw.lock && Math.max(Math.abs(dx), Math.abs(dy)) > 8) sw.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if (sw.lock !== 'x') return;
+      const y = Math.max(0, sw.y0 - dx * pinSwipe[key].perPx());
+      if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo({ top: y, behavior: 'instant' });
+    });
+    const end = () => { if (sw && sw.lock === 'x') draggedAt = Date.now(); sw = null; };
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    // klik bawaan di akhir geseran (mis. badge / tombol kartu) diabaikan
+    el.addEventListener('click', (e) => { if (Date.now() - draggedAt < 400) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+  };
+  swipeToScroll(agrid, 'asatidz');
+  if (track) swipeToScroll(track, 'layanan');
 
   // Tenant marquee + grid
   const tenants = D.tenants.map(([name, file, tone]) => ({ name, tone, src: `assets/img/tenant/${file}` }));
@@ -3031,7 +3059,7 @@
     // saat layar diputar, tanpa perlu reload.
     gsap.matchMedia().add('(min-height: 521px)', () => {
       const dist = () => Math.max(0, track.scrollWidth - innerWidth);
-      gsap.timeline({
+      const ltl = gsap.timeline({
         scrollTrigger: {
           trigger: '.layanan__pin', start: 'top top',
           end: () => `+=${dist() ? dist() * 1.45 + innerHeight * .3 : 1}`,
@@ -3043,12 +3071,15 @@
       })
         .to(track, { x: () => -dist(), ease: 'none', duration: 1 })
         .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
+      // geser jari (HP) → gulir halaman setara; 1.42 = durasi geser + jeda di timeline
+      const perPx = (tl, d) => () => (d() ? ((tl.scrollTrigger.end - tl.scrollTrigger.start) / 1.42) / d() : 0);
+      pinSwipe.layanan = { perPx: perPx(ltl, dist) };
 
       // asatidz: satu baris, geser horizontal saat overflow (mirip layanan)
       const agridTrack = $('#asatidzGrid');
       if (agridTrack) {
         const adist = () => Math.max(0, agridTrack.scrollWidth - innerWidth);
-        gsap.timeline({
+        const atl = gsap.timeline({
           scrollTrigger: {
             trigger: '.asatidz__pin', start: 'top top',
             end: () => `+=${adist() ? adist() * 1.45 + innerHeight * .25 : 1}`,
@@ -3057,7 +3088,9 @@
         })
           .to(agridTrack, { x: () => -adist(), ease: 'none', duration: 1 })
           .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
+        pinSwipe.asatidz = { perPx: perPx(atl, adist) };
       }
+      return () => { pinSwipe.layanan = null; pinSwipe.asatidz = null; };
 
     });
 
