@@ -1082,7 +1082,10 @@ html.snap-hero .hero { scroll-snap-align: start; }
    pertama/terakhir = rata tengah bila muat, tanpa memotong sisi kiri bila tidak. */
 .asatidz__grid {
   flex: none; align-items: flex-start; display: flex; flex-wrap: nowrap; gap: var(--ast-gap); --ast-gap: 16px; padding: 0 var(--ast-pad, var(--gutter));
-  overflow-x: auto; overflow-y: hidden; overscroll-behavior: contain; scrollbar-width: none; /* tak ada gulir vertikal di dalamnya */
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; /* tak ada gulir vertikal di dalamnya */
+  /* hanya sumbu x yang ditahan (cegah geser-kembali browser); sumbu y dibiarkan
+     agar usapan naik/turun di atas kartu tetap menggulir halaman (HP) */
+  touch-action: pan-x pan-y;
   /* snap: kartu berlabuh di --ast-pad (dihitung asatidz.js) → 1/2/3 kartu yang muat
      penuh selalu pas di tengah layar, tetangganya mengintip sama lebar */
   scroll-snap-type: x mandatory; scroll-padding-inline: var(--ast-pad, var(--gutter));
