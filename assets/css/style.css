@@ -774,6 +774,8 @@ html:not(.js) .preloader { display: none; }
 .jopen.is-soon { background: #ffb020; color: var(--ink); }
 .jopen.is-wait { background: var(--white); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--grey-2); }
 .jopen.is-wait::before { background: var(--grey); }
+.jopen.is-break { background: var(--ink); color: var(--white); }
+.jopen.is-break::before { background: var(--lime); animation: blink 1s steps(2) infinite; }
 .jnext { display: inline-flex; align-items: center; width: max-content; padding: 3px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); background: var(--white); box-shadow: inset 0 0 0 1.5px var(--blue); }
 .is-pink .jnext, .jcard.is-pink > .jnext { color: var(--pink); box-shadow: inset 0 0 0 1.5px var(--pink); }
 /* akan mulai/buka ≤30 menit: biru muda (beda dari oranye "Segera tutup") */
@@ -891,6 +893,19 @@ html:not(.js) .preloader { display: none; }
 .jdur .jcard.is-piled.far-done { --b2: var(--paper); }
 .jdur .jcard.is-piled:hover { background: var(--lime-3); }
 .jdur .jcard.is-piled.is-pink:hover { background: #fdeef5; }
+/* kartu jeda/istirahat di rangkaian panggung: latar belang ala kartu "menyusul"
+   (jelas beda dari acara, tetap belang walau sudah lewat), garis waktu putus-putus,
+   titik kosong. Ditaruh setelah aturan .jcard:not(.is-piled) agar tidak tertimpa. */
+.jdur .jcard.jcard--gap, .jdur .jcard.jcard--gap:not(.is-piled), .jdur .jcard.jcard--gap.is-done:not(.is-piled) { background: repeating-linear-gradient(-45deg, var(--white) 0 10px, #f3f3f0 10px 20px); }
+.jdur .jcard.jcard--gap:hover, .jdur .jcard.jcard--gap:not(.is-piled):hover, .jdur .jcard.jcard--gap.is-done:not(.is-piled):hover, .jdur .jcard.jcard--gap:hover .jstop time { background: var(--lime-3); }
+.jcard--gap .jstop::before { background: repeating-linear-gradient(to right, var(--grey) 0 6px, transparent 6px 12px); }
+.jdur .jcard--gap .jstop i, .jdur .jcard--gap.is-done .jstop i { background: var(--white); border: 2px solid var(--grey); box-sizing: border-box; box-shadow: 0 0 0 4px var(--white); }
+.jdur .jcard--gap:hover .jstop i { background: var(--lime-3); box-shadow: 0 0 0 4px var(--lime-3); }
+.jdur .jcard--gap .jstop time, .jdur .jcard--gap.is-done .jstop time { background: var(--white); color: var(--ink-3); padding: 2px 6px; }
+.jcard--gap h3 { color: var(--ink-3); }
+.jcard--gap .jico { stroke: var(--ink-3); }
+.jdur .jcard--gap .jcard__edge { color: var(--grey); }
+.jcard--gap .jcard__edge::before { background: repeating-linear-gradient(to right, var(--grey) 0 6px, transparent 6px 12px); }
 .jcard__edge { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 0 14px; opacity: 0; pointer-events: none; color: var(--blue); }
 /* lanjutan garis waktu + titik berongga, sejajar .jstop kartu yang terbuka */
 .jcard__edge::before { content: ""; position: absolute; left: 0; right: 0; top: 24px; height: 2px; background: var(--grey-2); }

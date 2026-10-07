@@ -1175,6 +1175,8 @@
     obrolan: 'M4 5h11v8H8l-4 3zM15 9h5v8l-3-2h-6v-2',
     muslimah: 'M4.5 21C5 18 5 15 5 10a7 7 0 0 1 14 0c0 5 0 8 .5 11-5 1-10 1-15 0zM12 7a3.5 4.5 0 1 1 0 9 3.5 4.5 0 0 1 0-9zM8.7 10.2c2.1-.8 4.5-.8 6.6 0',
     titik: 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z',
+    masjid: 'M3 21h18M5 21v-8h14v8M12 3c-3.2 2-5 4.2-5 7h10c0-2.8-1.8-5-5-7zM12 3V1M10 21v-3a2 2 0 0 1 4 0v3',
+    jam: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zM12 7v5l3 2',
     grup: 'M12 4a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM6.5 20v-1a5.5 5.5 0 0 1 11 0v1M5 8.5a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM1.5 19v-.5A3.5 3.5 0 0 1 5 15M19 8.5a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM22.5 19v-.5A3.5 3.5 0 0 0 19 15',
   };
   // Ikon dipilih dari kata kunci judul; r.icon di data-prod.js bisa menimpanya.
@@ -1256,7 +1258,12 @@
       upcoming.filter((el) => span(el)[0] === first).forEach((el) => put(el, '<span class="jnext mono">Selanjutnya</span>'));
     }
     // layanan di stan
-    units.filter((el) => !isSeq(el)).forEach((el) => {
+    // kartu jeda (Durasi): selama jedanya berjalan → label "Istirahat"
+    units.filter((el) => el.hasAttribute('data-gap')).forEach((el) => {
+      const [a, b] = span(el);
+      if (now.min >= a && now.min < b) put(el, '<span class="jopen mono is-break">Istirahat</span>');
+    });
+    units.filter((el) => !isSeq(el) && !el.hasAttribute('data-gap')).forEach((el) => {
       const [a, b] = span(el);
       const st = now.min < a ? (a - now.min <= SOON ? ['is-starting', 'Segera buka'] : ['is-wait', `Buka ${fmtMin(a)}`])
         : now.min >= b ? ['is-closed', 'Tutup']
@@ -1288,22 +1295,56 @@
     };
     // Tampilan "Durasi": jam mulai bersama ditulis sekali di kepala grup, tiap
     // kartu cukup jam selesainya + bar sepanjang durasinya relatif ke rentang grup.
-    const durHtml = (g) => {
+    // Jeda di rangkaian panggung: keterangan dari waktu sholat (D.sholat) yang jatuh
+    // di dalam rentang jeda — Dzuhur & jeda ≥1 jam → "Ishoma".
+    const SHOLAT = Object.entries(D.sholat || {});
+    const gapInfo = (a, b) => {
+      const hit = SHOLAT.filter(([, t]) => { const m = toMin(t); return m >= a && m < b; });
+      const cap = (k) => k[0].toUpperCase() + k.slice(1);
+      const ishoma = b - a >= 60 && hit.some(([k]) => k === 'dzuhur');
+      return {
+        title: ishoma ? 'Ishoma' : hit.length ? 'Istirahat Sholat' : 'Jeda',
+        note: [ishoma ? 'Istirahat, sholat & makan' : '', ...hit.map(([k, t]) => `${cap(k)} ± ${t}`)].filter(Boolean).join(' · '),
+        icon: hit.length ? 'masjid' : 'jam',
+      };
+    };
+    const durHtml = (g, gaps) => {
       const rs = [...g.rows].sort(byEnd);
       const rg = rs.map((r) => r.time.split(' - ').map(toMin));
       const gs = Math.min(...rg.map((x) => x[0])), ge = Math.max(...rg.map((x) => x[1]));
       const same = rg.every((x) => x[0] === gs);
       const head = same ? `Mulai <b>${fmtMin(gs)}</b>` : `<b>${fmtMin(gs)}</b> – <b>${fmtMin(ge)}</b>`;
       // acara dengan jam (selesai) yang sama → satu kartu, isinya berderet
-      const cards = [];
+      let cards = [];
       rs.forEach((r, i) => {
         const label = same ? `s/d ${fmtMin(rg[i][1])}` : esc(r.time);
         const last = cards[cards.length - 1];
         if (last && last.label === label) last.items.push(r); else cards.push({ label, items: [r] });
       });
+      // rangkaian panggung: sela kosong antar-kartu → kartu jeda (garis putus-putus)
+      if (gaps) {
+        const sp = (c) => c.items.map((r) => r.time.split(' - ').map(toMin));
+        cards = cards.flatMap((c, i) => {
+          if (!i) return [c];
+          const pe = Math.max(...sp(cards[i - 1]).map((x) => x[1])), ns = Math.min(...sp(c).map((x) => x[0]));
+          return ns > pe ? [{ gap: [pe, ns], label: `${fmtMin(pe)} - ${fmtMin(ns)}` }, c] : [c];
+        });
+      }
+      const gapCard = (c) => {
+        const info = gapInfo(...c.gap);
+        return `
+        <div class="jcard jcard--gap">
+          <span class="jcard__edge" aria-hidden="true" data-t="${c.label}"></span>
+          <div class="jstop"><i aria-hidden="true"></i><time>${c.label}</time></div>
+          <div class="jcard__item" data-t="${c.label}" data-gap>
+            <h3><svg class="jico" viewBox="0 0 24 24" aria-hidden="true"><path d="${JICONS[info.icon]}"/></svg><span>${info.title}</span></h3>
+            ${info.note ? `<p>${esc(info.note)}</p>` : ''}
+          </div>
+        </div>`;
+      };
       // Kartu berjajar 1 baris (geser horizontal, urut jam selesai). Di atas
       // tiap kartu ada garis waktu bersambung dengan titik di jam selesainya.
-      return `<div class="jdur"><div class="jdur__head"><span>${head}</span><span class="jdur__nav" hidden><button type="button" data-dir="-1" aria-label="Geser ke kiri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></span></div><div class="jrail${cards.length > 2 ? ' jrail--many' : ''}${same ? '' : ' jrail--range'}"><div class="jrail__track">${cards.map((c) => `
+      return `<div class="jdur"><div class="jdur__head"><span>${head}</span><span class="jdur__nav" hidden><button type="button" data-dir="-1" aria-label="Geser ke kiri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></span></div><div class="jrail${cards.length > 2 ? ' jrail--many' : ''}${same ? '' : ' jrail--range'}"><div class="jrail__track">${cards.map((c) => (c.gap ? gapCard(c) : `
         <div class="jcard${c.items.every((r) => r.ladies) ? ' is-pink' : ''}">
           <span class="jcard__edge" aria-hidden="true" data-t="${c.label}"></span>
           <div class="jstop"><i aria-hidden="true"></i><time>${c.label}</time></div>${c.items.map((r) => `
@@ -1312,7 +1353,7 @@
             ${noteOf(r) ? `<p>${esc(noteOf(r))}</p>` : ''}
             ${r.tag ? `<span class="tag">${esc(TAGS[r.tag] || r.tag)}</span>` : ''}
           </div>`).join('')}
-        </div>`).join('')}</div></div></div>`;
+        </div>`)).join('')}</div></div></div>`;
     };
     // Durasi: acara panggung berurutan (tanpa group) dikumpulkan jadi satu baris
     // kartu horizontal di atas (judul dari tag-nya, mis. "Kajian & Talkshow") — lepas dari Pagi/Siang/Sore/
@@ -1323,7 +1364,7 @@
     const chainTags = Object.keys(TAGS).filter((k) => chainRows.some((r) => r.tag === k)).map((k) => TAGS[k]);
     const chainTitle = chainTags.length ? chainTags.join(', ').replace(/, ([^,]*)$/, ' & $1') : 'Acara Panggung';
     const chain = chainRows.length
-      ? `<div class="jperiode"><span>${esc(chainTitle)}</span></div>${chainRows.length > 1 ? durHtml({ rows: chainRows }) : rowHtml(chainRows[0])}`
+      ? `<div class="jperiode"><span>${esc(chainTitle)}</span></div>${chainRows.length > 1 ? durHtml({ rows: chainRows }, true) : rowHtml(chainRows[0])}`
       : '';
     let lastP = null;
     const sections = [];
