@@ -2812,6 +2812,39 @@
     history.replaceState(null, '', url);
     return true;
   };
+  // Snap hero ↔ section kedua (#tentang). Desktop (Lenis): setelah menggulir
+  // ±18% layar dari salah satu titik, halaman meluncur ke titik berikutnya
+  // (turun → Tentang, naik → hero); berhenti sebelum ambang → kembali ke titik
+  // terdekat. Di luar rentang itu gulir bebas. HP (sentuh) memakai CSS scroll-snap (lihat .snap-hero di CSS)
+  // karena lebih mulus mengikuti momentum jari.
+  if (lenis && finePointer && !reduced) {
+    const sec2 = $('#tentang');
+    let lastY = scrollY, snapping = false, idleT = 0;
+    const snapTo = (to) => {
+      snapping = true;
+      clearTimeout(idleT);
+      // easeInOutSine: berangkat & mendarat pelan (bawaan Lenis expo-out terasa menyentak di awal)
+      lenis.scrollTo(to, { duration: 1.4, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2, lock: true, force: true, onComplete: () => { snapping = false; lastY = lenis.scroll; } });
+    };
+    lenis.on('scroll', () => {
+      const y = lenis.scroll;
+      const dir = Math.sign(y - lastY);
+      lastY = y;
+      clearTimeout(idleT);
+      // navLocked: sedang meluncur lewat anchor/menu → jangan dibajak
+      if (!sec2 || snapping || navLocked || root.classList.contains('menu-open')) return;
+      const top2 = sec2.getBoundingClientRect().top + scrollY;
+      if (y <= 24 || y >= top2 - 24) return;
+      // tidak langsung: baru meluncur setelah menggulir cukup jauh (±18% layar)
+      // dari titik awal ke arah titik lain
+      const need = innerHeight * 0.18;
+      if (dir > 0 && y > need) { snapTo(top2); return; }
+      if (dir < 0 && y < top2 - need) { snapTo(0); return; }
+      // berhenti di tengah jalan (belum melewati ambang) → kembali ke titik terdekat
+      idleT = setTimeout(() => { if (!snapping && !navLocked) snapTo(lenis.scroll < top2 / 2 ? 0 : top2); }, 220);
+    });
+  }
+  root.classList.toggle('snap-hero', !finePointer && !reduced);
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#"]');
     if (!a) return;
