@@ -24,7 +24,10 @@
   .asatidz__pin { padding: clamp(40px, 6vh, 90px) 0; }
   .asatidz .sec-head { margin-bottom: clamp(14px, 2.8vh, 48px); }
   .asatidz .sec-head .title { font-size: clamp(24px, 3.6vh, 42px); }
-  .asatidz__grid > .ustadz { --ust-w: min(280px, 27vh); }
+  /* 36vh: iPad landscape (±740px) → ±265px; 27vh dulu terlalu kecil (±170px
+     setelah menyusut, foto tergencet nama). Layar sangat pendek tetap aman
+     lewat jaring pengaman max-height: 100% di bawah. */
+  .asatidz__grid > .ustadz { --ust-w: min(280px, 36vh); }
   .asatidz__note { margin-top: clamp(10px, 2vh, 26px); }
 }
 

@@ -95,8 +95,14 @@ export const bootBooth = (() => {
 // scroll terakhir setelah skrip ini jalan — kalau dibaca dari scrollY,
 // pemulihan itu dikira guliran pengunjung dan lompatan ke tujuan batal.
 export let userScrolled = false;
+// Selama deep link berjalan (preloader → luncur → koreksi posisi), snap hero
+// (perangkat sentuh) dimatikan lewat .snap-boot — kalau tidak, Safari menarik
+// guliran kembali ke hero dan tujuan tak pernah tercapai. Dilepas saat
+// pengunjung mengambil alih, atau oleh hemat.js setelah koreksi terakhir.
+export const releaseBootSnap = () => root.classList.remove('snap-boot');
 if (bootHash || bootBooth) {
-  const mark = () => { userScrolled = true; };
+  root.classList.add('snap-boot');
+  const mark = () => { userScrolled = true; releaseBootSnap(); };
   addEventListener('wheel', mark, { passive: true, once: true });
   addEventListener('touchmove', mark, { passive: true, once: true });
   // klik/ketuk apa pun (mis. tautan jadwal di tooltip tenda) = pengunjung mengambil
