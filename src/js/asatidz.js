@@ -52,55 +52,62 @@ agrid.addEventListener('scroll', queueFront, { passive: true });
 addEventListener('resize', queueFront);
 markFront();
 if (soonN) agrid.insertAdjacentHTML('afterend', '<p class="asatidz__note">Daftar asatidz InsyaAllah segera diumumkan</p>');
-// Badge di foto kartu asatidz yang punya jadwal HARI INI (sejak 00:00 WIB s/d
-// jam tutup, lihat openDayAt): "Hari ini · 16.00" sebelum mulai → "Berlangsung"
-// (+ garis tepi) saat kajiannya jalan → "Selesai" setelahnya. Cek tiap menit.
+// Badge di foto kartu asatidz, dari SELURUH jadwal acara (WIB):
+// "Berlangsung" (+ garis tepi) saat kajiannya jalan › sesi terdekat yang belum
+// mulai: "Hari ini · 16.00" / "Besok · 16.00" / "Sab, 26 Des · 16.00" ›
+// "Selesai" hanya setelah sesi terakhirnya di seluruh rangkaian. Cek tiap menit.
+const DAY_MS = 86400000;
 const markAsatidzLive = () => {
-  const now = wibNow();
-  const day = openDayAt(Date.now());
-  const st = new Map(); // id → { live, next (menit mulai terdekat), akhwat }
-  ((day && D.jadwal && D.jadwal[day.key]) || []).forEach((r) => {
+  const now = Date.now();
+  const today = wibNow().iso;
+  const tomorrow = new Date(new Date(`${today}T00:00:00Z`).getTime() + DAY_MS).toISOString().slice(0, 10);
+  const st = new Map(); // id → { live, next, done } — tiap sesi { day, time, start, akhwat }
+  D.days.forEach((day) => ((D.jadwal && D.jadwal[day.key]) || []).forEach((r) => {
     const [a, b] = r.time.split(' - ').map(toMin);
+    const at = (m) => new Date(`${day.iso}T${fmtMin(m).replace('.', ':')}:00+07:00`).getTime();
+    const s = { day, time: r.time, start: at(a), akhwat: !!r.akhwat };
+    const end = at(b);
     [].concat(r.ustadz || []).forEach((id) => {
-      // t = jam sesi yang dituju badge: yang berjalan › terdekat › terakhir selesai
-      const o = st.get(id) || { live: false, next: null, akhwat: false, t: '', tNext: '', tDone: '' };
-      if (now.min >= a && now.min < b) { o.live = true; o.akhwat = !!r.akhwat; o.t = r.time; }
-      else if (now.min < a) { if (o.next === null || a < o.next) { o.next = a; o.tNext = r.time; } }
-      else o.tDone = r.time;
+      const o = st.get(id) || { live: null, next: null, done: null };
+      if (now >= s.start && now < end) o.live = s;
+      else if (now < s.start) { if (!o.next || s.start < o.next.start) o.next = s; }
+      else if (!o.done || s.start > o.done.start) o.done = s;
       st.set(id, o);
     });
-  });
+  }));
   $$('.ustadz[data-id]', agrid).forEach((card) => {
     const o = st.get(card.dataset.id);
-    const live = !!o && o.live;
+    const live = !!o && !!o.live;
     card.classList.toggle('is-live', live);
-    card.classList.toggle('is-pink', live && o.akhwat);
-    // badge = tautan ke jadwal hari ini (tab dipilih di handler klik agrid)
-    const t = !o ? '' : live ? o.t : o.next !== null ? o.tNext : o.tDone;
-    const badge = (cls, text) => `<a href="#jadwal" class="ustadz__badge ${cls} mono" data-day="${day.key}" data-t="${esc(t)}" aria-label="${text} — buka jadwal hari ini">${text}<span class="ustadz__go" aria-hidden="true">→</span></a>`;
-    const html = !o ? ''
+    card.classList.toggle('is-pink', live && o.live.akhwat);
+    // badge = tautan ke sesi yang dituju di jadwal (tab dipilih di handler klik agrid)
+    const s = !o ? null : o.live || o.next || o.done;
+    const badge = (cls, text) => `<a href="#jadwal" class="ustadz__badge ${cls} mono" data-day="${s.day.key}" data-t="${esc(s.time)}" aria-label="${text} — buka jadwalnya">${text}<span class="ustadz__go" aria-hidden="true">→</span></a>`;
+    const jam = s && fmtMin(toMin(s.time.split(' - ')[0]));
+    const html = !s ? ''
       : live ? badge('jlive', 'Berlangsung')
-        : o.next !== null ? badge('ustadz__badge--today', `Hari ini · ${fmtMin(o.next)}`)
+        : o.next ? (s.day.iso === today ? badge('ustadz__badge--today', `Hari ini · ${jam}`)
+          : badge('ustadz__badge--next', `${s.day.iso === tomorrow ? 'Besok' : `${s.day.short.slice(0, 3)}, ${s.day.date}`} · ${jam}`))
           : badge('ustadz__badge--done', 'Selesai');
     const old = card.querySelector(':scope > .ustadz__badge');
     if (old && old.outerHTML === html) return;
     if (old) old.remove();
     if (html) card.insertAdjacentHTML('beforeend', html);
   });
-  sortAsatidz(st);
+  sortAsatidz(st, today);
 };
-// Urutan kartu: Berlangsung › hari ini belum mulai (jam terdekat dulu) › hari ini
-// sudah selesai › tanpa jadwal hari ini (urutan data) › "InsyaAllah menyusul" ›
-// akhwat tanpa jadwal hari ini (selalu paling kanan).
+// Urutan kartu: Berlangsung › hari ini belum mulai (jam terdekat dulu) › sesi
+// hari berikutnya (terdekat dulu) › sudah selesai semua › tanpa jadwal (urutan
+// data) › "InsyaAllah menyusul" › akhwat tanpa jadwal (selalu paling kanan).
 // DOM-nya yang dipindah (bukan CSS order) agar margin kartu pertama/terakhir &
 // urutan Tab tetap benar. Hanya disentuh bila urutannya memang berubah.
 const baseOrder = $$('.ustadz', agrid);
-const sortAsatidz = (st) => {
+const sortAsatidz = (st, today) => {
   const rank = (card) => {
     const o = card.dataset.id && st.get(card.dataset.id);
-    if (card.classList.contains('ustadz--soon')) return [4, 0];
-    if (!o) return card.classList.contains('ustadz--akhwat') ? [5, 0] : [3, 0];
-    return o.live ? [0, 0] : o.next !== null ? [1, o.next] : [2, 0];
+    if (card.classList.contains('ustadz--soon')) return [5, 0];
+    if (!o) return card.classList.contains('ustadz--akhwat') ? [6, 0] : [4, 0];
+    return o.live ? [0, 0] : o.next ? [o.next.day.iso === today ? 1 : 2, o.next.start] : [3, 0];
   };
   const sorted = baseOrder.map((card, i) => ({ card, i, r: rank(card) }))
     .sort((x, y) => x.r[0] - y.r[0] || x.r[1] - y.r[1] || x.i - y.i)
@@ -242,6 +249,21 @@ const swipeToScroll = (el, key) => {
   // klik bawaan di akhir geseran (mis. badge / tombol kartu) diabaikan
   el.addEventListener('click', (e) => { if (Date.now() - draggedAt < 400) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
 };
+// Posisi gulir berlabuh terdekat (kartu rata --ast-pad, sama dengan CSS snap).
+// dir: 1 = condong ke kanan, -1 = ke kiri, 0 = yang paling dekat.
+const snapLeft = (el, dir = 0) => {
+  const pad = parseFloat(getComputedStyle(el).scrollPaddingLeft) || 0;
+  const max = el.scrollWidth - el.clientWidth;
+  const cur = el.scrollLeft;
+  const pts = $$('.ustadz', el).map((c) => Math.min(max, Math.max(0, c.offsetLeft - pad)));
+  // seretan pendek (< 1/5 kartu) tetap di kartu terdekat
+  const near = pts.reduce((a, b) => (Math.abs(b - cur) < Math.abs(a - cur) ? b : a), 0);
+  if (!dir) return near;
+  const step = (pts[1] ?? pts[0]) - pts[0] || 1;
+  if (Math.abs(near - cur) < step / 5) return near;
+  const pick = dir > 0 ? pts.filter((x) => x >= cur).sort((a, b) => a - b)[0] : pts.filter((x) => x <= cur).sort((a, b) => b - a)[0];
+  return pick ?? near;
+};
 // Asatidz: deretan digeser biasa (overflow-x, scrollbar disembunyikan). Sentuh &
 // trackpad sudah bisa; mouse tidak (roda hanya vertikal) → bisa diseret.
 const dragScroll = (el) => {
@@ -256,17 +278,31 @@ const dragScroll = (el) => {
     if (!d.moved && Math.abs(dx) > 5) { d.moved = true; el.classList.add('is-dragging'); }
     if (d.moved) el.scrollLeft = d.left - dx;
   });
-  addEventListener('pointerup', () => {
+  addEventListener('pointerup', (e) => {
     if (!d) return;
+    const dx = e.clientX - d.x;
     if (d.moved) draggedAt = Date.now();
     d = null;
-    el.classList.remove('is-dragging'); // snap aktif lagi → kartu berlabuh
+    if (!el.classList.contains('is-dragging')) return;
+    // snap tidak selalu dipasang ulang browser setelah dimatikan (Safari) →
+    // labuhkan sendiri ke kartu terdekat searah seretan, baru snap diaktifkan lagi
+    el.scrollTo({ left: snapLeft(el, -Math.sign(dx)), behavior: reduced ? 'auto' : 'smooth' });
+    const done = () => { clearTimeout(t); el.removeEventListener('scrollend', done); el.classList.remove('is-dragging'); };
+    const t = setTimeout(done, 600);
+    el.addEventListener('scrollend', done);
   });
   // klik di akhir seretan (mis. badge kartu) diabaikan
   el.addEventListener('click', (e) => { if (Date.now() - draggedAt < 300) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
   el.addEventListener('dragstart', (e) => e.preventDefault()); // gambar tidak ikut terseret
 };
 dragScroll(agrid);
+// Jaring pengaman: gulir jari/trackpad yang berhenti di luar titik labuh (snap
+// browser kadang meleset setelah urutan kartu berubah) → labuhkan ke terdekat.
+agrid.addEventListener('scrollend', () => {
+  if (agrid.classList.contains('is-dragging')) return;
+  const x = snapLeft(agrid);
+  if (Math.abs(x - agrid.scrollLeft) > 2) agrid.scrollTo({ left: x, behavior: reduced ? 'auto' : 'smooth' });
+});
 // Jarak sisi deretan (--ast-pad) agar kartu yang muat penuh (1/2/3…) berada tepat
 // di tengah layar saat berlabuh. Hanya bila deretan meluber; kalau semua muat,
 // kartu sudah rata tengah lewat margin auto. Saat meluber, lebar kartu sudah
