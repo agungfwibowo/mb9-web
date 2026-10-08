@@ -1,0 +1,21 @@
+/* ---------- Lazy fade ---------- */
+/* Gambar yang diunduh lewat data-src. Ditaruh paling akhir agar transisinya
+   tidak ditimpa .plogo img / .logo-tile img yang punya transition sendiri. */
+
+/* 1. Petak yang isinya belum datang diberi rona tipis, jadi tidak pernah ada
+      kotak kosong yang mendadak terisi. */
+:root { --skel: rgba(17, 17, 17, .05); }
+.logo-tile:has(img[data-src]),
+.tenant__grid .ph:has(img[data-src]),
+.plogo:has(img[data-src]),
+.ustadz:has(img[data-src]) { background-image: linear-gradient(var(--skel), var(--skel)); }
+.logo-tile.is-dark:has(img[data-src]),
+.tenant__grid .ph.is-dark:has(img[data-src]),
+.plogo--dark:has(img[data-src]) { --skel: rgba(255, 255, 255, .07); }
+
+/* 2. Gambarnya meluncur masuk dari kiri ke posisi tengah sambil memudar masuk.
+      Pakai `translate` (bukan transform) agar tidak bentrok efek hover. */
+/* butuh dua-duanya: .is-loaded (pikselnya siap) + .is-seen (petaknya masuk layar) */
+img.lazy-img { opacity: 0; translate: -24px 0; transition: opacity .45s var(--ease), translate .55s var(--ease); }
+img.lazy-img.is-loaded.is-seen { opacity: 1; translate: none; }
+

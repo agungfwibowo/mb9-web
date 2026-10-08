@@ -1,0 +1,80 @@
+/* ---------- Noise (brand: add noise, subtle) ---------- */
+.noise {
+  /* z-index di atas preloader (10000) agar grain ikut terlihat di layar loader */
+  position: fixed; inset: -60px; z-index: 10010; pointer-events: none; --noise-o: .1; --burst: 11000ms; --intro: 3600ms; opacity: var(--noise-o); mix-blend-mode:difference; will-change: transform;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.3' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+/* Pembuka: layar benar-benar bersih sampai loader selesai (root dapat
+   .is-loaded dari main.js), ditahan 3 detik lagi, baru grain "menangkap
+   sinyal" lewat beberapa kedipan. Kelas is-intro ditulis langsung di HTML
+   supaya bersihnya berlaku sejak cat pertama, bukan menunggu JS. */
+.noise.is-intro { opacity: 0; }
+.is-loaded .noise.is-intro {
+  opacity: var(--noise-o);
+  animation: grain 1.2s steps(6) infinite, tv-in var(--intro) steps(1, end) 1;
+}
+@keyframes tv-in {
+  0%, 83% { opacity: 0; }        /* 3 detik bersih */
+  84.5% { opacity: calc(var(--noise-o) + .2); }
+  86% { opacity: 0; }
+  88.5% { opacity: calc(var(--noise-o) + .18); }
+  90.5% { opacity: 0; }
+  93% { opacity: calc(var(--noise-o) + .2); }
+  95% { opacity: 0; }
+  97% { opacity: calc(var(--noise-o) + .1); }
+  98.5% { opacity: 0; }
+  100% { opacity: calc(var(--noise-o) + .15); }
+}
+/* Gangguan sinyal sesekali: grain dipercepat dan opasitasnya berdenyut,
+   seperti TV yang kehilangan sinyal. Dipicu dari main.js pada jeda acak yang
+   panjang. Selektor kedua menyamai kekhususan aturan intro di atas dan ditulis
+   setelahnya, supaya burst tetap menang selama kelas is-intro masih menempel.
+   Hanya opacity + transform yang berubah, jadi tetap di compositor. */
+.noise.is-burst, .is-loaded .noise.is-burst {
+  animation: grain .22s steps(6) infinite, tv-burst var(--burst) steps(1, end) 1;
+}
+/* steps() membuat tiap nilai dipegang penuh lalu lompat — tanpa itu opacity
+   memudar halus dan terbaca seperti berkedip, bukan putus sinyal.
+   Persentase relatif terhadap --burst (11s): kedipan pendek ~0,5 detik, lalu
+   grain hilang total 10 detik (4.6%→95.5%), baru pulih lewat kedipan. */
+@keyframes tv-burst {
+  0% { opacity: var(--noise-o); }
+  0.5% { opacity: calc(var(--noise-o) + .2); }
+  1.4% { opacity: 0; }
+  2.2% { opacity: calc(var(--noise-o) + .18); }
+  3% { opacity: 0; }
+  3.8% { opacity: calc(var(--noise-o) + .2); }
+  4.6% { opacity: 0; }           /* sinyal hilang, ditahan sampai 95.5% */
+  95.5% { opacity: calc(var(--noise-o) + .2); }
+  96.7% { opacity: 0; }
+  97.8% { opacity: calc(var(--noise-o) + .12); }
+  100% { opacity: var(--noise-o); }
+}
+/* transform (GPU) — bukan background-position — agar tidak memicu repaint layar penuh */
+@keyframes grain {
+  0%, 100% { transform: translate3d(0, 0, 0); } 20% { transform: translate3d(-40px, 30px, 0); }
+  40% { transform: translate3d(30px, -45px, 0); } 60% { transform: translate3d(-30px, -15px, 0); }
+  80% { transform: translate3d(45px, 45px, 0); }
+}
+
+/* Hemat CPU: HANYA animasi infinite berikut yang dijeda saat section-nya di luar layar
+   (lihat main.js). Sengaja tidak memakai selector universal agar animasi sekali-jalan
+   seperti fadeIn/coachIn tidak ikut membeku. */
+.anim-off .logo-row,
+.anim-off .marquee__track,
+.anim-off .footer__big,
+.anim-off .footer__logo,
+.anim-off .tilt__mark,
+.anim-off .tilt__shadow,
+.anim-off .soon__icon .hand,
+.anim-off .hero__scroll i::after,
+.anim-off .layanan__scroll i::after,
+.anim-off .countdown__label::before,
+.anim-off .nav__flag,
+.anim-off .asatidz__note::before,
+.anim-off .day__badge--today::before,
+.anim-off .ustadz__badge--today::before,
+.anim-off .ustadz.is-live .ustadz__body::after,
+.anim-off .day.is-piled.is-today { animation-play-state: paused; }
+

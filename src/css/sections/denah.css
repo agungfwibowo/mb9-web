@@ -1,0 +1,92 @@
+/* ---------- Denah ---------- */
+.denah { background: var(--lime); overflow-x: clip; }
+.denah > .container { position: relative; z-index: 1; }
+.deco--denah { width: clamp(200px, 22vw, 360px); right: 6%; bottom: clamp(20px, 3vw, 44px); }
+.denah .sec-num { color: var(--ink); }
+.denah .sec-sub { color: var(--ink-2); }
+.denah__wrap { position: relative; display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+/* z-index: sticky selalu membuat stacking context sendiri, jadi dropdown
+   Bagikan (z 25) di dalamnya hanya berlaku di dalam panel ini — tanpa ini
+   peta (lebih belakang di DOM) digambar menimpa dropdown yang terbuka ke kanan */
+.denah__side { position: sticky; top: 110px; z-index: 5; display: grid; gap: 18px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--ink); background: var(--white); }
+.seg button { padding: 12px; border: 0; background: transparent; font: 700 13px/1 var(--mono); text-transform: uppercase; cursor: pointer; transition: background .3s, color .3s; }
+.seg button[aria-selected="true"] { background: var(--ink); color: var(--lime); }
+.denah__hint { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 6px 0 -6px; }
+.legend { display: grid; gap: 8px; }
+.chip {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 2px solid var(--ink); background: var(--white); cursor: pointer;
+  font: 600 14px/1.2 var(--sans); text-align: left; transition: transform .3s var(--ease), background .3s, opacity .3s;
+}
+.chip i { width: 18px; height: 18px; flex: none; border: 1.5px solid var(--ink); background: var(--c); }
+.chip em { margin-left: auto; font: 700 12px/1 var(--mono); font-style: normal; color: var(--ink-3); }
+.chip:hover { transform: translateX(4px); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--white); }
+.chip[aria-pressed="true"] em { color: var(--lime); }
+.legend.has-active .chip[aria-pressed="false"] { opacity: .55; }
+/* Mode Gambar Asli: filter tetap tampil, semua kategori tampak aktif, tidak bisa diklik */
+.denah__side.is-img .legend { pointer-events: none; }
+.denah__hint { transition: opacity .3s; }
+.denah__side.is-img .denah__hint { opacity: 0; }
+.denah__side.is-img .chip { cursor: default; }
+.denah__side.is-img .chip[aria-pressed] { background: var(--white); color: var(--ink-2); opacity: 1; box-shadow: none; }
+.denah__side.is-img .chip em { color: var(--ink-3); }
+.denah__stage { position: relative; background: var(--ink); border: 2px solid var(--ink); clip-path: var(--notch); }
+.denah__view { display: none; }
+.denah__view.is-active { display: block; animation: fadeIn .5s var(--ease); }
+@keyframes fadeIn { from { opacity: 0; transform: scale(.98); } }
+.denah__view img { width: 100%; height: auto; }  /* height: auto wajib — atribut height="1350" di HTML akan merentang gambar tanpa ini */
+#denahSvg { width: 100%; height: auto; display: block; }
+#denahSvg .booth { cursor: pointer; transition: opacity .35s, transform .35s var(--ease); transform-box: fill-box; transform-origin: center; }
+#denahSvg .booth rect { stroke: #1d1d1d; stroke-width: 1.5; }
+#denahSvg .booth text { font: 700 17px var(--mono); pointer-events: none; }
+#denahSvg .booth:hover, #denahSvg .booth.is-sel { transform: scale(1.18); }
+#denahSvg .booth.is-sel rect { stroke: var(--white); stroke-width: 3; }
+/* Grup tenant: tenda lain dipudarkan (spotlight) — tetap jelas walau tenda
+   tenant berjauhan; tenda anggota bergaris putih & sedikit membesar.
+   Deretan yang menempel dibingkai putus-putus berjalan (satu per kelompok). */
+/* Saat filter kategori aktif, filter yang menentukan peredupan (lihat is-dim
+   di bawah) — spotlight tidak ikut meredupkan tenda kategori yang difilter. */
+#denahSvg.has-pick:not(.is-filtered) .booth:not(.is-sel):not(.is-mate):not(:hover) { filter: saturate(.15); opacity: .4; }
+#denahSvg .booth.is-mate { transform: scale(1.06); }
+#denahSvg .booth.is-mate rect { stroke: var(--white); stroke-width: 3; }
+#denahSvg .booth-group {
+  fill: rgba(255, 255, 255, .08); stroke: var(--white); stroke-width: 3; stroke-dasharray: 10 6;
+  pointer-events: none; animation: booth-group-march .9s linear infinite;
+}
+@keyframes booth-group-march { to { stroke-dashoffset: -16; } }
+/* tenda tenant terpilih tetap terang walau di luar kategori yang difilter */
+#denahSvg.is-filtered .booth.is-dim:not(.is-sel):not(.is-mate) { opacity: .14; }
+#denahSvg .label { font: 700 18px var(--mono); fill: var(--ink); pointer-events: none; }
+.denah-coach {
+  position: absolute; z-index: 6; left: 50%; top: 18px; transform: translateX(-50%);
+  width: min(300px, calc(100% - 28px)); padding: 16px; background: var(--lime); color: var(--ink);
+  clip-path: var(--notch); box-shadow: 0 14px 30px rgba(0, 0, 0, .35);
+  animation: coachIn .45s var(--ease) both;
+}
+@keyframes coachIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
+.denah-coach p { margin: 0 0 12px; font-size: 13.5px; line-height: 1.5; }
+.denah-coach__ok {
+  width: 100%; padding: 9px 12px; border: 0; background: var(--ink); color: var(--lime);
+  font: 700 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.denah-coach__ok:hover { background: var(--white); color: var(--ink); }
+/* z-index 4: di atas peta, tapi di BAWAH .denah__side (z 5) — popover
+   Bagikan di panel samping harus menutupi tooltip, bukan sebaliknya. */
+.booth-tip {
+  position: absolute; z-index: 4; pointer-events: none; padding: 8px 12px; background: var(--white); color: var(--ink); border: 2px solid var(--ink);
+  font: 700 13px/1.3 var(--mono); white-space: nowrap; opacity: 0; transform: translate(-50%, -130%); transition: opacity .2s;
+}
+.booth-tip.is-on { opacity: 1; }
+.booth-tip.is-below { transform: translate(-50%, 30%); }
+/* Tombol bagikan lokasi tenda terpilih — di panel samping denah (sticky di
+   desktop, tepat di bawah peta di HP), jadi tidak pernah menutupi tenda.
+   Bukan di dalam tooltip: di desktop tooltip mengikuti hover dan akan
+   berpindah ke tenda lain saat kursor bergerak menuju tombolnya. */
+.denah-share { --bg: var(--lime); --fg: var(--ink); --edge: var(--ink); width: 100%; min-width: 0; justify-content: center; }
+.denah-share > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* isian hover .btn bawaannya lime — di atas latar lime tidak terlihat */
+.denah-share::before { background: var(--white); }
+.denah-share[hidden] { display: none; }
+

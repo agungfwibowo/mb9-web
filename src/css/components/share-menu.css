@@ -1,0 +1,84 @@
+/* ---------- Menu Bagikan (Jadwal & Denah) ----------
+   QR berlogo di atas, lalu jejaring sosial & aksi. Pembungkus .share
+   menjadi patokan posisi dropdown-nya. */
+/* min-width: 0 — sebagai item grid, lebarnya mengikuti teks nowrap di tombol
+   (nama tenant panjang) dan seluruh panel samping denah ikut melebar menimpa peta */
+.share { position: relative; min-width: 0; }
+.share:has(> .denah-share[hidden]) { display: none; } /* tanpa celah grid saat tombolnya tersembunyi */
+.share-pop {
+  /* ditempel ke <body>, posisi (top/left) diisi main.js dari letak tombolnya */
+  position: fixed; top: 0; left: 0; z-index: 8500;
+  width: min(300px, calc(100vw - 2 * var(--gutter)));
+  padding: 14px;
+  background: var(--white); color: var(--ink); border: 3px solid var(--ink); clip-path: var(--notch);
+}
+.share-pop[hidden] { display: none; }
+/* Modal (logo footer): kartu yang sama di tengah layar + latar gelap */
+.share-shade { position: fixed; inset: 0; z-index: 9100; background: rgba(20, 20, 20, .72); animation: fadeIn .2s; }
+.share-shade[hidden] { display: none; }
+.share-pop--modal { padding-top: 46px; z-index: 9110; } /* di atas nav (9000) */
+.share-pop__x {
+  position: absolute; top: 8px; right: 22px; width: 32px; height: 32px; display: grid; place-items: center;
+  border: 2px solid var(--ink); background: var(--white); color: var(--ink); font: 700 14px/1 var(--mono); cursor: pointer;
+}
+.share-pop__x:hover, .share-pop__x:focus-visible { background: var(--lime); }
+/* isi yang digulir (bukan .share-pop-nya: garis diagonal ::after meluber 3px
+   dan akan memunculkan scrollbar). max-height diisi main.js saat ruang sempit. */
+.share-pop__body { display: grid; gap: 10px; overflow-y: auto; overscroll-behavior: contain; }
+.share-pop__qr { justify-self: center; width: 168px; height: 168px; }
+.share-pop__cap { margin: -4px 0 0; text-align: center; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.share-pop__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.share-pop__opt {
+  /* tinggi seragam: label 2 baris (Salin tautan) ↔ 1 baris (Tersalin ✓)
+     tidak lagi mengubah tinggi dropdown */
+  display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 48px; padding: 8px 10px;
+  background: var(--white); color: var(--ink); border: 2px solid var(--ink);
+  font: 700 11.5px/1.1 var(--mono); text-transform: uppercase; letter-spacing: .04em; text-align: left;
+  text-decoration: none; cursor: pointer; transition: background .2s;
+}
+.share-pop__opt:hover, .share-pop__opt:focus-visible { background: var(--lime); }
+/* Unduh (link utama) → tooltip 2 pilihan: QR saja / Poster A4, muncul di atas tombol */
+.share-pop__dl { position: relative; display: grid; }
+.share-pop__dl > .share-pop__opt[aria-expanded="true"] { background: var(--ink); color: var(--lime); }
+.share-pop__sub { position: absolute; z-index: 3; left: 0; right: 0; bottom: calc(100% + 8px); display: grid; background: var(--white); border: 2px solid var(--ink); box-shadow: 0 8px 18px rgba(0, 0, 0, .18); }
+.share-pop__sub[hidden] { display: none; }
+.share-pop__sub::after { content: ""; position: absolute; left: 50%; top: 100%; width: 10px; height: 10px; background: var(--white); border: 2px solid var(--ink); border-top: 0; border-left: 0; transform: translate(-50%, -4px) rotate(45deg); }
+.share-pop__sub button { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; border: 0; background: var(--white); color: var(--ink); font: 700 11.5px/1.1 var(--mono); text-transform: uppercase; letter-spacing: .04em; text-align: left; cursor: pointer; transition: background .2s; }
+.share-pop__sub button + button { border-top: 1px solid var(--grey-2); }
+.share-pop__sub button:hover, .share-pop__sub button:focus-visible { background: var(--lime); }
+.share-pop__sub small { font: 400 10px/1 var(--mono); color: var(--ink-3); }
+.share-pop__opt svg { flex: none; width: 16px; height: 16px; fill: currentColor; }
+.share-pop__opt svg.is-line { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.share-pop__opt--wide { grid-column: 1 / -1; justify-content: center; }
+/* umpan balik di dalam tombol (Tersalin ✓ / Terunduh ✓) */
+.share-pop__opt.is-done { background: var(--lime); }
+/* kartu berlogo: logo tenant + nomor/kategori + nama */
+.booth-tip.has-logo { display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; }
+.booth-tip__logo { flex: none; width: 52px; height: 52px; padding: 4px; display: grid; place-items: center; background: var(--white); border: 1px solid var(--grey-2); }
+.booth-tip__logo.is-dark { background: var(--ink); border-color: var(--ink); }
+.booth-tip__logo img { width: 100%; height: 100%; object-fit: contain; }
+.booth-tip__logo.is-icon .jico { width: 28px; height: 28px; margin: 0; fill: none; stroke: var(--blue); stroke-width: 1.8; }
+.booth-tip__hrs { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--ink-2); }
+.booth-tip__hrs a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--grey-2); }
+.booth-tip__hrs a:hover, .booth-tip__hrs a:focus-visible { background: var(--lime); text-decoration: none; }
+.booth-tip__hrs em { font-style: normal; padding: 2px 6px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+.booth-tip__hrs .is-open { background: var(--lime); color: var(--ink); }
+.booth-tip__hrs .is-closed { background: var(--ink-3); color: var(--white); }
+.booth-tip__hrs .is-wait { background: var(--white); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--grey-2); }
+.booth-tip__txt { display: grid; gap: 3px; min-width: 0; }
+/* selebar isinya (satu baris), tapi maks. selebar layar browser (sisa 16px tiap
+   sisi) — hanya nama yang terlalu panjang yang turun baris, per kata */
+.booth-tip.has-logo { width: max-content; max-width: calc(100vw - 32px); white-space: normal; }
+.booth-tip__txt small { white-space: nowrap; }
+.booth-tip__txt b { overflow-wrap: break-word; }
+.booth-tip__hrs { white-space: nowrap; }
+.booth-tip__txt small { font: 700 11px/1.2 var(--mono); color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; }
+.booth-tip__txt b { font: 700 14px/1.25 var(--mono); }
+/* Tooltip tenda terpilih yang punya tautan: bisa diklik. ::after menjembatani
+   celah antara tooltip dan tenda supaya kursor tidak "jatuh" ke tenda lain. */
+.booth-tip.is-on.is-live { pointer-events: auto; }
+.booth-tip.is-live::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 32%; }
+.booth-tip.is-below.is-live::after { top: auto; bottom: 100%; }
+.booth-tip__link { justify-self: start; margin-top: 2px; font: 700 12px/1.2 var(--mono); color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.booth-tip__link:hover, .booth-tip__link:focus-visible { background: var(--lime); text-decoration: none; }
+

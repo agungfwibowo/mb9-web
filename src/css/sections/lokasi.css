@@ -1,0 +1,22 @@
+/* ---------- Lokasi (full-bleed map + floating card) ---------- */
+.lokasi { position: relative; background: var(--paper); border-block: 6px solid var(--ink); }
+.lokasi__map { --crop: 230px; position: relative; overflow: hidden; height: clamp(520px, 70vh, 720px); background: var(--grey-2); }
+/* iframe diperbesar & digeser ke atas → kartu info bawaan Google (pojok kiri atas) terpotong; atribusi bawah tetap tampil */
+.lokasi__map iframe { pointer-events: none; position: absolute; left: 0; top: calc(var(--crop) * -1); display: block; width: 100%; height: calc(100% + var(--crop)); border: 0; filter: grayscale(1) contrast(1.05); transition: filter .6s var(--ease); }
+.lokasi__map:hover iframe { filter: grayscale(.2); }
+/* Desktop: geser pusat peta (pin) ke kanan agar tidak tertutup kartu di kiri */
+@media (min-width: 861px) { .lokasi__map { --shift: 240px; } .lokasi__map iframe { width: calc(100% + var(--shift) * 2); } }
+.lokasi__overlay { position: absolute; inset: 0; display: flex; align-items: center; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); pointer-events: none; }
+.loc-card { width: min(100%, 440px); background: var(--ink-2); color: var(--white); box-shadow: 10px 10px 0 var(--lime); pointer-events: auto; }
+.loc-card__head { padding: 14px 24px; background: var(--lime); color: var(--ink); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+.loc-card__body { padding: 28px 26px 26px; }
+/* font sama dengan judul section lain (h2.title) — Roboto Mono, bukan Public Sans (body) */
+.loc-card__title { font: 700 clamp(24px, 2.4vw, 30px)/1.12 var(--mono); text-transform: uppercase; letter-spacing: -.02em; margin-bottom: 12px; }
+.loc-card__addr { color: var(--grey-2); font-size: 15px; margin-bottom: 26px; }
+.loc-card__rows { margin: 0 0 28px; }
+.loc-card__rows div { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid #4a4a4a; }
+.loc-card__rows div:last-child { border-bottom: 1px solid #4a4a4a; }
+.loc-card__rows dt { color: var(--grey-2); font-size: 14px; }
+.loc-card__rows dd { margin: 0; font-weight: 700; font-size: 15px; text-align: right; }
+.loc-card__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+

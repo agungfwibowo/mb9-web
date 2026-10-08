@@ -1,0 +1,51 @@
+/* ---------- Layanan (pinned horizontal) ---------- */
+.layanan { background: var(--ink); color: var(--white); position: relative; overflow: hidden; }
+.layanan::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px); background-size: 64px 64px; background-position: calc(50% + 32px) 0; pointer-events: none; }
+/* Section ini di-pin: selama pin aktif isinya TIDAK bisa di-scroll vertikal,
+   dan .layanan memotong luapannya (overflow: hidden). Karena itu semua ukuran
+   vertikalnya harus ikut tinggi layar, bukan angka tetap — kalau tidak, di
+   jendela yang lebih pendek dari ~1000px kartunya terpotong di bawah.
+   padding atas minimal 84px agar judul tidak tertutup nav yang fixed. */
+.layanan__pin { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: clamp(84px, 9vh, 120px) 0 clamp(40px, 6vh, 90px); position: relative; }
+.layanan__head { margin-bottom: min(48px, 5vh); }
+.layanan__head .title { font-size: clamp(24px, min(5vw, 5.5vh), 60px); }
+.layanan__head .sec-num { color: var(--lime); }
+.layanan__head .sec-sub { color: var(--grey-2); }
+.layanan__track { display: flex; justify-content: center; gap: 24px; padding: 0 var(--gutter); width: max-content; min-width: 100%; will-change: transform; }
+.lcard {
+  position: relative; width: min(84vw, 460px); min-height: min(420px, 42vh); padding: 34px; background: var(--ink-2); border: var(--bw) solid var(--edge);
+  display: flex; flex-direction: column; clip-path: var(--notch); transition: background .4s var(--ease), color .4s, --edge .4s, transform .5s var(--ease), filter .5s var(--ease);
+}
+.lcard:hover { background: var(--lime); color: var(--ink); }
+.lcard__num { font: 700 13px/1 var(--mono); color: var(--lime); margin-bottom: auto; }
+/* isi kartu layanan rata atas → ikon sejajar walau panjang daftarnya beda;
+   kartu ajakan (CTA) tetap rata bawah */
+.lcard:not(.lcard--cta) .lcard__num { margin-bottom: 0; }
+.lcard:hover .lcard__num, .lcard.is-active .lcard__num { color: var(--blue); }
+.lcard__icon { width: 64px; height: 64px; margin: 30px 0 22px; display: grid; place-items: center; background: var(--lime); color: var(--ink); transition: background .4s, color .4s, transform .6s var(--ease); }
+.lcard:hover .lcard__icon, .lcard.is-active .lcard__icon { background: var(--ink); color: var(--lime); transform: rotate(-8deg); }
+.lcard__icon svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 2; }
+.lcard h3 { font: 700 clamp(22px, 2.4vw, 28px)/1.15 var(--mono); text-transform: uppercase; margin-bottom: 20px; }
+.lcard ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.lcard li { position: relative; padding-left: 26px; font-size: 16px; line-height: 1.4; }
+.lcard li::before { content: ''; position: absolute; left: 0; top: 5px; width: 12px; height: 12px; background: var(--lime); clip-path: polygon(0 0, 100% 50%, 0 100%); transition: background .4s; }
+.lcard:hover li::before, .lcard.is-active li::before { background: var(--blue); }
+/* butir yang acaranya ada hari ini → tautan (href dipasang asatidz.js);
+   tanpa href tampil sebagai teks biasa */
+.lcard__go { color: inherit; text-decoration: none; }
+/* jarak ke label ada di teks (bukan di label) → label yang turun baris tetap rata kiri */
+.lcard__go[href] { margin-right: 8px; text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.lcard__go[href]:hover, .lcard__go[href]:focus-visible { text-decoration-style: solid; }
+/* label status (Buka/Tutup/…) di belakang tautan; "Buka" lime ditukar saat kartu
+   lime (hover/aktif) supaya tidak hilang di latar yang sama */
+.lcard li .jopen { vertical-align: 2px; padding: 2px 7px; font-size: 10px; }
+.lcard li .jopen::before { display: none; } /* tanpa titik di kartu layanan */
+.lcard:hover li .jopen.is-open, .lcard.is-active li .jopen.is-open { background: var(--ink); color: var(--lime); }
+.lcard p { margin: 0; font-size: 16px; }
+.lcard p b { color: var(--lime); transition: color .4s; }
+.lcard:hover p b, .lcard.is-active p b { color: var(--ink); }
+.lcard__free { position: absolute; top: 28px; right: 28px; font: 700 12px/1 var(--mono); padding: 6px 9px; background: var(--white); color: var(--ink); letter-spacing: .08em; }
+.lcard--cta { background: var(--lime); color: var(--ink); justify-content: flex-end; }
+.lcard--cta h3 { font-size: clamp(28px, 3vw, 40px); }
+.lcard--cta:hover, .lcard--cta.is-active { background: var(--white); }
+
