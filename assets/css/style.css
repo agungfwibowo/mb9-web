@@ -134,11 +134,13 @@ p { margin: 0 0 1em; }
 .anim-off .tilt__shadow,
 .anim-off .soon__icon .hand,
 .anim-off .hero__scroll i::after,
+.anim-off .layanan__scroll i::after,
 .anim-off .countdown__label::before,
 .anim-off .nav__flag,
 .anim-off .asatidz__note::before,
 .anim-off .day__badge--today::before,
 .anim-off .ustadz__badge--today::before,
+.anim-off .ustadz.is-live .ustadz__body::after,
 .anim-off .day.is-piled.is-today { animation-play-state: paused; }
 
 /* ---------- Scroll progress ---------- */
@@ -357,8 +359,11 @@ html:not(.js) .preloader { display: none; }
 .mmenu__home:focus-visible { outline-offset: 4px; }
 .mmenu__logo { display: block; width: clamp(76px, 20vw, 104px); height: auto; animation: mark-float 2.8s ease-in-out infinite alternate; }
 /* baris tanggal/lokasi di kaki menu — sekarang tautan ke seksi jadwal */
-.mmenu__meta { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 700; line-height: 1.5; margin: 0; padding: 14px 16px; background: var(--ink); color: var(--lime); text-decoration: none; border: var(--bw) solid var(--ink); clip-path: var(--notch); position: relative; transition: background .25s, color .25s; }
+.mmenu__meta { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; line-height: 1.5; margin: 0; padding: 14px 16px; background: var(--ink); color: var(--lime); text-decoration: none; border: var(--bw) solid var(--ink); clip-path: var(--notch); position: relative; transition: background .25s, color .25s; }
 .mmenu__meta::before { content: ''; flex: none; width: 10px; height: 10px; background: currentColor; animation: blink 1s steps(2) infinite; }
+/* tanggal + lokasi dibungkus satu span: tanpa itu flex memecahnya jadi dua kolom
+   yang terlipat sendiri-sendiri; tanggal tidak boleh terpotong di tengah */
+.mmenu__meta [data-mb9="menuDates"] { white-space: nowrap; }
 .mmenu__meta:hover, .mmenu__meta:focus-visible { background: var(--lime); color: var(--ink); }
 
 /* ---------- Blur-up ---------- */
@@ -510,6 +515,7 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .hero__scroll { position: absolute; right: var(--gutter); bottom: 150px; z-index: 2; display: grid; justify-items: center; gap: 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .2em; text-decoration: none; writing-mode: vertical-rl; }
 .hero__scroll i { width: 2px; height: 60px; background: var(--grey-2); position: relative; overflow: hidden; }
 .hero__scroll i::after { content: ''; position: absolute; inset: 0; background: var(--ink); animation: scrollline 1.8s var(--ease) infinite; }
+.layanan__scroll { display: none; }
 @keyframes scrollline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
 
 /* ---------- Marquee ---------- */
@@ -710,12 +716,14 @@ html.snap-hero .hero { scroll-snap-align: start; }
 /* clip horizontal saja — badge yang menjorok ke atas (top:-11px) tetap utuh */
 .day { clip-path: inset(-26px 0 0 0); }
 /* transisi baru aktif setelah layout pertama, supaya tidak ada animasi saat load */
-.days.is-ready .day { transition: background .3s, flex-basis .3s cubic-bezier(.22, .9, .24, 1); }
+/* warna teks ikut ditransisikan bersama latar: kalau teks berganti seketika
+   sementara latar masih memudar, tab aktif sempat "kedip" (putih di atas putih) */
+.days.is-ready .day { transition: background .3s, color .3s, flex-basis .3s cubic-bezier(.22, .9, .24, 1); }
 /* label menghilang cepat tanpa jeda, lalu muncul hanya setelah lebar kartu
    selesai bergerak — supaya tidak ada teks terpotong di tengah transisi */
-.days.is-ready .day > * { transition: opacity .1s linear; }
+.days.is-ready .day > * { transition: opacity .1s linear, color .3s; }
 .days.is-ready .day.is-piled .day__edge,
-.days.is-ready .day:not(.is-piled) > *:not(.day__edge) { transition: opacity .14s linear .17s; }
+.days.is-ready .day:not(.is-piled) > *:not(.day__edge) { transition: opacity .14s linear .17s, color .3s; }
 
 /* Tumpuk: kartu yang muat tampil normal, sisanya diciutkan jadi strip tipis
    yang menumpuk di kiri dan/atau kanan (kelas .is-piled diatur di JS). */
@@ -863,7 +871,7 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .jdur .jcard.is-live.is-pink:not(.is-piled):hover, .jdur .jcard.is-live.is-pink:hover .jstop time { background: #fdeef5; }
 .jdur .jcard.is-live .jstop time { background: #edf1ff; }
 .jdur .jcard.is-live.is-pink .jstop time { background: #fdeef5; }
-@media (prefers-reduced-motion: reduce) { .ustadz > .jlive, .ustadz > .jlive .ustadz__go, .ustadz > .jlive::before, .jrow.is-live::after, .jdur .jcard.is-live .jstop i, .jdur .jcard.is-piled.is-live .jcard__edge i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ustadz > .jlive .ustadz__go, .ustadz > .jlive::before, .jrow.is-live::after, .jdur .jcard.is-live .jstop i, .jdur .jcard.is-piled.is-live .jcard__edge i { animation: none; } }
 /* Tabel: acara yang berjalan bersamaan (field group di data-prod.js) → garis biru kiri */
 /* latar putih (abu-abu khusus untuk acara yang sudah lewat) — paralel cukup ditandai garis biru */
 .jrow.is-grp { box-shadow: inset 4px 0 0 var(--blue); }
@@ -1104,6 +1112,28 @@ html.snap-hero .hero { scroll-snap-align: start; }
 /* min-height = padding + nama 2 baris + peran → kotak nama sama tinggi, teks rata atas */
 .ustadz__body { position: relative; min-height: 85px; padding: 16px; background: var(--ink); color: var(--white); box-shadow: inset 1px 0 0 rgba(255, 255, 255, .22); }
 .ustadz__body h3 { font: 700 15px/1.25 var(--mono); }
+/* tab ikon mic di atas nama (kiri): ::before = kotak, warnanya ikut latar body
+   (hitam/biru/pink); ::after = ikon (path "mic" dari JICONS, putih lewat data URI),
+   terpisah supaya hanya ikonnya yang berdenyut saat kartu "Berlangsung" */
+.ustadz:not(.ustadz--soon) .ustadz__body::before,
+.ustadz:not(.ustadz--soon) .ustadz__body::after { content: ''; position: absolute; left: 16px; bottom: 100%; width: 34px; height: 34px; }
+.ustadz:not(.ustadz--soon) .ustadz__body::before { background: inherit; }
+.ustadz:not(.ustadz--soon) .ustadz__body::after { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3M8 21h8'/%3E%3C/svg%3E") center / 18px no-repeat; }
+/* denyut "ngebeat" seperti orang bicara: dug-dug, jeda, lalu tiga ketukan tak
+   seragam, jeda lagi — satu putaran 2,4 dtk */
+.ustadz.is-live .ustadz__body::after { animation: mic-beat 2.4s ease-out infinite; }
+@keyframes mic-beat {
+  0%, 26%, 48%, 84%, 100% { transform: scale(1); }
+  6%  { transform: scale(1.3); }
+  12% { transform: scale(.95); }
+  18% { transform: scale(1.18); }
+  54% { transform: scale(1.32); }
+  60% { transform: scale(.94); }
+  66% { transform: scale(1.14); }
+  72% { transform: scale(.97); }
+  78% { transform: scale(1.24); }
+}
+@media (prefers-reduced-motion: reduce) { .ustadz.is-live .ustadz__body::after { animation: none; } }
 .ustadz__body small { display: block; color: var(--lime); font: 12px/1.25 var(--mono); }
 /* Kajiannya sedang berlangsung (markAsatidzLive di main.js) */
 /* dibuka dari nama di jadwal: kotak nama berkedip lime (teks jadi gelap) */
@@ -1132,10 +1162,9 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .ustadz__badge:hover .ustadz__go, .ustadz__badge:focus-visible .ustadz__go { transform: translateX(3px); }
 /* denyut di titik badge (cincin di luar badge terpotong tepi kartu) */
 .ustadz > .jlive::before { width: 8px; height: 8px; animation: dot-pulse 1.2s ease-out infinite; }
-/* latar badge Berlangsung: kilau terang menyapu kiri → kanan */
-.ustadz > .jlive { background: linear-gradient(100deg, var(--blue) 35%, #5a80ff 50%, var(--blue) 65%) 100% 0 / 260% 100%; animation: badge-shine 2.4s linear infinite; }
-.ustadz.is-pink > .jlive { background-image: linear-gradient(100deg, var(--pink) 35%, #f37ab8 50%, var(--pink) 65%); }
-@keyframes badge-shine { to { background-position: -160% 0; } }
+/* latar badge Berlangsung: polos (kilau berjalan dihapus — denyut sudah ada di ikon mic) */
+.ustadz > .jlive { background: var(--blue); }
+.ustadz.is-pink > .jlive { background: var(--pink); }
 /* panah badge Berlangsung bergerak maju-mundur → mengajak membuka jadwal */
 .ustadz > .jlive .ustadz__go { animation: go-nudge 1.2s ease-in-out infinite; }
 @keyframes go-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
@@ -1545,7 +1574,11 @@ html.snap-hero .hero { scroll-snap-align: start; }
   /* HP/tablet: foto selebar layar penuh, rasio lebih lebar agar tidak terlalu tinggi */
   .tema__media { margin-right: calc(var(--gutter) * -1); }
   .tema__media .img-reveal { aspect-ratio: 2 / 1; }
-  .lokasi__map { --crop: 170px; height: 440px; }
+  /* peta HP dipendekkan: iframe tetap setinggi semula (610px) supaya kotak info
+     Google tetap terpotong, lalu digeser agar pin (di tengah iframe) jatuh di
+     ±120px — tengah area yang tidak tertutup kartu lokasi (margin-top: -60px) */
+  .lokasi__map { height: 300px; }
+  .lokasi__map iframe { height: 610px; top: -185px; }
   .lokasi__overlay { position: static; padding: 0 var(--gutter); margin-top: -60px; position: relative; }
   .loc-card { margin: 0 auto 36px; width: 100%; box-shadow: 6px 6px 0 var(--lime); }
     .deco--zigzag { right: -2%; width: 24%; }
@@ -1570,6 +1603,11 @@ html.snap-hero .hero { scroll-snap-align: start; }
   .layanan__head { margin-bottom: 3vh; }
   .deco--blocks { width: 64px; left: 12%; bottom: calc(100% + 10px); }
   .layanan__head .sec-num { margin-bottom: 10px; }
+  /* petunjuk scroll HP: tengah bawah di bawah kartu; meniru .hero__scroll */
+  .layanan__pin { padding-bottom: calc(2vh + 28px); }
+  .layanan__scroll { position: absolute; left: 50%; bottom: 1.2vh; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--grey-2); }
+  .layanan__scroll i { width: 2px; height: 20px; background: rgba(255, 255, 255, .2); position: relative; overflow: hidden; }
+  .layanan__scroll i::after { content: ''; position: absolute; inset: 0; background: var(--lime); animation: scrollline 1.8s var(--ease) infinite; }
   .layanan__head .title { font-size: clamp(24px, min(7vw, 4.4vh), 34px); }
   .layanan__head .sec-sub { margin-top: 10px; font-size: 14.5px; line-height: 1.5; }
   .layanan__track { gap: 14px; }
@@ -1594,6 +1632,8 @@ html.snap-hero .hero { scroll-snap-align: start; }
   /* aspect-ratio 3/4 → tinggi = basis x 1.33; 34vh menahannya di ~45vh */
   .asatidz__grid > .ustadz { flex: 0 0 min(62vw, 34vh); min-width: 0; } /* HP: ukuran tetap, digeser */
   .ustadz__body { padding: 12px; min-height: 73px; }
+  .ustadz:not(.ustadz--soon) .ustadz__body::before, .ustadz:not(.ustadz--soon) .ustadz__body::after { left: 12px; width: 28px; height: 28px; }
+  .ustadz:not(.ustadz--soon) .ustadz__body::after { background-size: 15px; }
   .ustadz__body h3 { font-size: 14px; }
   .ustadz__body small { font-size: 11px; }
   .ustadz--soon .q { width: 30px; height: 30px; top: 10px; right: 10px; font-size: 16px; }
@@ -1900,7 +1940,7 @@ img.lazy-img.is-loaded.is-seen { opacity: 1; translate: none; }
   .mmenu__home { grid-column: 2; grid-row: 1; }
   .mmenu__logo { width: clamp(48px, 14vh, 72px); }
   .hero { min-height: 0; padding: 24px 0 24px; }
-  .hero__scroll { display: none; }
+  .hero__scroll, .layanan__scroll { display: none; }
 
   .layanan__pin, .asatidz__pin { min-height: 0; padding: 28px 0; }
   .layanan__head, .asatidz .sec-head { margin-bottom: 16px; }
