@@ -52,6 +52,10 @@ window.MB9 = {
      ada jadwal hari ini ditaruh paling kanan. */
   asatidz: [],
 
+  /* LAYANAN — butir (items) yang acaranya ada di JADWAL otomatis jadi tautan ke
+     sesi terdekat yang belum selesai (hari ini, atau hari berikutnya), dicocokkan lewat kata pertama butir ("Bekam (Khusus Ikhwan)" ↔ "Bekam").
+     Kalau kata pertamanya tidak cocok, tulis sebagai objek dengan kata kunci sendiri:
+     { text: 'Cek Gula Darah', cari: 'pemeriksaan' } */
   layanan: [
     {
       title: 'Layanan Medis & Kesehatan',
