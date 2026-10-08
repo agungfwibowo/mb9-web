@@ -717,14 +717,16 @@ html.snap-hero .hero { scroll-snap-align: start; }
 /* clip horizontal saja — badge yang menjorok ke atas (top:-11px) tetap utuh */
 .day { clip-path: inset(-26px 0 0 0); }
 /* transisi baru aktif setelah layout pertama, supaya tidak ada animasi saat load */
-/* warna teks ikut ditransisikan bersama latar: kalau teks berganti seketika
-   sementara latar masih memudar, tab aktif sempat "kedip" (putih di atas putih) */
-.days.is-ready .day { transition: background .3s, color .3s, flex-basis .3s cubic-bezier(.22, .9, .24, 1); }
+/* warna tab (latar & teks) berganti SEKETIKA, tidak ditransisikan: kalau latar
+   putih→hitam dan teks hitam→putih memudar bersamaan, di tengah jalan keduanya
+   sama-sama abu → tulisan sempat hilang ("ngeblink"); kalau hanya latar yang
+   memudar, teks putih sempat di atas latar putih. Hanya lebar yang dianimasikan. */
+.days.is-ready .day { transition: flex-basis .3s cubic-bezier(.22, .9, .24, 1); }
 /* label menghilang cepat tanpa jeda, lalu muncul hanya setelah lebar kartu
    selesai bergerak — supaya tidak ada teks terpotong di tengah transisi */
-.days.is-ready .day > * { transition: opacity .1s linear, color .3s; }
+.days.is-ready .day > * { transition: opacity .1s linear; }
 .days.is-ready .day.is-piled .day__edge,
-.days.is-ready .day:not(.is-piled) > *:not(.day__edge) { transition: opacity .14s linear .17s, color .3s; }
+.days.is-ready .day:not(.is-piled) > *:not(.day__edge) { transition: opacity .14s linear .17s; }
 
 /* Tumpuk: kartu yang muat tampil normal, sisanya diciutkan jadi strip tipis
    yang menumpuk di kiri dan/atau kanan (kelas .is-piled diatur di JS). */
@@ -768,7 +770,7 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .day.is-piled[aria-selected="true"]::after { width: 10px; height: 10px; } /* segitiga sudut diperkecil di strip */
 .day {
   position: relative; padding: 18px 16px; text-align: left; background: var(--white); border: 2px solid var(--ink); cursor: pointer;
-  display: grid; gap: 4px; transition: background .3s;
+  display: grid; gap: 4px;
 }
 .day small { font: 700 11px/1 var(--mono); color: var(--blue); letter-spacing: .1em; text-transform: uppercase; }
 .day b { font: 700 clamp(17px, 2vw, 24px)/1.1 var(--mono); text-transform: uppercase; }
