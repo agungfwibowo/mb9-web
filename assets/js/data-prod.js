@@ -40,6 +40,11 @@ window.MB9 = {
      biru di kiri. Dipilih manual (kurasi), bukan dihitung dari jam.
      order (opsional): paksa urutan di Tabel tanpa memindah baris. Angka kecil
      tampil duluan; tanpa order = 0. Tampilan Durasi tetap diurut menurut jam.
+     tenda (opsional): nomor tenda yang dipakai acara itu PADA HARI ITU, mis.
+       tenda: 5 (atau [5, 6]) → tautan "Tenda 05" ke denah, dan tooltip tenda 05
+       menampilkan acara + jamnya. Tenda layanan boleh bergantian: Donor Darah di
+       tenda 05 hari ke-1, acara lain di tenda 05 hari ke-3. Tenda tenant tetap
+       memakai placements (tenda: 'Nama Tenant' atau judul = nama tenant).
      Selama kosong, tab hari menampilkan status "InsyaAllah menyusul". */
   jadwal: {
     d1: [], d2: [], d3: [], d4: [], d5: [],

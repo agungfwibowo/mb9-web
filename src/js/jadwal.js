@@ -110,20 +110,37 @@ const pinkCls = (r) => (r.akhwat ? ' is-pink' : '');
 const ustadzById = Object.fromEntries((D.asatidz || []).filter((u) => u.id).map((u) => [u.id, u.name]));
 // id pengisi di elemen jadwal → badge asatidz bisa menemukan acaranya
 const ustAttr = (r) => (r.ustadz ? ` data-ustadz="${esc([].concat(r.ustadz).join(' '))}"` : '');
-// Tenda acara di denah: nama pemilik tenda (D.placements) = r.tenda, atau
-// judul acara yang sama persis (mis. "Donor Darah") → label "Tenda 33".
+// Tenda acara di denah, dua cara:
+// • `tenda: 5` (nomor, atau [5, 6]) — tenda yang dipakai acara itu PADA HARINYA.
+//   Untuk tenda layanan yang bisa bergantian: Donor Darah di tenda 05 hari ke-1,
+//   acara lain di tenda yang sama hari ke-3. Tidak perlu masuk D.placements.
+// • nama pemilik tenda (D.placements) = r.tenda, atau judul acara yang sama
+//   persis (mis. "Rasyaad TV") — tenant, tendanya tetap sepanjang acara.
+const p2 = (n) => String(n).padStart(2, '0');
 const tendaOf = {};
+const boothNos = {}; // nama pemilik → nomor tenda
 (D.placements || []).forEach(([name, from, to = from]) => {
-  const p2 = (n) => String(n).padStart(2, '0');
   (tendaOf[name] = tendaOf[name] || []).push(from === to ? p2(from) : `${p2(from)}–${p2(to)}`);
+  for (let n = from; n <= to; n++) (boothNos[name] = boothNos[name] || []).push(n);
 });
-export const tendaName = (r) => (r.tenda && tendaOf[r.tenda] ? r.tenda : tendaOf[r.title] ? r.title : null);
+const tendaNums = (r) => (typeof r.tenda === 'number' || Array.isArray(r.tenda) ? [].concat(r.tenda).map(Number) : null);
+export const tendaName = (r) => (tendaNums(r) ? null : r.tenda && tendaOf[r.tenda] ? r.tenda : tendaOf[r.title] ? r.title : null);
+// Semua nomor tenda yang dipakai acara r ([] bila tanpa tenda)
+export const tendaNos = (r) => tendaNums(r) || (tendaName(r) ? boothNos[tendaName(r)] : []);
+// Tautan "Tenda xx" ke denah: tenant → tendanya dipilih (data-tenant-link),
+// nomor → tenda itu (data-booth-link)
+const tendaLink = (r) => {
+  const nums = tendaNums(r);
+  if (nums) return nums.length ? `<a href="#denah" class="jnote-ust" data-booth-link="${nums[0]}" data-cursor="Lokasi">Tenda ${nums.map(p2).join(', ')}</a>` : '';
+  const name = tendaName(r);
+  return name ? `<a href="#denah" class="jnote-ust" data-tenant-link="${esc(name)}" data-cursor="Lokasi">Tenda ${tendaOf[name].join(', ')}</a>` : '';
+};
 // versi HTML: nama asatidz jadi tautan ke kartunya di section Asatidz,
 // tenda jadi tautan ke denah (tendanya dipilih — handler data-tenant-link)
 const noteHtml = (r) => [
   [].concat(r.ustadz || []).filter((id) => ustadzById[id]).map((id) => `<a href="#asatidz" class="jnote-ust" data-ust="${esc(id)}">${esc(ustadzById[id])}</a>`).join(' &amp; '),
   r.note ? esc(r.note) : '',
-  tendaName(r) ? `<a href="#denah" class="jnote-ust" data-tenant-link="${esc(tendaName(r))}" data-cursor="Lokasi">Tenda ${tendaOf[tendaName(r)].join(', ')}</a>` : '',
+  tendaLink(r),
 ].filter(Boolean).join(' · ');
 const noteOf = (r) => [[].concat(r.ustadz || []).map((id) => ustadzById[id]).filter(Boolean).join(' & '), r.note]
   .filter(Boolean).join(' · ');

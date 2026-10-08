@@ -89,20 +89,22 @@
   //   { time: '16.30 - 18.00', title: 'Penutupan Acara' },
   // ];
 
-  // Layanan di tenda (uji): tenda contoh dikosongkan dari tenant lalu diisi
-  // layanan. Nama sama dengan judul jadwal → baris jadwal mendapat tautan
-  // "Tenda xx" & tooltip tenda di denah menampilkan jam buka hari ini.
-  const SERVICE_AT = {
+  // Layanan di tenda (uji): tenda 01–05 dikosongkan dari tenant, lalu baris
+  // jadwal layanan diberi `tenda: <nomor>` → baris jadwal mendapat tautan
+  // "Tenda xx" & tooltip tenda di denah menampilkan acara + jamnya.
+  // Tenda bisa bergantian: tenda 04 = Pemeriksaan … Dermatologis (hari 1–2)
+  // lalu … Gizi (hari 3); tenda 05 = Donor Darah (hari 1) lalu Nikah Gratis (hari 3).
+  const SERVICE_TENDA = {
     // tenda sekolah (33) sengaja tidak dipakai
-    1: 'Bekam', 2: '7/8 Cut', 3: "Konsultasi Syar'i",
-    4: 'Pemeriksaan Kesehatan Umum & Dermatologis', 5: 'Donor Darah',
+    Bekam: 1, '7/8 Cut': 2, "Konsultasi Syar'i": 3,
+    'Pemeriksaan Kesehatan Umum & Dermatologis': 4, 'Pemeriksaan Kesehatan Umum & Gizi': 4,
+    'Donor Darah': 5, 'Nikah Gratis': 5,
   };
-  D.boothOwners = [...(D.boothOwners || []), ...Object.values(SERVICE_AT).map((n) => [n, ''])];
-  const taken = (from, to) => Object.keys(SERVICE_AT).some((n) => n >= from && n <= to);
+  Object.values(D.jadwal).flat().forEach((r) => { if (SERVICE_TENDA[r.title]) r.tenda = SERVICE_TENDA[r.title]; });
+  const used = Object.values(SERVICE_TENDA);
+  const taken = (from, to) => used.some((n) => n >= from && n <= to);
   const displaced = (D.placements || []).filter(([, from, to = from]) => taken(from, to)).map(([name]) => name);
-  D.placements = (D.placements || [])
-    .filter(([, from, to = from]) => !taken(from, to))
-    .concat(Object.entries(SERVICE_AT).map(([n, name]) => [name, Number(n)]));
+  D.placements = (D.placements || []).filter(([, from, to = from]) => !taken(from, to));
   // Tenant yang tendanya terpakai layanan tetap dapat tenda: tenda terakhir dari
   // tenant yang menyewa ≥3 tenda berderet (urut daftar) diberikan ke mereka —
   // tidak ada tenant yang kehilangan semua tendanya.
