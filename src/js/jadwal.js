@@ -848,20 +848,32 @@ tabs.addEventListener('pointermove', (e) => {
     sw.edge = winStart === before; // tidak bisa bergeser lagi → ujung deretan
     sw.steps = steps;
   }
+  sw.offset = true;
   tabsOffset(sw.edge ? dx * 0.15 : (dx - steps * TAB_STEP) * 0.35, false);
 });
-const endTabSwipe = () => {
-  if (!tabSwipe) return;
-  // klik sesudahnya dibuang hanya bila memang tergeser (ada kartu bergeser /
-  // jari pindah ≥24px) — ketukan biasa yang jarinya sedikit goyang tetap klik
-  if (tabSwipe.lock === 'x' && (tabSwipe.steps || Math.abs(tabSwipe.dx) >= 24)) tabSwipedAt = Date.now();
+// Sentuhan: hari dipilih langsung saat jari diangkat (tidak menunggu event
+// click bawaan — di HP asli klik pertama sesudah menggeser bisa tertahan/hilang,
+// mis. Safari iOS). Klik bawaan yang menyusul diabaikan agar tidak dobel.
+// Tergeser = ada kartu bergeser / jari pindah ≥24px → bukan ketukan.
+let tabTappedAt = 0;
+const endTabSwipe = (e) => {
+  const sw = tabSwipe;
+  if (!sw) return;
   tabSwipe = null;
-  tabsOffset(0, true);
+  if (sw.offset) tabsOffset(0, true);
+  const swiped = sw.lock === 'x' && (sw.steps || Math.abs(sw.dx) >= 24);
+  if (swiped) { tabSwipedAt = Date.now(); return; }
+  if (e.type !== 'pointerup' || sw.lock === 'y') return;
+  const b = e.target.closest('.day');
+  if (!b) return;
+  tabTappedAt = Date.now();
+  selectDay(b);
 };
 tabs.addEventListener('pointerup', endTabSwipe);
 tabs.addEventListener('pointercancel', endTabSwipe);
 tabs.addEventListener('click', (e) => {
   if (Date.now() - tabSwipedAt < 400) return; // klik bawaan dari akhir geseran
+  if (Date.now() - tabTappedAt < 700) return; // sudah dipilih saat jari diangkat
   const b = e.target.closest('.day');
   if (b) selectDay(b);
 });
