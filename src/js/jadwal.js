@@ -690,6 +690,9 @@ if (viewBox && TABEL_ON) {
 const daysNav = $('#daysNav');
 const activeIdx = (list) => list.findIndex((b) => b.getAttribute('aria-selected') === 'true');
 let winStart = 0; // indeks kartu normal pertama — digeser seperlunya saja
+// true setelah tab digeser jari: jendela boleh tidak memuat tab aktif (hanya
+// melihat-lihat); dikembalikan false saat sebuah hari dipilih
+let freeWin = false;
 const layoutDays = () => {
   const list = $$('.day', tabs);
   const n = list.length;
@@ -709,7 +712,8 @@ const layoutDays = () => {
   let m = n; // jumlah kartu yang tampil normal
   while (m > 1 && !fits(m)) m--;
   // geser jendela seperlunya saja agar kartu aktif tetap di dalamnya
-  winStart = Math.min(Math.max(winStart, a - m + 1, 0), a, n - m);
+  winStart = freeWin ? Math.min(Math.max(winStart, 0), n - m)
+    : Math.min(Math.max(winStart, a - m + 1, 0), a, n - m);
   const start = winStart;
   const end = start + m; // eksklusif
   const stack = m < n;
@@ -792,6 +796,7 @@ let stickBusy = false; // klik beruntun selama naik diabaikan
 export let chosenDay = null; // hari yang DIPILIH pengunjung (bukan bawaan saat load)
 export const selectDay = (btn, focus) => {
   chosenDay = btn.dataset.day;
+  freeWin = false;
   $$('.day', tabs).forEach((b) => { b.setAttribute('aria-selected', b === btn); b.tabIndex = b === btn ? 0 : -1; });
   if (focus) btn.focus({ preventScroll: true });
   // replaceState, bukan pushState: ganti tab tidak perlu menumpuk riwayat back
@@ -812,7 +817,51 @@ daysNav.addEventListener('click', (e) => {
   const list = $$('.day', tabs);
   selectDay(list[activeIdx(list) + Number(b.dataset.dir)]);
 });
-tabs.addEventListener('click', (e) => { const b = e.target.closest('.day'); if (b) selectDay(b); });
+// Geser jari di deretan tab (saat ada yang menumpuk) → jendela kartu ikut
+// bergeser SELAMA diseret (tiap TAB_STEP px = 1 kartu, dianimasikan transisi
+// flex-basis yang sudah ada); sisa seretan menggeser deretan sedikit mengikuti
+// jari, di ujung deretan terasa kenyal. Tab aktif TIDAK berubah — memilih hari
+// tetap dengan klik.
+const TAB_STEP = 70;
+let tabSwipe = null, tabSwipedAt = 0;
+const tabsOffset = (px, anim) => {
+  tabs.style.transition = anim ? 'transform .35s cubic-bezier(.22, .9, .24, 1)' : 'none';
+  tabs.style.transform = px ? `translateX(${px}px)` : '';
+};
+tabs.addEventListener('pointerdown', (e) => {
+  tabSwipe = e.pointerType !== 'mouse' && tabs.classList.contains('is-stacked') && !reduced
+    ? { x: e.clientX, y: e.clientY, lock: null, steps: 0, edge: false } : null;
+});
+tabs.addEventListener('pointermove', (e) => {
+  const sw = tabSwipe;
+  if (!sw) return;
+  const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+  if (!sw.lock && Math.max(Math.abs(dx), Math.abs(dy)) > 8) sw.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+  if (sw.lock !== 'x') return;
+  const steps = Math.trunc(dx / TAB_STEP);
+  if (steps !== sw.steps) {
+    const before = winStart;
+    winStart -= steps - sw.steps;
+    freeWin = true;
+    layoutDays();
+    sw.edge = winStart === before; // tidak bisa bergeser lagi → ujung deretan
+    sw.steps = steps;
+  }
+  tabsOffset(sw.edge ? dx * 0.15 : (dx - steps * TAB_STEP) * 0.35, false);
+});
+const endTabSwipe = () => {
+  if (!tabSwipe) return;
+  if (tabSwipe.lock === 'x') tabSwipedAt = Date.now();
+  tabSwipe = null;
+  tabsOffset(0, true);
+};
+tabs.addEventListener('pointerup', endTabSwipe);
+tabs.addEventListener('pointercancel', endTabSwipe);
+tabs.addEventListener('click', (e) => {
+  if (Date.now() - tabSwipedAt < 400) return; // klik bawaan dari akhir geseran
+  const b = e.target.closest('.day');
+  if (b) selectDay(b);
+});
 tabs.addEventListener('keydown', (e) => {
   const list = $$('.day', tabs);
   const i = list.indexOf(document.activeElement);
