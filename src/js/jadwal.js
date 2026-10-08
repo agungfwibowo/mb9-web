@@ -672,7 +672,18 @@ panel.addEventListener('click', (e) => {
 panel.addEventListener('keydown', (e) => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.jcard.is-piled')) { e.preventDefault(); e.target.click(); }
 });
-window.addEventListener('resize', syncRails);
+// Lebar layar berubah → jumlah kartu terbuka ikut berubah. Jendela dilabuhkan
+// lagi ke kartu aktif (berlangsung/buka), kalau tidak ia tertinggal di kartu
+// selesai hasil penjepitan di layar lebar. Hanya lebar: bilah alamat HP yang
+// muncul/hilang saat menggulir mengubah tinggi saja.
+let railW = innerWidth;
+window.addEventListener('resize', () => {
+  if (innerWidth !== railW) {
+    railW = innerWidth;
+    $$('.jrail', panel).forEach((rail) => { rail.dataset.start = firstActive(rail); });
+  }
+  syncRails();
+});
 // Glitch foto Tema: lapisan memakai sumber yang benar-benar dimuat (avif/webp)
 const temaImg = $('.tema__media img');
 if (temaImg) {
