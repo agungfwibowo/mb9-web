@@ -1,7 +1,7 @@
 import { $, $$, D, esc, lenis, reduced } from './core.js';
 import { lockNav } from './navbar.js';
 import { lazyWatch, track } from './konten.js';
-import { everyMinute, fmtMin, moveRail, openDayAt, panel, selectDay, toMin, wibNow } from './jadwal.js';
+import { dayLabel, everyMinute, fmtMin, moveRail, openDayAt, panel, selectDay, toMin, wibNow } from './jadwal.js';
 
 // Asatidz
 const agrid = $('#asatidzGrid');
@@ -56,11 +56,9 @@ if (soonN) agrid.insertAdjacentHTML('afterend', '<p class="asatidz__note">Daftar
 // "Berlangsung" (+ garis tepi) saat kajiannya jalan › sesi terdekat yang belum
 // mulai: "Hari ini · 16.00" / "Besok · 16.00" / "Sab, 26 Des · 16.00" ›
 // "Selesai" hanya setelah sesi terakhirnya di seluruh rangkaian. Cek tiap menit.
-const DAY_MS = 86400000;
 const markAsatidzLive = () => {
   const now = Date.now();
   const today = wibNow().iso;
-  const tomorrow = new Date(new Date(`${today}T00:00:00Z`).getTime() + DAY_MS).toISOString().slice(0, 10);
   const st = new Map(); // id → { live, next, done } — tiap sesi { day, time, start, akhwat }
   D.days.forEach((day) => ((D.jadwal && D.jadwal[day.key]) || []).forEach((r) => {
     const [a, b] = r.time.split(' - ').map(toMin);
@@ -87,7 +85,7 @@ const markAsatidzLive = () => {
     const html = !s ? ''
       : live ? badge('jlive', 'Berlangsung')
         : o.next ? (s.day.iso === today ? badge('ustadz__badge--today', `Hari ini · ${jam}`)
-          : badge('ustadz__badge--next', `${s.day.iso === tomorrow ? 'Besok' : `${s.day.short.slice(0, 3)}, ${s.day.date}`} · ${jam}`))
+          : badge('ustadz__badge--next', `${dayLabel(s.day, today)} · ${jam}`))
           : badge('ustadz__badge--done', 'Selesai');
     const old = card.querySelector(':scope > .ustadz__badge');
     if (old && old.outerHTML === html) return;
@@ -176,7 +174,7 @@ agrid.addEventListener('click', (e) => {
 // hari ini bila masih ada, kalau tidak hari acara berikutnya yang memuatnya.
 // Semua sesinya sudah lewat → teks biasa. Dicek tiap menit (ikut ganti hari).
 // Label hari ini mengikuti jadwal (markLive): Buka 10.00 › Segera buka › Buka ›
-// Segera tutup; hari lain: "Hari ke-4".
+// Segera tutup; hari lain: "Besok" / "Sab, 26 Des" (dayLabel).
 const SOON = 30;
 const sessOf = (day, kw) => ((D.jadwal && D.jadwal[day.key]) || [])
   .filter((r) => r.title.toLowerCase().includes(kw)).map((r) => r.time.split(' - ').map(toMin));
@@ -196,7 +194,7 @@ const targetOf = (kw) => {
   for (const d of D.days) {
     if (d.iso <= now.iso) continue;
     const ss = sessOf(d, kw).sort((p, q) => p[0] - q[0]);
-    if (ss.length) return { day: d, a: ss[0][0], st: ['is-wait', `Hari ke-${D.days.indexOf(d) + 1}`] };
+    if (ss.length) return { day: d, a: ss[0][0], st: ['is-wait', dayLabel(d, now.iso)] };
   }
   return null;
 };

@@ -146,6 +146,13 @@ export const wibNow = () => {
   const o = Object.fromEntries(f.formatToParts(new Date()).map((x) => [x.type, x.value]));
   return { iso: `${o.year}-${o.month}-${o.day}`, min: Number(o.hour) * 60 + Number(o.minute) };
 };
+// Label hari acara selain hari ini — sama di badge asatidz, kartu Layanan &
+// tooltip tenda: "Besok" bila tanggalnya esok (WIB), selain itu "Sab, 26 Des".
+const DAY_MS = 86400000;
+export const dayLabel = (d, todayIso = wibNow().iso) => {
+  const tomorrow = new Date(new Date(`${todayIso}T00:00:00Z`).getTime() + DAY_MS).toISOString().slice(0, 10);
+  return d.iso === tomorrow ? 'Besok' : `${d.short.slice(0, 3)}, ${d.date}`;
+};
 // Status otomatis dari jam (hanya di hari acara menurut WIB, cek tiap menit):
 // • acara panggung (rangkaian, tanpa group / data-seq): "Live" saat berjalan,
 //   "Selanjutnya" di acara panggung terdekat yang belum mulai
