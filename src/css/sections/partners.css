@@ -21,10 +21,12 @@
 .plist { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
 /* lebar fleksibel: maks 270px, tapi menyusut ke setengah baris agar layar
    peralihan (±560–620px) tetap 2 kolom, bukan turun jadi 1 kolom */
-.plogo { width: min(270px, calc(50% - 10px)); height: auto; aspect-ratio: 270 / 175; padding: 26px; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; background: var(--white); border: 2px solid var(--ink); transition: box-shadow .4s var(--ease), translate .4s var(--ease); }
+.plogo { width: min(270px, calc(50% - 10px)); height: auto; aspect-ratio: 270 / 175; padding: 16px; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; background: var(--white); border: 2px solid var(--ink); transition: box-shadow .4s var(--ease), translate .4s var(--ease); }
 .plogo img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1); transition: filter .4s; }
 .plogo:hover { translate: 0 -6px; box-shadow: 0 6px 0 var(--lime), 0 6px 0 2px var(--ink); }
 .plogo:hover img { filter: none; opacity: 1; }
+/* layar sentuh tak punya hover → logo langsung berwarna (abu-abu sulit dibaca) */
+@media (hover: none), (pointer: coarse) { .plogo img { filter: none; } }
 .plogo--dark { background: var(--ink); }
 
 

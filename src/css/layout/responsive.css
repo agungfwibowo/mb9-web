@@ -24,10 +24,10 @@
   .asatidz__pin { padding: clamp(40px, 6vh, 90px) 0; }
   .asatidz .sec-head { margin-bottom: clamp(14px, 2.8vh, 48px); }
   .asatidz .sec-head .title { font-size: clamp(24px, 3.6vh, 42px); }
-  /* 36vh: iPad landscape (±740px) → ±265px; 27vh dulu terlalu kecil (±170px
+  /* 40vh: iPad landscape (±740px) → ±295px; 27vh dulu terlalu kecil (±170px
      setelah menyusut, foto tergencet nama). Layar sangat pendek tetap aman
      lewat jaring pengaman max-height: 100% di bawah. */
-  .asatidz__grid > .ustadz { --ust-w: min(280px, 36vh); }
+  .asatidz__grid > .ustadz { --ust-w: min(300px, 40vh); }
   .asatidz__note { margin-top: clamp(10px, 2vh, 26px); }
 }
 
@@ -173,7 +173,7 @@
   .marquee__track { font-size: 13px; }
   .marquee__group { gap: 16px; padding: 12px 16px 12px 0; }
   .plist { gap: 16px; }
-  .plogo, .pgroup--main .plogo { width: calc(50% - 8px); height: 110px; padding: 18px; }
+  .plogo, .pgroup--main .plogo { width: calc(50% - 8px); height: 110px; padding: 10px; }
   .tema__copy > p:not(.kicker) { font-size: 14px; }
   .sec-sub { font-size: 16px; }
   .countdown { justify-content: center; }

@@ -22,8 +22,10 @@
 }
 .asatidz__grid::-webkit-scrollbar { display: none; }
 .asatidz__grid.is-dragging { cursor: grabbing; scroll-snap-type: none; } /* seret mouse: snap menyusul saat dilepas */
-/* boleh menyusut s/d 85% → bila hampir muat, semua kartu pas di tengah tanpa digeser */
-.asatidz__grid > .ustadz { --ust-w: min(280px, 32vh); flex: 0 1 var(--ust-w); min-width: calc(var(--ust-w) * .85); scroll-snap-align: start; }
+/* ukuran tetap (tidak menyusut): dulu boleh s/d 85% agar semua muat, tapi
+   dengan banyak pemateri kartu jadi kecil & foto tergencet nama — lebih baik
+   deretan digeser seperti di HP */
+.asatidz__grid > .ustadz { --ust-w: min(300px, 34vh); flex: 0 0 var(--ust-w); scroll-snap-align: start; }
 .asatidz__grid > .ustadz:first-child { margin-left: auto; }
 .asatidz__grid > .ustadz:last-child { margin-right: auto; }
 @media (max-width: 860px) { .layanan__track { touch-action: pan-y; } } /* HP: geser horizontal ditangani JS (→ gulir halaman) */

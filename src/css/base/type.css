@@ -1,3 +1,8 @@
+/* Teks petunjuk per jenis input: mouse/trackpad ("arahkan kursor") vs layar
+   sentuh ("ketuk") — mis. di denah. Sama dengan finePointer di core.js. */
+@media (hover: hover) and (pointer: fine) { .for-touch { display: none; } }
+@media (hover: none), (pointer: coarse) { .for-mouse { display: none; } }
+
 /* ---------- Tags / kicker / titles ---------- */
 .kicker { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .tag { display: inline-block; padding: 5px 9px; font-size: 12px; background: var(--lime); color: var(--ink); }
