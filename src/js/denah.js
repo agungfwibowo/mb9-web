@@ -1,4 +1,4 @@
-import { $, $$, D, esc, hasGsap, lenis, reduced, root, stripIndex } from './core.js';
+import { $, $$, BULAN, D, esc, hasGsap, lenis, reduced, root, stripIndex } from './core.js';
 import { lockNav } from './navbar.js';
 import { MB9_LOGO, shareMenu } from './bagikan.js';
 import { JICONS, fmtMin, iconKey, openDayAt, tendaName, toMin, wibNow } from './jadwal.js';
@@ -126,22 +126,34 @@ const linkOf = (g) => {
   const host = new URL(url).hostname.replace(/^www\./, '');
   return `<a class="booth-tip__link" href="${esc(url)}" target="_blank" rel="noopener" data-cursor="Buka">${esc(host)} <span aria-hidden="true">↗</span></a>`;
 };
-// Jam buka–tutup HARI INI (WIB) untuk tenda yang punya jadwal (judul / r.tenda
-// sama dengan nama pemilik tenda), dengan status Buka / Tutup / Buka jam ….
+// Jam buka–tutup tenda yang punya jadwal (judul / r.tenda sama dengan nama
+// pemilik tenda) di hari terdekat: hari ini selama masih ada sesi yang belum
+// selesai (status Buka / Tutup / Buka jam …), kalau tidak hari acara
+// berikutnya yang memuatnya (label Besok / tanggal). Tak ada lagi → kosong.
+const sessOn = (d, who) => ((d && D.jadwal && D.jadwal[d.key]) || []).filter((r) => tendaName(r) === who);
 const hoursOf = (who) => {
-  const day = openDayAt(Date.now());
-  const rs = ((day && D.jadwal && D.jadwal[day.key]) || []).filter((r) => tendaName(r) === who);
+  const now = wibNow();
+  const today = openDayAt(Date.now());
+  let day = today;
+  let rs = sessOn(today, who);
+  if (!rs.some((r) => toMin(r.time.split(' - ')[1]) > now.min)) {
+    const next = D.days.find((d) => d.iso > now.iso && sessOn(d, who).length);
+    if (next) { day = next; rs = sessOn(next, who); }
+  }
   if (!rs.length) return '';
-  const now = wibNow().min;
+  const i = D.days.indexOf(day);
+  const [, m, dd] = day.iso.split('-').map(Number);
+  const besok = i > 0 && D.days[i - 1].iso === now.iso;
   return rs.map((r) => {
     const [a, b] = r.time.split(' - ').map(toMin);
-    const st = now < a ? `Buka ${fmtMin(a)}` : now >= b ? 'Tutup' : 'Buka';
-    const cls = now < a ? 'is-wait' : now >= b ? 'is-closed' : 'is-open';
-    // tautan ke jadwal hari ini: dibuka & dikedipkan lewat focusSession (handler di tip)
-    return `<span class="booth-tip__hrs mono"><a href="#jadwal" data-day="${day.key}" data-t="${esc(r.time)}" data-title="${esc(r.title)}">Hari ini ${fmtMin(a)}–${fmtMin(b)} <span aria-hidden="true">→</span></a> <em class="${cls}">${st}</em></span>`;
+    const [st, cls] = day !== today ? [besok ? 'Besok' : `${dd} ${BULAN[m - 1].slice(0, 3)}`, 'is-wait']
+      : now.min < a ? [`Buka ${fmtMin(a)}`, 'is-wait'] : now.min >= b ? ['Tutup', 'is-closed'] : ['Buka', 'is-open'];
+    const when = day === today ? 'Hari ini' : `Hari ke-${i + 1}`;
+    // tautan ke sesinya di jadwal: dibuka & dikedipkan lewat focusSession (handler di tip)
+    return `<span class="booth-tip__hrs mono"><a href="#jadwal" data-day="${day.key}" data-t="${esc(r.time)}" data-title="${esc(r.title)}">${when} ${fmtMin(a)}–${fmtMin(b)}</a> <em class="${cls}">${st}</em></span>`;
   }).join('');
 };
-// klik jam di tooltip → buka acaranya di jadwal (tab hari ini, gulir, kedip)
+// klik jam di tooltip → buka acaranya di jadwal (tab harinya, gulir, kedip)
 tip.addEventListener('click', (e) => {
   const a = e.target.closest('.booth-tip__hrs a[data-day]');
   if (!a) return;
