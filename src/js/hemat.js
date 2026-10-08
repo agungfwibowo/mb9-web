@@ -1,4 +1,4 @@
-import { $, $$, bootBooth, bootHash, hasGsap, lenis, reduced, userScrolled } from './core.js';
+import { $, $$, bootBooth, bootHash, hasGsap, lenis, reduced, releaseBootSnap, userScrolled } from './core.js';
 import { boothRect, findBooth, focusBooth } from './denah.js';
 import { goToHash } from './lenis.js';
 import { finishPreloader, intro, scrollAnims, seenThisSession } from './intro.js';
@@ -25,7 +25,7 @@ const boot = () => finishPreloader().then(intro).then(() => {
   setTimeout(() => {
     // pengunjung sudah menggulir sendiri selama preloader → jangan ditarik
     // paksa, cukup kembalikan hash ke URL
-    if (userScrolled) { if (bootHash) history.replaceState(null, '', bootHash); return; }
+    if (userScrolled) { if (bootHash) history.replaceState(null, '', bootHash); releaseBootSnap(); return; }
     if (hasGsap) ScrollTrigger.refresh();
     requestAnimationFrame(() => {
       // link tenant didahulukan; nama/nomor tak dikenal → cukup ke #denah
@@ -53,8 +53,9 @@ const boot = () => finishPreloader().then(intro).then(() => {
           if (t && Math.abs(t.getBoundingClientRect().top - (lenis ? 20 : 0)) > 40) goToHash(id);
         });
       };
-      const later = () => { setTimeout(realign, 300); setTimeout(realign, 2000); setTimeout(realign, 4500); };
-      if (document.readyState === 'complete') { setTimeout(realign, 1600); setTimeout(realign, 4500); }
+      // snap hero baru boleh aktif lagi setelah koreksi terakhir selesai meluncur
+      const later = () => { setTimeout(realign, 300); setTimeout(realign, 2000); setTimeout(realign, 4500); setTimeout(releaseBootSnap, 6500); };
+      if (document.readyState === 'complete') { setTimeout(realign, 1600); setTimeout(realign, 4500); setTimeout(releaseBootSnap, 6500); }
       else addEventListener('load', later, { once: true });
     });
   }, reduced ? 0 : 500);
