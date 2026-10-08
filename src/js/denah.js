@@ -1,7 +1,7 @@
 import { $, $$, D, esc, hasGsap, lenis, reduced, root, stripIndex } from './core.js';
 import { lockNav } from './navbar.js';
 import { MB9_LOGO, shareMenu } from './bagikan.js';
-import { JICONS, dayLabel, fmtMin, iconKey, openDayAt, tendaName, toMin, wibNow } from './jadwal.js';
+import { JICONS, dayLabel, fmtMin, iconKey, openDayAt, tendaNos, toMin, wibNow } from './jadwal.js';
 import { focusSession } from './asatidz.js';
 import { boothsOf } from './tenant.js';
 
@@ -126,21 +126,24 @@ const linkOf = (g) => {
   const host = new URL(url).hostname.replace(/^www\./, '');
   return `<a class="booth-tip__link" href="${esc(url)}" target="_blank" rel="noopener" data-cursor="Buka">${esc(host)} <span aria-hidden="true">↗</span></a>`;
 };
-// Jam buka–tutup tenda yang punya jadwal (judul / r.tenda sama dengan nama
-// pemilik tenda) di hari terdekat: hari ini selama masih ada sesi yang belum
-// selesai (status Buka / Tutup / Buka jam …), kalau tidak hari acara
-// berikutnya yang memuatnya (label Besok / "Sab, 26 Des"). Tak ada lagi → kosong.
-const sessOn = (d, who) => ((d && D.jadwal && D.jadwal[d.key]) || []).filter((r) => tendaName(r) === who);
-const hoursOf = (who) => {
+// Acara yang memakai tenda n (lihat tendaNos) di hari terdekat: hari ini
+// selama masih ada sesi yang belum selesai, kalau tidak hari acara berikutnya
+// yang memakainya; tak ada lagi → sesi hari ini yang sudah tutup (bisa kosong).
+// Tenda layanan bisa dipakai acara berbeda tiap hari — isinya ikut hari itu.
+const sessOn = (d, n) => ((d && D.jadwal && D.jadwal[d.key]) || []).filter((r) => tendaNos(r).includes(n));
+const sessAt = (n) => {
   const now = wibNow();
   const today = openDayAt(Date.now());
-  let day = today;
-  let rs = sessOn(today, who);
-  if (!rs.some((r) => toMin(r.time.split(' - ')[1]) > now.min)) {
-    const next = D.days.find((d) => d.iso > now.iso && sessOn(d, who).length);
-    if (next) { day = next; rs = sessOn(next, who); }
-  }
-  if (!rs.length) return '';
+  const rs = sessOn(today, n);
+  if (rs.some((r) => toMin(r.time.split(' - ')[1]) > now.min)) return { day: today, rs, now, today };
+  const next = D.days.find((d) => d.iso > now.iso && sessOn(d, n).length);
+  return next ? { day: next, rs: sessOn(next, n), now, today } : { day: today, rs, now, today };
+};
+// Nama tenda: tenant pemiliknya, atau acara yang memakainya di hari terdekat
+const boothName = (g, ss = sessAt(Number(g.dataset.n))) => g.dataset.tenant || [...new Set(ss.rs.map((r) => r.title))].join(' / ');
+// Jam buka–tutup sesi-sesi itu: hari ini → status Buka / Tutup / Buka jam …;
+// hari lain → "Hari ke-N jam" + label Besok / "Sab, 26 Des".
+const hoursOf = ({ day, rs, now, today }) => {
   const i = D.days.indexOf(day);
   return rs.map((r) => {
     const [a, b] = r.time.split(' - ').map(toMin);
@@ -163,14 +166,15 @@ const fillTip = (g) => {
   if (tipFor === g) return;
   tipFor = g;
   const meta = `Tenda ${pad(g.dataset.n)} · ${CATS[g.dataset.cat].label.replace('Tenda ', '')}`;
-  const who = g.dataset.tenant;
+  const ss = sessAt(Number(g.dataset.n));
+  const who = boothName(g, ss);
   const logo = who && tenantLogo[who];
   tip.classList.toggle('has-logo', !!who);
   const mark = logo
     ? `<span class="booth-tip__logo${logo.dark ? ' is-dark' : ''}"><img src="${esc(logo.src)}" alt="" decoding="async"></span>`
-    : `<span class="booth-tip__logo is-icon"><svg class="jico" viewBox="0 0 24 24" aria-hidden="true"><path d="${JICONS[iconKey({ title: who || '' })]}"/></svg></span>`;
+    : `<span class="booth-tip__logo is-icon"><svg class="jico" viewBox="0 0 24 24" aria-hidden="true"><path d="${JICONS[iconKey({ title: ss.rs.length ? ss.rs[0].title : who })]}"/></svg></span>`;
   tip.innerHTML = who
-    ? `${mark}<span class="booth-tip__txt"><small>${esc(meta)}</small><b>${esc(who)}</b>${hoursOf(who)}${linkOf(g)}</span>`
+    ? `${mark}<span class="booth-tip__txt"><small>${esc(meta)}</small><b>${esc(who)}</b>${hoursOf(ss)}${linkOf(g)}</span>`
     : esc(meta);
 };
 // Koordinat layar (clientX/Y). Kartu di atas titik `top`; kalau ruang di
@@ -316,7 +320,7 @@ const selectBooth = (g) => {
   paintGroup(g);
   setBoothUrl(g);
   denahShare.close(); // isi menu (QR, judul) milik tenda sebelumnya
-  shareText = `Bagikan lokasi · ${g.dataset.tenant || `Tenda ${pad(g.dataset.n)}`}`;
+  shareText = `Bagikan lokasi · ${boothName(g) || `Tenda ${pad(g.dataset.n)}`}`;
   boothShareLabel.textContent = shareText;
   boothShare.hidden = false;
   g.parentNode.appendChild(g); // bawa ke depan
@@ -515,25 +519,32 @@ const denahShare = shareMenu(boothShare, () => {
   const url = new URL(location.href);
   url.pathname = stripIndex(url.pathname);
   url.searchParams.delete('hari');
-  const who = picked.dataset.tenant;
+  const tenant = picked.dataset.tenant;
+  const ss = sessAt(Number(picked.dataset.n));
+  const who = boothName(picked, ss);
   // tenant dengan beberapa tenda (berderet atau berjauhan): semua nomornya
   // ikut ditulis di judul share — bukan cuma tenda yang diklik
-  const where = `Tenda ${who && boothsOf[who] ? boothsOf[who].join(', ') : pad(picked.dataset.n)}`;
+  const where = `Tenda ${tenant && boothsOf[tenant] ? boothsOf[tenant].join(', ') : pad(picked.dataset.n)}`;
+  // tenda layanan: isinya bisa berganti per hari → hari & jam acaranya ikut,
+  // ditulis lengkap (bukan "Hari ini"/"Besok") karena pesan bisa dibaca kapan saja
+  const when = !tenant && ss.rs.length
+    ? ` · ${ss.day.short}, ${ss.day.date} ${fmtMin(Math.min(...ss.rs.map((r) => toMin(r.time.split(' - ')[0]))))}–${fmtMin(Math.max(...ss.rs.map((r) => toMin(r.time.split(' - ')[1]))))}`
+    : '';
   const ev = (D.event && D.event.title) || 'Muslim Berdedikasi 9';
   return {
     url: url.href,
-    title: who ? `${who} — ${where} · ${ev}` : `${where} · ${ev}`,
+    title: who ? `${who} — ${where}${when} · ${ev}` : `${where} · ${ev}`,
     logo: (who && tenantLogo[who]) || MB9_LOGO,
     file: `mb9-${who ? slug(who) : `tenda-${pad(picked.dataset.n)}`}`,
   };
 });
 
-// Klik tenant di slider/daftar. Didaftarkan sebelum handler anchor global,
+// Klik tenant di slider/daftar & "Tenda xx" di jadwal. Didaftarkan sebelum handler anchor global,
 // jadi stopImmediatePropagation mencegah guliran ganda ke awal section.
 document.addEventListener('click', (e) => {
-  const a = e.target.closest('[data-tenant-link]');
+  const a = e.target.closest('[data-tenant-link], [data-booth-link]');
   if (!a) return;
-  const first = firstBoothOf(a.dataset.tenantLink);
+  const first = a.dataset.boothLink ? findBooth(a.dataset.boothLink) : firstBoothOf(a.dataset.tenantLink);
   if (!first) return; // tanpa tenda: biarkan handler anchor ke #denah
   e.preventDefault();
   e.stopImmediatePropagation();
