@@ -76,6 +76,10 @@ export const JICONS = {
   gunting: 'M9 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM8.2 7.8L20 19M8.2 16.2L20 5',
   obrolan: 'M4 5h11v8H8l-4 3zM15 9h5v8l-3-2h-6v-2',
   muslimah: 'M4.5 21C5 18 5 15 5 10a7 7 0 0 1 14 0c0 5 0 8 .5 11-5 1-10 1-15 0zM12 7a3.5 4.5 0 1 1 0 9 3.5 4.5 0 0 1 0-9zM8.7 10.2c2.1-.8 4.5-.8 6.6 0',
+  // cup bekam berkatup di atas kulit yang tertarik masuk ke dalam cup
+  bekam: 'M2 20h4.5c1.5 0 2.5-2 5.5-2s4 2 5.5 2H22M6.5 20v-7c0-2.6 2.5-4.5 5.5-4.5s5.5 1.9 5.5 4.5v7M12 8.5V5.5M10 5.5h4',
+  // dua balon chat saling menimpa, ekor berlawanan (bergantian bicara); titik di balon depan
+  talkshow: 'M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v3l3-3M11 9h8a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v3l-3.5-3H11a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2zM13 13.5h.01M15 13.5h.01M17 13.5h.01',
   cincin: 'M12 21a6 6 0 1 1 0-12 6 6 0 0 1 0 12zM12 9l-2-2.5L12 4l2 2.5z',
   titik: 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z',
   masjid: 'M3 21h18M5 21v-8h14v8M12 3c-3.2 2-5 4.2-5 7h10c0-2.8-1.8-5-5-7zM12 3V1M10 21v-3a2 2 0 0 1 4 0v3',
@@ -85,10 +89,10 @@ export const JICONS = {
 // Ikon dipilih dari kata kunci judul; r.icon di data-prod.js bisa menimpanya.
 const ICON_RULES = [
   [/bazar|foodcourt/, 'toko'], [/khitan/, 'grup'], [/lomba|musabaqah|grand final/, 'piala'],
-  [/donor/, 'tetes'], [/periksa|kesehatan/, 'nadi'], [/bekam/, 'hati'], [/cut|cukur/, 'gunting'],
-  [/konsultasi/, 'obrolan'], [/nikah/, 'cincin'], [/muslimah/, 'muslimah'], [/talkshow|kajian/, 'mic'],
+  [/donor/, 'tetes'], [/periksa|kesehatan/, 'nadi'], [/bekam/, 'bekam'], [/cut|cukur/, 'gunting'],
+  [/konsultasi/, 'obrolan'], [/nikah/, 'cincin'], [/muslimah/, 'muslimah'], [/talkshow/, 'talkshow'], [/kajian/, 'mic'],
 ];
-const TAG_ICON = { lomba: 'piala', kajian: 'mic', talkshow: 'mic' };
+const TAG_ICON = { lomba: 'piala', kajian: 'mic', talkshow: 'talkshow' };
 export const iconKey = (r) => {
   const t = r.title.toLowerCase();
   const hit = ICON_RULES.find(([re]) => re.test(t));
@@ -772,7 +776,7 @@ stick.addEventListener('click', (e) => {
   if (y >= scrollY) { selectDay(next); return; }
   stickBusy = true;
   const go = () => setTimeout(() => { stickBusy = false; selectDay(next); }, reduced ? 0 : 150);
-  if (lenis) lenis.scrollTo(y, { duration: 0.4, onComplete: go });
+  if (lenis) lenis.scrollTo(y, { duration: 0.3, onComplete: go });
   else {
     scrollTo({ top: y, behavior: reduced ? 'instant' : 'smooth' });
     setTimeout(go, reduced ? 0 : 700);

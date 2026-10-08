@@ -81,7 +81,18 @@ export const scrollAnims = () => {
     const perPx = (tl, d) => () => (d() ? ((tl.scrollTrigger.end - tl.scrollTrigger.start) / 1.42) / d() : 0);
     const pinLayanan = () => {
       const dist = () => Math.max(0, track.scrollWidth - innerWidth);
+      // petunjuk scroll HP: tetap tampil sampai kartu terakhir masuk layar,
+      // memudar di seperempat jarak satu kartu terakhir sebelum track mentok
+      const hint = $('.layanan__scroll');
+      const fadeHint = () => {
+        const [a, b] = track.children;
+        if (!hint || !a) return;
+        const step = b ? b.offsetLeft - a.offsetLeft : a.offsetWidth;
+        const left = dist() + gsap.getProperty(track, 'x'); // sisa geser (px)
+        gsap.set(hint, { autoAlpha: gsap.utils.clamp(0, 1, left / (step * .25)) });
+      };
       const ltl = gsap.timeline({
+        onUpdate: fadeHint,
         scrollTrigger: {
           trigger: '.layanan__pin', start: 'top top',
           end: () => `+=${dist() ? dist() * 1.45 + innerHeight * .3 : 1}`,
