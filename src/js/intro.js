@@ -191,7 +191,9 @@ export const scrollAnims = () => {
   gsap.from('.day', { y: 40, opacity: 0, duration: .7, stagger: .08, ease: 'power3.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: '.days', start: 'top 88%', once: true } });
 
   // asatidz cards
-  gsap.from('.ustadz', { y: 60, rotateX: -20, opacity: 0, duration: .9, stagger: .08, ease: 'power3.out', transformPerspective: 800, scrollTrigger: { trigger: '.asatidz__grid', start: 'top 85%', once: true } });
+  // clearProps: GSAP membekukan `scale` CSS (kartu depan/tetangga di HP) ke inline
+  // transform — dibersihkan setelah selesai agar CSS kembali yang mengatur
+  gsap.from('.ustadz', { y: 60, rotateX: -20, opacity: 0, duration: .9, stagger: .08, ease: 'power3.out', transformPerspective: 800, clearProps: 'transform,translate,rotate,scale', scrollTrigger: { trigger: '.asatidz__grid', start: 'top 85%', once: true } });
 
   // denah booths pop-in
   gsap.from('#boothLayer .booth', {

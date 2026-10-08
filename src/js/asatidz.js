@@ -29,6 +29,28 @@ agrid.innerHTML = asatidz.map((u) => `
       </article>`;
 }).join('');
 if (asatidz.length) lazyWatch(agrid);
+// Kartu yang terlihat UTUH di deretan → .is-front (di HP/tablet tampil ukuran
+// penuh, yang terpotong di tepi mengecil; lihat CSS) — jadi menyesuaikan lebar
+// layar: HP ±1 kartu penuh, tablet bisa 2–3. Tidak ada yang utuh → yang paling
+// banyak terlihat. Ukuran asli (offsetWidth) dipakai, bukan hasil skala.
+// Diukur ulang saat digeser & resize.
+let frontRaf = 0;
+const markFront = () => {
+  frontRaf = 0;
+  const r = agrid.getBoundingClientRect();
+  const cards = $$('.ustadz', agrid);
+  const seen = cards.map((c) => {
+    const left = r.left + c.offsetLeft - agrid.scrollLeft, w = c.offsetWidth;
+    return Math.max(0, Math.min(left + w, r.right) - Math.max(left, r.left)) / (w || 1);
+  });
+  const full = seen.map((v) => v >= .97);
+  if (!full.some(Boolean)) { const i = seen.indexOf(Math.max(...seen)); if (i >= 0) full[i] = true; }
+  cards.forEach((c, i) => c.classList.toggle('is-front', full[i]));
+};
+const queueFront = () => { if (!frontRaf) frontRaf = requestAnimationFrame(markFront); };
+agrid.addEventListener('scroll', queueFront, { passive: true });
+addEventListener('resize', queueFront);
+markFront();
 if (soonN) agrid.insertAdjacentHTML('afterend', '<p class="asatidz__note">Daftar asatidz InsyaAllah segera diumumkan</p>');
 // Badge di foto kartu asatidz yang punya jadwal HARI INI (sejak 00:00 WIB s/d
 // jam tutup, lihat openDayAt): "Hari ini · 16.00" sebelum mulai → "Berlangsung"
@@ -86,6 +108,7 @@ const sortAsatidz = (st) => {
   const now = [...agrid.children].filter((c) => c.classList.contains('ustadz'));
   if (sorted.every((c, i) => c === now[i])) return;
   sorted.forEach((c) => agrid.appendChild(c));
+  queueFront(); // urutan berubah → kartu depan diukur ulang
   // kartu terdepan terlihat — tapi jangan ganggu yang sedang menggeser deretan
   const r = agrid.getBoundingClientRect();
   if (r.bottom < 0 || r.top > innerHeight) agrid.scrollLeft = 0;
