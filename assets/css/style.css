@@ -1124,7 +1124,8 @@ html.snap-hero .hero { scroll-snap-align: start; }
    seret — lihat asatidz.js). Scrollbar disembunyikan. Margin auto di kartu
    pertama/terakhir = rata tengah bila muat, tanpa memotong sisi kiri bila tidak. */
 .asatidz__grid {
-  flex: none; align-items: flex-start; display: flex; flex-wrap: nowrap; gap: var(--ast-gap); --ast-gap: 16px; padding: 0 var(--ast-pad, var(--gutter));
+  /* position: relative → offsetLeft kartu diukur dari deretan (lihat markFront) */
+  position: relative; flex: none; align-items: flex-start; display: flex; flex-wrap: nowrap; gap: var(--ast-gap); --ast-gap: 16px; padding: 0 var(--ast-pad, var(--gutter));
   overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; /* tak ada gulir vertikal di dalamnya */
   /* hanya sumbu x yang ditahan (cegah geser-kembali browser); sumbu y dibiarkan
      agar usapan naik/turun di atas kartu tetap menggulir halaman (HP) */
@@ -1665,12 +1666,19 @@ html.snap-hero .hero { scroll-snap-align: start; }
   .asatidz .sec-head .title { font-size: clamp(24px, min(7vw, 4.4vh), 34px); }
   .asatidz .sec-head .sec-sub { margin-top: 10px; font-size: 14.5px; line-height: 1.5; }
   /* aspect-ratio 3/4 → tinggi = basis x 1.33; 34vh menahannya di ~45vh */
-  .asatidz__grid > .ustadz { flex: 0 0 min(62vw, 34vh); min-width: 0; } /* HP: ukuran tetap, digeser */
+  .asatidz__grid > .ustadz { flex: 0 0 min(76vw, 42vh); min-width: 0; }
+  /* kartu yang paling terlihat di frame (.is-front, diatur asatidz.js) ukuran
+     penuh; tetangganya mengecil ke arah kartu depan. Pakai properti `scale`
+     (bukan transform) agar tidak bentrok dengan transform animasi masuk GSAP
+     dan tidak mengubah tata letak → snap geser tetap pas */
+  .asatidz__grid > .ustadz { scale: .86; transform-origin: 100% 100%; transition: scale .35s var(--ease); }
+  .asatidz__grid > .ustadz.is-front { scale: 1; }
+  .asatidz__grid > .ustadz.is-front ~ .ustadz { transform-origin: 0 100%; } /* HP: ukuran tetap, digeser */
   .ustadz__body { padding: 12px; min-height: 73px; }
   .ustadz:not(.ustadz--soon) .ustadz__body::before, .ustadz:not(.ustadz--soon) .ustadz__body::after { left: 12px; width: 28px; height: 28px; }
   .ustadz:not(.ustadz--soon) .ustadz__body::after { background-size: 15px; }
-  .ustadz__body h3 { font-size: 14px; }
-  .ustadz__body small { font-size: 11px; }
+  .ustadz__body h3 { font-size: 15px; }
+  .ustadz__body small { font-size: 12px; }
   .ustadz--soon .q { width: 30px; height: 30px; top: 10px; right: 10px; font-size: 16px; }
   .asatidz__note { margin-top: 2.2vh; font-size: 12.5px; }
 }
