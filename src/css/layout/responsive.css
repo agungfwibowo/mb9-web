@@ -1,0 +1,182 @@
+/* ---------- Responsive ---------- */
+/* Layar desktop yang pendek (mis. 1280x720): section layanan di-pin setinggi
+   layar, jadi kalau judul + kartu lebih tinggi dari viewport, kartunya
+   terpotong karena .layanan punya overflow:hidden. Semua ukuran vertikalnya
+   dibuat ikut tinggi layar, bukan angka tetap. */
+@media (min-width: 861px) and (max-height: 820px) {
+  .layanan__pin { padding: clamp(40px, 6vh, 80px) 0; }
+  .layanan__head { margin-bottom: clamp(14px, 2.5vh, 32px); }
+  .layanan__head .sec-num { margin-bottom: 8px; }
+  .layanan__head .title { font-size: clamp(24px, 3.6vh, 42px); }
+  .layanan__head .sec-sub { margin-top: 8px; font-size: 15px; }
+  .deco--blocks { width: clamp(64px, 7vh, 110px); }
+  .lcard { min-height: min(420px, 38vh); padding: 24px; }
+  .lcard__num { font-size: 12px; }
+  .lcard__icon { width: clamp(40px, 6vh, 52px); height: clamp(40px, 6vh, 52px); margin: clamp(10px, 2vh, 18px) 0 clamp(10px, 1.8vh, 16px); }
+  .lcard__icon svg { width: 28px; height: 28px; }
+  .lcard h3 { font-size: clamp(18px, 2.4vh, 26px); margin-bottom: clamp(8px, 1.6vh, 14px); }
+  .lcard li, .lcard p { font-size: 15px; }
+  .lcard ul { gap: clamp(5px, 1vh, 8px); }
+  .lcard--cta h3 { font-size: clamp(22px, 3.4vh, 36px); }
+  .lcard__free { top: 18px; right: 18px; }
+
+  /* asatidz dipin dengan cara yang sama — ikut dirapatkan */
+  .asatidz__pin { padding: clamp(40px, 6vh, 90px) 0; }
+  .asatidz .sec-head { margin-bottom: clamp(14px, 2.8vh, 48px); }
+  .asatidz .sec-head .title { font-size: clamp(24px, 3.6vh, 42px); }
+  .asatidz__grid > .ustadz { --ust-w: min(280px, 27vh); }
+  .asatidz__note { margin-top: clamp(10px, 2vh, 26px); }
+}
+
+/* Jaring pengaman: section yang di-pin tidak bisa di-scroll vertikal dan
+   .layanan/.asatidz memotong luapannya (overflow: hidden). Berapa pun sisa
+   ruangnya, kartu tidak boleh lebih tinggi dari ruang yang tersedia —
+   kalau mepet, kartunya yang mengalah, bukan terpotong layar. */
+.layanan__track, .asatidz__grid { min-height: 0; flex-shrink: 1; }
+.lcard, .asatidz__grid > .ustadz { max-height: 100%; }
+
+@media (max-width: 1080px) {
+  .nav__links, .nav__cta { display: none; }
+  .nav__burger { display: block; }
+  .hero__inner { grid-template-columns: 1fr; }
+  .hero__visual { order: -1; max-width: 300px; margin: 0 auto; }
+  .denah__wrap { grid-template-columns: 1fr; }
+  /* Panel denah → bar sticky di bawah layar; berhenti di bawah peta (akhir section) */
+  .denah__side {
+    position: sticky; top: auto; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 50; order: 2; align-self: end; margin-top: 4px;
+    display: grid; gap: 8px; padding: 8px; background: var(--ink); border: 2px solid var(--ink); box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+    user-select: none; -webkit-user-select: none;
+  }
+  .denah__side .seg { border-color: var(--white); background: var(--white); }
+  .denah__side .seg button { color: var(--ink); padding: 9px; }
+  .denah__side .seg button[aria-selected="true"] { background: var(--ink); color: var(--lime); }
+  /* tombol Bagikan di bar gelap: garis & teks putih (gaya .btn--line), hover isi putih */
+  .denah-share { --bg: transparent; --fg: var(--white); --edge: var(--white); border-color: var(--white); }
+  .denah__hint { display: none; }
+  .legend { grid-template-columns: repeat(6, 1fr); gap: 5px; }
+  .chip { position: relative; justify-content: center; height: 32px; padding: 0; background: var(--c); border: 2px solid var(--c); color: var(--t); }
+  .chip:hover { transform: none; }
+  .chip i { display: none; }
+  .chip em { margin: 0; font-size: 13px; color: var(--t); }
+  .chip[aria-pressed="true"] { background: var(--c); color: var(--t); border-color: var(--white); box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--white); }
+  .chip[aria-pressed="true"] em { color: var(--t); }
+  .legend.has-active .chip[aria-pressed="false"] { opacity: .35; }
+  .denah__side.is-img .chip[aria-pressed] { background: var(--c); color: var(--t); border-color: var(--c); opacity: 1; box-shadow: none; }
+  .denah__side.is-img .chip em { color: var(--t); }
+  .denah__side.is-img .chip__label { opacity: 0 !important; }
+  /* keterangan hanya muncul saat hover / fokus / aktif — melayang di atas bar */
+  .chip { position: static; }
+  .chip__label {
+    position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translate(-50%, 6px); padding: 8px 14px;
+    background: var(--white); color: var(--ink); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--c);
+    font: 700 13px/1.2 var(--mono); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .25s var(--ease);
+  }
+  .chip:hover .chip__label, .chip:focus-visible .chip__label, .chip[aria-pressed="true"] .chip__label { opacity: 1; transform: translate(-50%, 0); }
+  /* layar sentuh: label hanya ikut status aktif, bukan sisa fokus setelah tap */
+  @media (hover: none) { .chip:focus-visible .chip__label { opacity: 0; } .chip[aria-pressed="true"] .chip__label { opacity: 1; } }
+  .legend:hover .chip[aria-pressed="true"]:not(:hover) .chip__label { opacity: 0; }
+}
+@media (max-width: 860px) {
+  body { font-size: 16px; }
+  .tema__grid { grid-template-columns: 1fr; }
+  /* HP/tablet: foto selebar layar penuh, rasio lebih lebar agar tidak terlalu tinggi */
+  .tema__media { margin-right: calc(var(--gutter) * -1); }
+  .tema__media .img-reveal { aspect-ratio: 2 / 1; }
+  /* peta HP dipendekkan: iframe tetap setinggi semula (610px) supaya kotak info
+     Google tetap terpotong, lalu digeser agar pin (di tengah iframe) jatuh di
+     ±120px — tengah area yang tidak tertutup kartu lokasi (margin-top: -60px) */
+  .lokasi__map { height: 300px; }
+  .lokasi__map iframe { height: 610px; top: -185px; }
+  .lokasi__overlay { position: static; padding: 0 var(--gutter); margin-top: -60px; position: relative; }
+  .loc-card { margin: 0 auto 36px; width: 100%; box-shadow: 6px 6px 0 var(--lime); }
+    .deco--zigzag { right: -2%; width: 24%; }
+    .deco--sq { width: 80px; right: 4%; top: 40px; }
+  .partners__grid { background-size: 135px 78px; background-position: center; }
+    .deco--sq-b { right: 4%; top: 20px; }
+    .deco--tema-b { margin-left: calc(-10% - var(--gutter)); }
+  .days { --day-min: 150px; --sliver: 30px; --lap: 6px; }
+  .day { padding: 15px 12px; }
+  .days-nav button { width: 46px; height: 46px; }
+  .jrow { grid-template-columns: 1fr auto; column-gap: 10px; row-gap: 4px; align-items: center; --dot-y: 21px; }
+  .jrow time { grid-column: 1; grid-row: 1; }
+  /* tag menempel di tepi kanan, teks tegak — sama seperti kartu Durasi */
+  .jrow { padding-right: 34px; }
+  .jrow .tag { position: absolute; top: 0; right: 0; padding: 8px 3px; writing-mode: vertical-rl; line-height: 1; }
+  .jrow > div { grid-column: 1 / -1; grid-row: 2; }
+  .jrow.is-live time, .jrow:has(.jopen) time, .jrow:has(.jnext) time { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  .jgrid { grid-template-columns: 1fr; }
+  .footer__grid { grid-template-columns: 1fr; }
+  /* layanan tetap horizontal di mobile — dipadatkan agar muat 1 layar */
+  .layanan__pin { min-height: 100svh; padding: calc(76px + 1vh) 0 3vh; }
+  .layanan__head { margin-bottom: 3vh; }
+  .deco--blocks { width: 64px; left: 12%; bottom: calc(100% + 10px); }
+  .layanan__head .sec-num { margin-bottom: 10px; }
+  /* petunjuk scroll HP: tengah bawah di bawah kartu; meniru .hero__scroll */
+  .layanan__pin { padding-bottom: calc(2vh + 28px); }
+  .layanan__scroll { position: absolute; left: 50%; bottom: 1.2vh; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--grey-2); }
+  .layanan__scroll i { width: 2px; height: 20px; background: rgba(255, 255, 255, .2); position: relative; overflow: hidden; }
+  .layanan__scroll i::after { content: ''; position: absolute; inset: 0; background: var(--lime); animation: scrollline 1.8s var(--ease) infinite; }
+  .layanan__head .title { font-size: clamp(24px, min(7vw, 4.4vh), 34px); }
+  .layanan__head .sec-sub { margin-top: 10px; font-size: 14.5px; line-height: 1.5; }
+  .layanan__track { gap: 14px; }
+  .lcard { width: min(82vw, 380px); min-height: 0; padding: 22px; }
+  .lcard__num { margin-bottom: 0; }
+  .lcard__free { top: 18px; right: 18px; }
+  .lcard__icon { width: 48px; height: 48px; margin: 18px 0 14px; }
+  .lcard__icon svg { width: 26px; height: 26px; }
+  .lcard h3 { font-size: 20px; margin-bottom: 14px; }
+  .lcard ul { gap: 8px; }
+  .lcard li, .lcard p { font-size: 14.5px; }
+  .lcard--cta h3 { font-size: 24px; }
+  /* asatidz dipin setinggi layar juga: selama pin aktif section-nya tidak bisa
+     di-scroll vertikal, jadi kalau judul + kartu lebih tinggi dari layar,
+     kartunya terpotong di bawah. Semua ukuran vertikalnya diikat ke tinggi
+     layar, cara yang sama seperti layanan di atas. */
+  .asatidz__pin { min-height: 100svh; padding: calc(76px + 1vh) 0 3vh; }
+  .asatidz .sec-head { margin-bottom: 3vh; }
+  .asatidz .sec-num { margin-bottom: 10px; }
+  .asatidz .sec-head .title { font-size: clamp(24px, min(7vw, 4.4vh), 34px); }
+  .asatidz .sec-head .sec-sub { margin-top: 10px; font-size: 14.5px; line-height: 1.5; }
+  /* aspect-ratio 3/4 → tinggi = basis x 1.33; 34vh menahannya di ~45vh */
+  .asatidz__grid > .ustadz { flex: 0 0 min(76vw, 42vh); min-width: 0; }
+  /* kartu yang paling terlihat di frame (.is-front, diatur asatidz.js) ukuran
+     penuh; tetangganya mengecil ke arah kartu depan. Pakai properti `scale`
+     (bukan transform) agar tidak bentrok dengan transform animasi masuk GSAP
+     dan tidak mengubah tata letak → snap geser tetap pas */
+  .asatidz__grid > .ustadz { scale: .86; transform-origin: 100% 100%; transition: scale .35s var(--ease); }
+  .asatidz__grid > .ustadz.is-front { scale: 1; }
+  .asatidz__grid > .ustadz.is-front ~ .ustadz { transform-origin: 0 100%; } /* HP: ukuran tetap, digeser */
+  .ustadz__body { padding: 12px; min-height: 73px; }
+  .ustadz:not(.ustadz--soon) .ustadz__body::before, .ustadz:not(.ustadz--soon) .ustadz__body::after { left: 12px; width: 38px; height: 38px; }
+  .ustadz:not(.ustadz--soon) .ustadz__body::after { background-size: 21px; }
+  .ustadz__body h3 { font-size: 15px; }
+  .ustadz__body small { font-size: 12px; }
+  .ustadz--soon .q { width: 30px; height: 30px; top: 10px; right: 10px; font-size: 16px; }
+  .asatidz__note { margin-top: 2.2vh; font-size: 12.5px; }
+}
+@media (max-width: 560px) {
+  .days { --day-min: 128px; --sliver: 24px; --lap: 6px; }
+  @media (max-width: 380px) { .days { --day-min: 118px; --sliver: 22px; } }
+  .day small { font-size: 10px; }
+  .day span { font-size: 13px; }
+  .hero { padding-top: 104px; }
+  .hero__visual { max-width: 210px; }
+  /* tetap 3 kolom satu baris di HP — angka & keterangan dirapatkan */
+  .stats b { padding: 14px 12px 12px; font-size: clamp(24px, 8vw, 32px); }
+  .stats span { padding: 9px 12px; font-size: 12px; }
+  .soon { grid-template-columns: 1fr; }
+  .logo-tile { width: 112px; height: 112px; }
+  .marquee__track { font-size: 13px; }
+  .marquee__group { gap: 16px; padding: 12px 16px 12px 0; }
+  .plist { gap: 16px; }
+  .plogo, .pgroup--main .plogo { width: calc(50% - 8px); height: 110px; padding: 18px; }
+  .tema__copy > p:not(.kicker) { font-size: 14px; }
+  .sec-sub { font-size: 16px; }
+  .countdown { justify-content: center; }
+  .footer__brand { flex-direction:column; }
+  .footer__logo { align-self:center; margin-bottom:32px; }
+  .footer__brand img { width:150px; height:auto; }
+  .footer__bottom { flex-direction:column; align-items:center; text-align:center; }
+}
+

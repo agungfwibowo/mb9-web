@@ -1,0 +1,10 @@
+/* ---------- Marquee ---------- */
+.marquee { overflow: hidden; background: var(--lime); border-block: 2px solid var(--ink); transform: rotate(-1.6deg) scale(1.03); margin: -10px 0; position: relative; z-index: 3; }
+.marquee--dark { background: var(--ink); color: var(--white); }
+.marquee__track { display: flex; width: max-content; animation: marquee var(--dur, 40s) linear infinite; font: 700 clamp(16px, 2vw, 22px)/1 var(--mono); text-transform: uppercase; white-space: nowrap; will-change: transform; }
+/* tiap grup membawa jarak di kanannya sendiri → -50% tepat 1 grup, loop mulus */
+.marquee__group { display: flex; flex: none; align-items: center; gap: 28px; padding: 18px 28px 18px 0; }
+.marquee__group b { color: var(--lime); }
+.marquee:hover .marquee__track { animation-play-state: paused; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+

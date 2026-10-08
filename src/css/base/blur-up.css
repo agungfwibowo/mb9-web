@@ -1,0 +1,13 @@
+/* ---------- Blur-up ---------- */
+/* --lqip = placeholder 20px (base64, <300 byte) yang ditulis inline di HTML;
+   jadi latar buram sampai foto asli selesai diunduh, lalu saling cross-fade. */
+.lqip { position: relative; display: block; }
+.lqip::before {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background: var(--lqip) center / cover no-repeat; filter: blur(14px); transform: scale(1.08);
+  transition: opacity .5s var(--ease);
+}
+.lqip img { position: relative; z-index: 1; opacity: 0; transition: opacity .5s var(--ease); }
+.lqip.is-loaded::before { opacity: 0; }
+.lqip.is-loaded img { opacity: 1; }
+

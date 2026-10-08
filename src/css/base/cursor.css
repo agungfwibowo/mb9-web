@@ -1,0 +1,21 @@
+/* ---------- Scroll progress ---------- */
+.scroll-progress { position: fixed; inset: 0 0 auto 0; height: 4px; z-index: 9980; pointer-events: none; }
+.scroll-progress span { display: block; height: 100%; background: var(--blue); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* ---------- Custom cursor (fine pointers only) ---------- */
+.cursor { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .cursor {
+    display: grid; place-items: center; position: fixed; left: 0; top: 0; z-index: 9995; pointer-events: none;
+    width: 14px; height: 14px; margin: -7px 0 0 -7px; background: var(--lime); border: 2px solid var(--ink);
+    transition: width .35s var(--ease), height .35s var(--ease), margin .35s var(--ease), background .3s, border-color .3s;
+    mix-blend-mode: normal;
+  }
+  .cursor.is-hover { width: 44px; height: 44px; margin: -22px 0 0 -22px; background: transparent; }
+  .cursor.is-on-dark { border-color: var(--white); }
+  .cursor.has-label { width: 92px; height: 92px; margin: -46px 0 0 -46px; background: var(--lime); }
+  .cursor__label { font: 700 12px/1 var(--mono); text-transform: uppercase; color: var(--ink); opacity: 0; transition: opacity .2s; }
+  .cursor.has-label .cursor__label { opacity: 1; }
+  .cursor.is-hidden { opacity: 0; }
+}
+

@@ -1,0 +1,122 @@
+/* ---------- Asatidz ---------- */
+.asatidz { background: var(--white); padding: 0; }
+/* ukurannya masih diikat ke tinggi layar (tampilan sama seperti saat dulu di-pin) */
+.asatidz__pin { position: relative; z-index: 1; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: clamp(84px, 9vh, 150px) 0 clamp(40px, 6vh, 90px); }
+.asatidz .sec-head .title { font-size: clamp(24px, min(5vw, 5.5vh), 60px); }
+.asatidz .sec-head { margin-bottom: min(64px, 5vh); }
+.asatidz .container { position: relative; z-index: 1; }
+/* satu baris; jika melebihi layar → digeser mendatar biasa (jari/trackpad, mouse:
+   seret — lihat asatidz.js). Scrollbar disembunyikan. Margin auto di kartu
+   pertama/terakhir = rata tengah bila muat, tanpa memotong sisi kiri bila tidak. */
+.asatidz__grid {
+  /* position: relative → offsetLeft kartu diukur dari deretan (lihat markFront) */
+  position: relative; flex: none; align-items: flex-start; display: flex; flex-wrap: nowrap; gap: var(--ast-gap); --ast-gap: 16px; padding: 0 var(--ast-pad, var(--gutter));
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; /* tak ada gulir vertikal di dalamnya */
+  /* hanya sumbu x yang ditahan (cegah geser-kembali browser); sumbu y dibiarkan
+     agar usapan naik/turun di atas kartu tetap menggulir halaman (HP) */
+  touch-action: pan-x pan-y;
+  /* snap: kartu berlabuh di --ast-pad (dihitung asatidz.js) → 1/2/3 kartu yang muat
+     penuh selalu pas di tengah layar, tetangganya mengintip sama lebar */
+  scroll-snap-type: x mandatory; scroll-padding-inline: var(--ast-pad, var(--gutter));
+  cursor: grab; user-select: none; -webkit-user-select: none;
+}
+.asatidz__grid::-webkit-scrollbar { display: none; }
+.asatidz__grid.is-dragging { cursor: grabbing; scroll-snap-type: none; } /* seret mouse: snap menyusul saat dilepas */
+/* boleh menyusut s/d 85% → bila hampir muat, semua kartu pas di tengah tanpa digeser */
+.asatidz__grid > .ustadz { --ust-w: min(280px, 32vh); flex: 0 1 var(--ust-w); min-width: calc(var(--ust-w) * .85); scroll-snap-align: start; }
+.asatidz__grid > .ustadz:first-child { margin-left: auto; }
+.asatidz__grid > .ustadz:last-child { margin-right: auto; }
+@media (max-width: 860px) { .layanan__track { touch-action: pan-y; } } /* HP: geser horizontal ditangani JS (→ gulir halaman) */
+.ustadz { position: relative; aspect-ratio: 1; background: var(--paper); border: 2px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.ustadz img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: transform .8s var(--ease), filter .6s; }
+.ustadz:hover img { transform: scale(1.06); filter: grayscale(0); }
+/* min-height = padding + nama 2 baris + peran → kotak nama sama tinggi, teks rata atas */
+.ustadz__body { position: relative; min-height: 85px; padding: 16px; background: var(--ink); color: var(--white); box-shadow: inset 1px 0 0 rgba(255, 255, 255, .22); }
+.ustadz__body h3 { font: 700 15px/1.25 var(--mono); }
+/* tab ikon mic di atas nama (kiri): ::before = kotak, warnanya ikut latar body
+   (hitam/biru/pink); ::after = ikon (path "mic" dari JICONS, putih lewat data URI),
+   terpisah supaya hanya ikonnya yang berdenyut saat kartu "Berlangsung" */
+.ustadz:not(.ustadz--soon) .ustadz__body::before,
+.ustadz:not(.ustadz--soon) .ustadz__body::after { content: ''; position: absolute; left: 16px; bottom: 100%; width: 34px; height: 34px; }
+.ustadz:not(.ustadz--soon) .ustadz__body::before { background: inherit; }
+.ustadz:not(.ustadz--soon) .ustadz__body::after { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3M8 21h8'/%3E%3C/svg%3E") center / 18px no-repeat; }
+/* denyut "ngebeat" seperti orang bicara: dug-dug, jeda, lalu tiga ketukan tak
+   seragam, jeda lagi — satu putaran 2,4 dtk */
+.ustadz.is-live .ustadz__body::after { animation: mic-beat 2.4s ease-out infinite; }
+@keyframes mic-beat {
+  0%, 26%, 48%, 84%, 100% { transform: scale(1); }
+  6%  { transform: scale(1.3); }
+  12% { transform: scale(.95); }
+  18% { transform: scale(1.18); }
+  54% { transform: scale(1.32); }
+  60% { transform: scale(.94); }
+  66% { transform: scale(1.14); }
+  72% { transform: scale(.97); }
+  78% { transform: scale(1.24); }
+}
+@media (prefers-reduced-motion: reduce) { .ustadz.is-live .ustadz__body::after { animation: none; } }
+.ustadz__body small { display: block; color: var(--lime); font: 12px/1.25 var(--mono); }
+/* Kajiannya sedang berlangsung (markAsatidzLive di main.js) */
+/* dibuka dari nama di jadwal: kotak nama berkedip lime (teks jadi gelap) */
+.ustadz.is-flash .ustadz__body { animation: ust-flash .9s steps(1) 3; }
+.ustadz.is-flash .ustadz__body small { animation: ust-flash-sub .9s steps(1) 3; }
+@keyframes ust-flash { 0% { background: var(--lime); color: var(--ink); } 50% { background: var(--ink); color: var(--white); } }
+/* ikon mic putih → gelap saat kotaknya lime (kotak ikon ::before ikut background: inherit) */
+.ustadz.is-flash .ustadz__body::after { animation: ust-flash-ico .9s steps(1) 3; }
+@keyframes ust-flash-ico { 0% { filter: brightness(0); opacity: .85; } 50% { filter: none; opacity: 1; } }
+@keyframes ust-flash-sub { 0% { color: var(--ink); } 50% { color: var(--lime); } }
+.ustadz.is-live { z-index: 1; border-color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); }
+.ustadz.is-live.is-pink { border-color: var(--pink); box-shadow: inset 0 0 0 2px var(--pink); }
+.ustadz__badge { position: absolute; top: 0; left: 0; right: 0; z-index: 1; display: flex; align-items: center; width: auto; box-sizing: border-box; padding: 6px 10px; }
+.ustadz__badge { text-decoration: none; }
+/* dibuka dari badge asatidz: acaranya di jadwal berkedip (class .is-flash
+   dinyala-matikan JS). Saat menyala garis waktu ikut menyesuaikan: cincin titik &
+   latar jam jadi lime agar menyatu, garis dipertegas agar tetap terlihat. Saat
+   padam semuanya kembali ke gaya aslinya (Berlangsung/Selesai/hover). */
+/* selama urutan kedip (.is-flashing) transisi dimatikan → latar, cincin & garis berganti serempak */
+#jadwalPanel .is-flashing, #jadwalPanel .is-flashing *, #jadwalPanel .is-flashing::before, #jadwalPanel .is-flashing::after,
+#jadwalPanel .is-flashing *::before, #jadwalPanel .is-flashing *::after { transition: none !important; }
+#jadwalPanel .jrow.is-flash, #jadwalPanel .jcard.is-flash { background: var(--lime); box-shadow: inset 0 0 0 3px var(--blue); }
+#jadwalPanel .jrow.is-seq.is-flash::after { box-shadow: 0 0 0 3px var(--lime); }
+#jadwalPanel .jcard.is-flash .jstop i { box-shadow: 0 0 0 4px var(--lime); }
+#jadwalPanel .jrow.is-flash::after, #jadwalPanel .jcard.is-flash .jstop i { animation: none; } /* denyut Berlangsung jeda saat menyala */
+#jadwalPanel .jcard.is-flash .jstop time { background: var(--lime); }
+#jadwalPanel .jrow.is-seq.is-flash::before, #jadwalPanel .jcard.is-flash .jstop::before { background: var(--ink-3); }
+.ustadz__go { margin-left: auto; padding-left: 8px; font-size: 13px; line-height: 1; transition: transform .25s var(--ease); }
+.ustadz__badge:hover .ustadz__go, .ustadz__badge:focus-visible .ustadz__go { transform: translateX(3px); }
+/* denyut di titik badge (cincin di luar badge terpotong tepi kartu) */
+.ustadz > .jlive::before { width: 8px; height: 8px; animation: dot-pulse 1.2s ease-out infinite; }
+/* latar badge Berlangsung: polos (kilau berjalan dihapus — denyut sudah ada di ikon mic) */
+.ustadz > .jlive { background: var(--blue); }
+.ustadz.is-pink > .jlive { background: var(--pink); }
+/* panah badge Berlangsung bergerak maju-mundur → mengajak membuka jadwal */
+.ustadz > .jlive .ustadz__go { animation: go-nudge 1.2s ease-in-out infinite; }
+@keyframes go-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+@keyframes dot-pulse { 0% { box-shadow: 0 0 0 0 rgba(197, 250, 1, .95); transform: scale(1); } 50% { transform: scale(1.25); } 100% { box-shadow: 0 0 0 9px rgba(197, 250, 1, 0); transform: scale(1); } }
+/* punya jadwal hari ini (belum mulai / sudah selesai) — gaya sama dengan badge tab hari */
+.ustadz__badge--today, .ustadz__badge--next, .ustadz__badge--done { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,.18); }
+.ustadz__badge--today { background: var(--blue); color: var(--white); } /* biru polos (Berlangsung: gradien + titik berdenyut) */
+.ustadz__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--lime); animation: blink 1s steps(2) infinite; }
+.ustadz__badge--next { background: var(--ink); color: var(--lime); } /* sesi di hari acara berikutnya */
+.ustadz__badge--done { background: var(--grey-2); color: var(--ink-2); }
+.ustadz--soon { background: repeating-linear-gradient(-45deg, var(--paper) 0 14px, #e2e2df 14px 28px); }
+/* siluet ikut alur flex (bukan absolute) → selalu menempel di atas kotak nama, setinggi apa pun kotaknya.
+   Mengisi sisa tinggi kartu di bawah jarak atas (ruang badge + padding); gambarnya
+   rata bawah (preserveAspectRatio xMidYMax) → tak tertutup badge. */
+.ustadz .sil { display: block; flex: 1 1 0; min-height: 0; width: 100%; margin-top: 44px; color: var(--grey-2); transition: color .4s, transform .6s var(--ease); }
+.ustadz--soon:hover .sil { color: var(--grey); }
+/* pemateri ikhwan yang kajiannya sedang berlangsung: latar & siluet biru muda */
+.ustadz.is-live:not(.ustadz--akhwat) { background: #dfe7ff; }
+.ustadz.is-live:not(.ustadz--akhwat) .sil { color: #a9bcf3; }
+.ustadz.is-live:not(.ustadz--akhwat) .ustadz__body { background: var(--blue); }
+.ustadz.is-live:not(.ustadz--akhwat) .ustadz__body small { color: #dfe7ff; }
+/* pemateri akhwat: latar & siluet pink */
+.ustadz--akhwat { background: var(--pink-3); }
+.ustadz--akhwat .sil { color: #f3a9cc; }
+/* kotak nama ikut berwarna hanya saat kajiannya berlangsung */
+.ustadz--akhwat.is-live .ustadz__body { background: var(--pink); }
+.ustadz--akhwat.is-live .ustadz__body small { color: var(--pink-3); }
+.ustadz--soon .q { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; display: grid; place-items: center; background: var(--lime); font: 700 20px/1 var(--mono); color: var(--ink); }
+.asatidz__note { margin-top: 30px; padding: 0 var(--gutter); display: flex; justify-content: center; align-items: center; gap: 14px; text-align: left; flex-wrap: nowrap; font: 700 14px/1.4 var(--mono); text-transform: uppercase; }
+.asatidz__note::before { content: ''; width: 12px; height: 12px; background: var(--blue); animation: blink 1s steps(2) infinite; }
+

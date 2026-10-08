@@ -1,0 +1,21 @@
+/* ---------- Preloader ---------- */
+.preloader { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; background: var(--lime); }
+html:not(.js) .preloader { display: none; }
+.preloader__inner { position: relative; z-index: 2; display: grid; justify-items: center; gap: 18px; }
+.preloader__mark { width: clamp(120px, 30vw, 170px); height: auto; animation: mark-float 1.6s ease-in-out infinite alternate; }
+.preloader__text { font-weight: 700; font-size: 15px; color: var(--ink); }
+.preloader__text .hl { color: var(--ink); background: var(--ink); color: var(--lime); padding: 0 6px; }
+.preloader__count { font-size: 56px; font-weight: 700; color: var(--ink); line-height: 1; }
+.preloader__panels { position: absolute; inset: 0; display: flex; z-index: 1; pointer-events: none; }
+.preloader__panels i { flex: 1; background: var(--ink); transform: scaleY(0); transform-origin: 50% 100%; }
+/* naik-turun simetris; pakai `translate` (bukan transform) agar tidak bentrok
+   kalau elemennya sewaktu-waktu dianimasikan GSAP lewat transform */
+@keyframes mark-float { from { translate: 0 7px; } to { translate: 0 -7px; } }
+.anim-off .preloader__mark, .anim-off .mmenu__logo { animation-play-state: paused; }
+.is-loaded .preloader { pointer-events: none; }
+/* Mode cepat (kunjungan ulang dalam sesi yang sama, via .pre-quick): tanpa logo &
+   hitungan — 3 panel gelap sudah menutup sejak awal lalu terangkat (main.js) */
+.pre-quick .preloader { background: transparent; }
+.pre-quick .preloader__inner { display: none; }
+.pre-quick .preloader__panels i { transform: scaleY(1); }
+

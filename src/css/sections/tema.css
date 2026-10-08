@@ -1,0 +1,76 @@
+/* ---------- Tema ---------- */
+.tema { background: var(--white); }
+.tema__grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(40px, 7vw, 100px); align-items: center; }
+.tema__media { position: relative; }
+.img-reveal { position: relative; overflow: hidden; clip-path: var(--notch); aspect-ratio: 4/3; background: var(--grey-2); }
+.img-reveal img { width: 100%; height: 118%; object-fit: cover; object-position: 90% 50%; /* kedua host (kanan foto) tetap masuk frame */ filter: grayscale(1) contrast(1.05); transition: filter .8s var(--ease), opacity .5s var(--ease); }
+.img-reveal::after { content: ''; position: absolute; inset: 0; z-index: 2; background: var(--lime); mix-blend-mode: multiply; opacity: .55; transition: opacity .8s var(--ease); }
+.tema__media:hover .img-reveal::after { opacity: .15; }
+/* Glitch: 2 salinan foto (biru & lime, monokrom lewat blend luminosity)
+   dipotong jadi irisan & digeser sesaat, berulang tiap ~4 dtk. */
+.glitch { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.glitch i { position: absolute; inset: 0; background: var(--src) 90% 50% / cover no-repeat, var(--c); background-blend-mode: luminosity; mix-blend-mode: hard-light; opacity: 0; }
+/* satu semburan; dipicu ulang oleh JS dengan jeda acak (lihat main.js) */
+.glitch.is-on i { animation: glitch-a .42s steps(1, end) both; }
+.glitch i:nth-child(1) { --c: var(--blue); }
+.glitch i:nth-child(2) { --c: var(--lime); }
+.glitch.is-on i:nth-child(2) { animation-name: glitch-b; animation-delay: .05s; }
+@keyframes glitch-a {
+  0%, 100% { opacity: 0; clip-path: inset(0 0 100% 0); transform: none; }
+  19% { opacity: .9; clip-path: inset(12% 0 70% 0); transform: translateX(-14px); }
+  38% { opacity: .9; clip-path: inset(48% 0 38% 0); transform: translateX(18px); }
+  57% { opacity: .9; clip-path: inset(78% 0 6% 0); transform: translateX(-8px); }
+  76% { opacity: .9; clip-path: inset(30% 0 58% 0); transform: translateX(10px); }
+  95% { opacity: 0; clip-path: inset(0 0 100% 0); transform: none; }
+}
+@keyframes glitch-b {
+  0%, 100% { opacity: 0; clip-path: inset(0 0 100% 0); transform: none; }
+  19% { opacity: .85; clip-path: inset(62% 0 24% 0); transform: translateX(12px); }
+  38% { opacity: .85; clip-path: inset(8% 0 82% 0); transform: translateX(-20px); }
+  57% { opacity: .85; clip-path: inset(40% 0 44% 0); transform: translateX(6px); }
+  76% { opacity: .85; clip-path: inset(86% 0 2% 0); transform: translateX(-12px); }
+  95% { opacity: 0; clip-path: inset(0 0 100% 0); transform: none; }
+}
+.has-tglitch { position: relative; }
+.tglitch, .tglitch > span { position: absolute; inset: 0; pointer-events: none; }
+.tglitch > span { opacity: 0; animation: tglitch-a 4.6s steps(1, end) var(--d, 0s) infinite; }
+.tglitch > span:nth-child(2) { animation-name: tglitch-b; }
+.tglitch > span:nth-child(1), .tglitch > span:nth-child(1) * { color: var(--blue) !important; }
+.tglitch > span:nth-child(2), .tglitch > span:nth-child(2) * { color: var(--lime) !important; }
+.tglitch > span * { background: transparent !important; opacity: 1 !important; transform: none !important; }
+@keyframes tglitch-a {
+  0%, 100% { opacity: 0; clip-path: inset(0 0 100% 0); transform: none; }
+  2% { opacity: 1; clip-path: inset(10% 0 72% 0); transform: translateX(-6px); }
+  4% { opacity: 1; clip-path: inset(52% 0 30% 0); transform: translateX(7px); }
+  6% { opacity: 1; clip-path: inset(80% 0 4% 0); transform: translateX(-4px); }
+  8% { opacity: 0; }
+}
+@keyframes tglitch-b {
+  0%, 100% { opacity: 0; clip-path: inset(0 0 100% 0); transform: none; }
+  2% { opacity: 1; clip-path: inset(60% 0 22% 0); transform: translateX(5px); }
+  4% { opacity: 1; clip-path: inset(18% 0 66% 0); transform: translateX(-8px); }
+  6% { opacity: 1; clip-path: inset(36% 0 46% 0); transform: translateX(4px); }
+  8% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .glitch, .tglitch { display: none; } }
+.deco--zigzag { width: 26%; right: -6%; top: -6%; }
+.tema { overflow: hidden; }
+.tema > .container { position: relative; z-index: 1; }
+.deco--tema-b { position: relative; display: block; width: 55%; margin: -6% 0 0 -10%; z-index: 1; }
+/* Gambar bleed sampai tepi kiri layar (HP: selebar gutter), sisi kanan tetap sejajar kolom */
+.tema__media { --bleed: calc(max(0px, (100vw - var(--maxw)) / 2) + var(--gutter)); margin-left: calc(var(--bleed) * -1); }
+.tema__media .img-reveal { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%); }
+.tema .title { margin-bottom: 30px; }
+.tema .title .w { display: inline-block; overflow: hidden; vertical-align: top; }
+.tema .title .w > span { display: inline-block; }
+.tema .title .w-hl { background: var(--lime); color: var(--ink); padding: 0 .12em; }
+.lead { font-size: clamp(18px, 1.5vw, 20px); color: var(--ink-2); }
+.stats { list-style: none; padding: 0; margin: 40px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto auto; grid-auto-flow: column; gap: 2px; background: var(--ink); border: var(--bw) solid var(--ink);
+  position: relative; clip-path: var(--notch); }
+/* li jadi display:contents agar baris angka & baris label rata tinggi antar kolom */
+.stats li { display: contents; }
+.stats b { background: var(--white); padding: 20px 20px 18px; font-size: clamp(30px, 3.4vw, 46px); line-height: 1; color: var(--ink); }
+.num-sfx { font-style: normal; font-size: .46em; letter-spacing: .02em; }
+.stats span { padding: 11px 20px; background: var(--ink); color: var(--grey-2); font-size: 13.5px; line-height: 1.35; box-shadow: inset 1px 0 0 rgba(255, 255, 255, .22); }
+.stats li:hover b { background: var(--lime); }
+

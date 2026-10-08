@@ -1,0 +1,99 @@
+/* ---------- Nav ---------- */
+.nav {
+  position: fixed; top: 14px; left: 50%; z-index: 9000; width: calc(100% - 2 * var(--gutter)); max-width: var(--maxw);
+  display: flex; align-items: center; gap: 20px; padding: 10px 10px 10px 16px;
+  background: rgba(236, 236, 234, .78); backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 2px solid var(--ink); transform: translateX(-50%); transition: transform .5s var(--ease), background .3s;
+}
+.nav.is-hidden { transform: translate(-50%, -140%); }
+.nav__brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav__brand img { width: 36px; height: auto; transition: transform .6s var(--ease); }
+.nav__brand:hover img { transform: rotate(-8deg) scale(1.08); }
+/* wordmark dua baris, setipe dengan judul: mono tebal, kapital, tracking rapat */
+.nav__brand span { font: 700 18px/.98 var(--mono); text-transform: uppercase; letter-spacing: -.02em; color: var(--ink); }
+.nav__links { display: flex; gap: 4px; }
+.nav__links a {
+  position: relative; padding: 9px 12px; font: 600 14px/1 var(--sans); text-decoration: none; color: var(--ink-2);
+}
+.nav__links a::after {
+  content: ''; position: absolute; left: 12px; right: 12px; bottom: 3px; height: 3px; background: var(--blue);
+  transform: scaleX(0); transform-origin: 0 50%; transition: transform .4s var(--ease);
+}
+.nav__links a:hover::after, .nav__links a.is-active::after { transform: scaleX(1); }
+.nav__links a.is-active { color: var(--ink); }
+/* penanda "ada jadwal hari ini" di link Jadwal — hanya tampil selama acara */
+.nav__flag { position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; background: var(--blue); animation: blink 1s steps(2) infinite; }
+.nav__flag[hidden] { display: none; }
+.nav__burger { --t: 7px; display: none; width: 46px; height: 46px; border: 0; background: var(--ink); cursor: pointer; position: relative; }
+/* Ikon piksel dalam kisi 3x3 sel berukuran --t: satu kotak nyata (sel kiri-atas)
+   + 5 box-shadow. Jumlah bayangannya sama di kedua state, jadi perpindahannya
+   bisa ditransisikan — bukan ganti gambar.
+   Tutup : [###]      Buka : [#·#]
+           [···]             [·#·]
+           [###]             [#·#]  */
+.nav__burger span {
+  position: absolute; top: calc(50% - var(--t) * 1.5); left: calc(50% - var(--t) * 1.5);
+  width: var(--t); height: var(--t); background: var(--lime);
+  /* Spread .5px pada SEMUA sel (termasuk bayangan di 0 0 yang membungkus kotak
+     aslinya) membuat tiap sel melebar .5px ke segala arah → antar sel saling
+     tindih 1px, tapi tepi atas-bawahnya tetap rata karena semuanya sama besar.
+     Tanpa ini, pada DPI pecahan (1.25x/1.5x) pembulatan sub-piksel menyisakan
+     garis tipis sehingga baloknya terlihat terpotong jadi kotak-kotak. */
+  box-shadow:
+    0 0 0 .5px var(--lime),                                     /* membungkus kotak asli (atas-kiri) */
+    var(--t) 0 0 .5px var(--lime),                              /* atas-tengah  */
+    calc(var(--t) * 2) 0 0 .5px var(--lime),                    /* atas-kanan   */
+    0 calc(var(--t) * 2) 0 .5px var(--lime),                    /* bawah-kiri   */
+    var(--t) calc(var(--t) * 2) 0 .5px var(--lime),             /* bawah-tengah */
+    calc(var(--t) * 2) calc(var(--t) * 2) 0 .5px var(--lime);   /* bawah-kanan  */
+  transition: box-shadow .4s var(--ease);
+}
+/* dua sel tengah meluncur ke pusat; empat sudut tinggal diam → X piksel */
+.menu-open .nav__burger span {
+  box-shadow:
+    0 0 0 .5px var(--lime),
+    var(--t) var(--t) 0 .5px var(--lime),
+    calc(var(--t) * 2) 0 0 .5px var(--lime),
+    0 calc(var(--t) * 2) 0 .5px var(--lime),
+    var(--t) var(--t) 0 .5px var(--lime),
+    calc(var(--t) * 2) calc(var(--t) * 2) 0 .5px var(--lime);
+}
+
+.mmenu {
+  position: fixed; inset: 0; z-index: 8990; background: var(--lime); padding: 110px var(--gutter) 40px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
+  /* layar pendek (HP landscape): isi lebih tinggi dari layar → menu sendiri yang
+     digulir. data-lenis-prevent di HTML: Lenis yang di-stop() saat menu terbuka
+     memblokir gesture scroll di mana pun, kecuali di elemen bertanda itu. */
+  overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  clip-path: circle(0 at calc(100% - 50px) 40px); transition: clip-path .7s var(--ease); visibility: hidden;
+}
+.menu-open .mmenu { clip-path: circle(150% at calc(100% - 50px) 40px); visibility: visible; }
+.mmenu nav { display: grid; gap: 4px; }
+.mmenu nav a {
+  display: flex; align-items: baseline; gap: 14px; font: 700 clamp(30px, 9vw, 48px)/1.15 var(--mono); text-transform: uppercase;
+  color: var(--ink); text-decoration: none; opacity: 0; transform: translateY(24px); transition: opacity .4s, transform .5s var(--ease);
+}
+.mmenu nav a small { font-size: 13px; color: var(--blue); }
+/* penanda "ada jadwal hari ini" di sebelah tautan Jadwal; font-size tetap
+   karena induknya memakai clamp() sampai 48px */
+.mmenu__flag { display: inline-flex; align-items: center; gap: 7px; font: 700 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; font-style: normal; padding: 5px 8px; background: var(--blue); color: var(--white); align-self: center; }
+.mmenu__flag::before { content: ''; flex: none; width: 8px; height: 8px; background: currentColor; animation: blink 1s steps(2) infinite; }
+/* display:inline-flex di atas menimpa display:none bawaan atribut [hidden] */
+.mmenu__flag[hidden] { display: none; }
+.menu-open .mmenu nav a { opacity: 1; transform: none; }
+.menu-open .mmenu nav a:nth-child(2) { transition-delay: .05s; } .menu-open .mmenu nav a:nth-child(3) { transition-delay: .1s; }
+.menu-open .mmenu nav a:nth-child(4) { transition-delay: .15s; } .menu-open .mmenu nav a:nth-child(5) { transition-delay: .2s; }
+.menu-open .mmenu nav a:nth-child(6) { transition-delay: .25s; } .menu-open .mmenu nav a:nth-child(7) { transition-delay: .3s; } .menu-open .mmenu nav a:nth-child(8) { transition-delay: .35s; }
+.mmenu__foot { display: grid; gap: 16px; }
+.mmenu__home { justify-self: end; display: block; line-height: 0; padding: 0; border: 0; background: none; cursor: pointer; }
+.mmenu__home:focus-visible { outline-offset: 4px; }
+.mmenu__logo { display: block; width: clamp(76px, 20vw, 104px); height: auto; animation: mark-float 2.8s ease-in-out infinite alternate; }
+/* baris tanggal/lokasi di kaki menu — sekarang tautan ke seksi jadwal */
+.mmenu__meta { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; line-height: 1.5; margin: 0; padding: 14px 16px; background: var(--ink); color: var(--lime); text-decoration: none; border: var(--bw) solid var(--ink); clip-path: var(--notch); position: relative; transition: background .25s, color .25s; }
+.mmenu__meta::before { content: ''; flex: none; width: 10px; height: 10px; background: currentColor; animation: blink 1s steps(2) infinite; }
+/* tanggal + lokasi dibungkus satu span: tanpa itu flex memecahnya jadi dua kolom
+   yang terlipat sendiri-sendiri; tanggal tidak boleh terpotong di tengah */
+.mmenu__meta [data-mb9="menuDates"] { white-space: nowrap; }
+.mmenu__meta:hover, .mmenu__meta:focus-visible { background: var(--lime); color: var(--ink); }
+

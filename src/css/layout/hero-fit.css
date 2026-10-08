@@ -1,0 +1,80 @@
+/* =========================================================
+   HERO FIT — seluruh hero (s.d. countdown) muat 1 layar.
+   Ukuran diikat ke tinggi viewport (vh) sekaligus lebar (vw).
+   ========================================================= */
+.hero { min-height: 100svh; padding: calc(84px + 2.5vh) 0 3vh; justify-content: center; }
+/* gap dipatok: di atas --maxw lebar kolom sudah tetap, gap 3vw yang terus
+   tumbuh malah menyempitkan kolom teks dan memaksa judul membungkus */
+.hero__inner { flex: 0 1 auto; gap: min(3vw, 48px); grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+.hero .kicker { margin-bottom: 2.2vh; }
+.hero .kicker p { display: flex; margin:0; }
+.hero .kicker p .tag { outline: 1px solid var(--ink); }
+.hero .kicker p .outline { outline: 1px solid var(--ink); padding: 4px 8px; }
+/* batas atas 64px, bukan 80px: .hero__inner berhenti melebar di --maxw (1280px)
+   sehingga kolom teks mentok ~682px. Di atas ~68px baris "Terbesar Di Medan"
+   tidak lagi muat satu baris — terlihat saat zoom browser di bawah 90%. */
+.hero__title { font-size: clamp(28px, min(4.2vw, 7vh), 64px); margin-bottom: 3vh; }
+.hero__meta { margin-bottom: 3vh; gap: 1.4vh 28px; }
+.hero__date strong { font-size: clamp(32px, min(4.6vw, 7vh), 68px); }
+.hero__date span { font-size: clamp(12px, min(1.5vw, 2.2vh), 22px); }
+.hero__facts { font-size: clamp(11.5px, 1.8vh, 15px); line-height: 1.55; }
+.hero__actions .btn { padding-block: clamp(11px, 1.8vh, 16px); }
+.tilt { width: min(100%, 440px, 58vh); }
+.countdown { margin-top: 3.2vh; padding-block: clamp(10px, 1.6vh, 18px); }
+.countdown__units { --cdn: clamp(22px, min(4vw, 4.8vh), 44px); }
+/* Scroll indicator: di desktop duduk di sisi kanan luar container, di HP di tengah bawah */
+.hero__scroll { right: max(14px, calc((100vw - var(--maxw)) / 4)); bottom: calc(3vh + 34px); z-index: 4; gap: 8px; color: var(--ink); }
+.hero__scroll i { height: clamp(36px, 7vh, 64px); }
+
+@media (max-width: 1080px) {
+  /* copy & visual jadi satu grid: logo duduk di samping tanggal */
+  .hero__inner { grid-template-columns: 1fr auto; grid-template-areas: "k k" "t t" "m v" "a v"; column-gap: 16px; align-items: center; }
+  .hero__copy { display: contents; }
+  .hero .kicker { grid-area: k; }
+  .hero__title { grid-area: t; }
+  .hero__meta { grid-area: m; margin-bottom: 2.4vh; }
+  .hero__actions { grid-area: a; align-self: start; }
+  .hero__visual { grid-area: v; order: 0; max-width: none; margin: 0; align-self: center; }
+  .tilt { width: clamp(84px, min(28vw, 24vh), 280px); }
+  .deco--arrows { display: none; }
+  .hero__title { font-size: clamp(26px, min(7.6vw, 6vh), 64px); }
+  .hero__date strong { font-size: clamp(30px, min(7vw, 5.6vh), 56px); }
+}
+@media (max-width: 560px) {
+  .hero { padding: calc(76px + 1.5vh) 0 2vh; }
+  .hero__inner { grid-template-areas: "k k" "t t" "m v" "a a"; }
+  .hero .kicker { font-size: 11px; gap: 8px; margin-bottom: 1.8vh; }
+  .hero .kicker p { flex-direction: column; gap: 0; align-items: flex-start; }
+
+  .hero__title { font-size: clamp(24px, min(8.4vw, 5.2vh), 40px); margin-bottom: 2.2vh; }
+  .hero__title .line { padding: 1px 0; }
+  .hero__meta { flex-direction: column; align-items: flex-start; gap: 1vh; margin-bottom: 2.2vh; }
+  .hero__date strong { font-size: clamp(28px, min(9.4vw, 5.4vh), 42px); }
+  .hero__facts { padding-left: 12px; font-size: clamp(10.5px, 1.6vh, 12.5px); }
+  .hero__actions { gap: 10px; }
+  .hero__actions .btn { padding: clamp(10px, 1.6vh, 14px) 14px; font-size: 11.5px; gap: 8px; }
+  .tilt { width: clamp(72px, min(24vw, 15vh), 120px); }
+  .countdown { margin-top: 2.4vh; padding: 10px 14px; gap: 6px 12px; justify-content: space-between; }
+  .countdown__head { flex-basis: 100%; justify-content: space-between; }
+  .countdown__label { font-size: 10.5px; }
+  .countdown__today { font-size: 10px; padding: 4px 8px; }
+  .countdown__units { --cdg: clamp(24px, 9vw, 48px); width: 100%; justify-content: center; }
+  .countdown__units div { min-width: 0; }
+  .countdown__units { --cdn: clamp(20px, 3.4vh, 28px); }
+  .countdown__units small { font-size: 10px; }
+  .hero { padding-bottom: calc(1.5vh + 30px); }
+  .hero__scroll { writing-mode: horizontal-tb; flex-direction: row; display: flex; align-items: center; left: 50%; right: auto; bottom: calc(1.2vh + 6px); transform: translateX(-50%); font-size: 10px; letter-spacing: .25em; }
+  .hero__scroll i { width: 2px; height: 20px; }
+  .noise {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.35' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .noise, .noise.is-intro, .is-loaded .noise.is-intro, .noise.is-burst { animation: none; }
+  .logo-row, .marquee__track, .footer__big, .footer__logo { animation: none; }
+  .zoom__hint { animation: none; opacity: .85; } /* tanpa animasi: petunjuk tetap tampil */
+  .logo-marquee { overflow-x: auto; }
+}
+

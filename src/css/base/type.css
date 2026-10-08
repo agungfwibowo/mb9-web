@@ -1,0 +1,18 @@
+/* ---------- Tags / kicker / titles ---------- */
+.kicker { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.tag { display: inline-block; padding: 5px 9px; font-size: 12px; background: var(--lime); color: var(--ink); }
+.tag--dark { background: var(--ink); color: var(--lime); }
+.title { font-family: var(--mono); font-weight: 700; font-size: clamp(30px, 5vw, 60px); letter-spacing: -.02em; text-transform: uppercase; color: var(--ink); }
+.title--light { color: var(--white); }
+.notch { display: inline; background: var(--ink); color: var(--white); padding: .06em .3em; box-decoration-break: clone; -webkit-box-decoration-break: clone; line-height: 1.35; }
+.hl-block { display: inline; background: var(--lime); color: var(--ink); padding: 0 .25em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.sec-head { margin-bottom: clamp(36px, 5vw, 64px); max-width: 880px; }
+.sec-head--center { margin-inline: auto; text-align: center; }
+.sec-head--row { max-width: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.sec-num { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 16px; }
+.sec-num::after { content: ''; width: 44px; height: 2px; background: currentColor; }
+.sec-sub { margin-top: 18px; font-size: 18px; color: var(--ink-3); max-width: 640px; }
+.sec-head--center .sec-sub { margin-inline: auto; }
+.sec-sub [data-mb9="hours"] { white-space: nowrap; } /* "08.00 – 21.00 WIB" tidak terpotong */
+.note { margin-top: 28px; font-size: 14px; color: var(--ink-3); max-width: 100%; }
+

@@ -1,0 +1,17 @@
+/* ---------- Mobile: baris tombol aksi ----------
+   Pola "RAM": auto-fit + minmax membuat tombol sama lebar selama dua kolom
+   masih muat, dan otomatis jatuh ke satu kolom selebar penuh kalau tidak.
+   Flexbox tidak bisa ini — pemutusan barisnya memakai flex-basis, bukan
+   min-width, jadi `flex: 1 1 0` + `min-width: max-content` hanya meluber.
+   --colmin = lebar intrinsik tombol terpanjang di baris itu, dibulatkan naik;
+   min(100%, …) menjaga agar tidak meluber saat wadahnya lebih sempit lagi. */
+@media (max-width: 560px) {
+  .hero__actions, .loc-card__actions, .a2hs__actions {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--colmin)), 1fr));
+  }
+  .hero__actions { --colmin: 170px; }
+  .loc-card__actions { --colmin: 180px; }
+  .a2hs__actions { --colmin: 95px; }
+  .hero__actions .btn, .loc-card__actions .btn, .a2hs__actions .btn { justify-content: center; }
+}
+

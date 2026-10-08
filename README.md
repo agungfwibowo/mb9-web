@@ -10,11 +10,16 @@ Produksi: <https://www.muslimberdedikasi.com/>
 ```
 index.html              Halaman utama (satu halaman, semua section)
 privasi/index.html      Ketentuan Layanan & Kebijakan Privasi → diakses di /privasi/
-assets/css/style.css    Seluruh gaya halaman utama
+assets/css/style.css    HASIL BUILD dari src/css (jangan diedit langsung) + style.css.map
 assets/js/data-prod.js  Data konten produksi (jadwal, tenant, sponsor, dll.)
 assets/js/data-dev.js   Data uji, aktif selain di muslimberdedikasi.com (menimpa data-prod.js)
 assets/js/main.js       HASIL BUILD dari src/js (jangan diedit langsung) + main.js.map
 assets/js/privasi.js    Penanda tombol navigasi di halaman Ketentuan & Privasi (tidak dibundel)
+src/css/                Sumber CSS per bagian, entry: src/css/main.css
+  base/                 Token :root, reset, noise, kursor, tipografi, util kecil
+  components/           Preloader, tombol, nav, menu bagikan, tombol mengambang, toast
+  sections/             Satu file per section halaman (hero, jadwal, asatidz, denah, …)
+  layout/               Responsive, hero-fit, layar pendek (sengaja dimuat paling akhir)
 src/js/                 Sumber JS per fitur (ES module), entry: src/js/main.js
   core.js               Helper DOM ($, esc, …), data hari, state lintas modul (lenis)
   navbar.js             Sembunyi/tampil navbar, progress bar, lockNav
@@ -35,17 +40,19 @@ Library pihak ketiga dimuat dari CDN: GSAP + ScrollTrigger, qrcode-generator (cd
 
 ## Menjalankan secara lokal
 
-JS ditulis per modul di `src/js/` lalu dibundel [esbuild](https://esbuild.github.io/) menjadi satu
-file `assets/js/main.js` (diminify + source map). Sekali saja: `npm install`. Lalu:
+JS ditulis per modul di `src/js/` dan CSS per bagian di `src/css/`, lalu dibundel
+[esbuild](https://esbuild.github.io/) menjadi `assets/js/main.js` dan `assets/css/style.css`
+(diminify + source map). Sekali saja: `npm install`. Lalu:
 
 ```bash
 npm run build   # sekali
-npm run watch   # build ulang otomatis tiap file src/js berubah
+npm run watch   # build ulang otomatis tiap file src/js atau src/css berubah
 ```
 
 Urutan import di `src/js/main.js` = urutan eksekusi; modul hanya boleh meng-import modul yang
-dimuat lebih awal. `assets/js/main.js` ikut di-commit (agar bisa dibuka lokal tanpa build), dan
-workflow deploy selalu mem-build ulang dari `src/js`.
+dimuat lebih awal. Urutan `@import` di `src/css/main.css` = urutan cascade, jadi jangan diacak.
+`assets/js/main.js` dan `assets/css/style.css` ikut di-commit (agar bisa dibuka lokal tanpa build),
+dan workflow deploy selalu mem-build ulang dari `src/`.
 
 Jalankan server statis dari root proyek, misalnya:
 
@@ -78,7 +85,7 @@ Catatan: GitHub Pages gratis untuk repo **public**. Untuk repo private butuh aku
 
 ## Merilis perubahan
 
-0. Bila mengubah `src/js`: `npm run build`.
+0. Bila mengubah `src/js` atau `src/css`: `npm run build`.
 1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.312` → `mb9-1.1.313`).
 2. Samakan semua `?v=` di [index.html](index.html) dengan angka versi tersebut
    (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`) dan `privasi.js` di [privasi/index.html](privasi/index.html). Cache lama otomatis dibuang saat worker baru aktif.

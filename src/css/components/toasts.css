@@ -1,0 +1,99 @@
+/* ---------- Ajakan pasang aplikasi (A2HS) ---------- */
+.a2hs {
+  position: fixed; left: 50%; bottom: 18px; z-index: 9300;
+  width: min(560px, calc(100% - 2 * var(--gutter)));
+  display: grid; grid-template-columns: auto 1fr; gap: 14px 16px; align-items: start;
+  padding: 16px; background: var(--white); border: var(--bw) solid var(--ink); clip-path: var(--notch);
+  /* mulai di bawah layar; .is-in yang menaikkannya */
+  translate: -50% 140%; opacity: 0; transition: translate .5s var(--ease), opacity .4s var(--ease);
+}
+.a2hs.is-in { translate: -50% 0; opacity: 1; }
+.a2hs[hidden] { display: none; }
+/* object-fit: contain — logonya 283x346 (tidak persegi), tanpa ini akan
+   dipaksa gepeng mengikuti kotak. Padding + lime membuatnya terbaca
+   sebagai ikon aplikasi, selaras dengan icon-192 milik manifest. */
+.a2hs img { width: 58px; height: 58px; object-fit: contain; padding: 3px; background: var(--lime); border: 2px solid var(--ink); }
+.a2hs__body b { display: block; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+.a2hs__body p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
+.a2hs__never { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12.5px; color: var(--ink-3); cursor: pointer; }
+.a2hs__never input { width: 16px; height: 16px; accent-color: var(--ink); cursor: pointer; }
+.a2hs__actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 560px) {
+  .a2hs { grid-template-columns: 1fr; gap: 12px; }
+  .a2hs img { display: none; }
+  .a2hs__actions { grid-column: 1; }
+}
+
+/* ---------- Status pemasangan aplikasi (mobile) ----------
+   Muncul di ATAS layar dengan caret menunjuk ke bilah notifikasi, tempat
+   Android menampilkan progres pemasangan aslinya. Pembungkus .itoast sengaja
+   tanpa clip-path agar caret di luar kotak tidak ikut terpotong. */
+.itoast {
+  /* caret 10px + top 4px → kotak mulai tepat di 14px, sejajar tepi atas nav
+     (lebarnya pun sama), jadi nav tertutup rapi tanpa garis terang mengintip */
+  position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 4px); z-index: 9500;
+  width: min(420px, calc(100% - 2 * var(--gutter)));
+  translate: -50% -140%; opacity: 0; pointer-events: none;
+  transition: translate .5s var(--ease), opacity .4s var(--ease);
+}
+.itoast.is-in { translate: -50% 0; opacity: 1; pointer-events: auto; }
+.itoast[hidden] { display: none; }
+.itoast__caret {
+  display: block; width: 0; height: 0; margin: 0 auto -1px;
+  border: 10px solid transparent; border-top: 0; border-bottom-color: var(--ink);
+  animation: itoast-nudge 1.1s ease-in-out infinite;
+}
+@keyframes itoast-nudge { 50% { translate: 0 -5px; } }
+.itoast__box { padding: 14px 16px 16px; background: var(--ink); color: var(--white); clip-path: var(--notch); box-shadow: 0 14px 30px rgba(0, 0, 0, .3); }
+.itoast__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.itoast__title { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--lime); }
+.itoast__x { flex: none; width: 28px; height: 28px; margin: -6px -6px -6px 0; display: grid; place-items: center; background: none; border: 0; color: var(--grey-2); font-size: 22px; line-height: 1; cursor: pointer; }
+.itoast__text { margin: 6px 0 0; font-size: 13.5px; line-height: 1.45; color: rgba(255, 255, 255, .82); }
+/* bar tak tentu selama memasang (progres aslinya tidak bisa dibaca halaman);
+   penuh saat selesai */
+.itoast__bar { display: block; height: 4px; margin-top: 12px; background: rgba(255, 255, 255, .14); overflow: hidden; }
+.itoast__bar span { display: block; width: 40%; height: 100%; background: var(--lime); animation: itoast-load 1.3s ease-in-out infinite; }
+@keyframes itoast-load { from { translate: -100% 0; } to { translate: 250% 0; } }
+.itoast.is-done .itoast__bar span, .itoast.is-wait .itoast__bar span { width: 100%; translate: 0 0; animation: none; }
+.itoast.is-wait .itoast__bar span { background: var(--grey); }
+/* caret hanya relevan saat menunjuk progres di bilah notifikasi */
+.itoast.is-done .itoast__caret { visibility: hidden; }
+
+/* ---------- Status sambungan (offline/online) ----------
+   Di BAWAH layar (bukan atas seperti .itoast — tidak menunjuk apa pun, jadi
+   tidak perlu caret), muncul tiap kali koneksi terputus/tersambung lagi. */
+.ntoast {
+  position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom, 0px) + 10px); z-index: 9400;
+  display: flex; align-items: center; gap: 10px;
+  width: max-content; max-width: calc(100% - 2 * var(--gutter));
+  padding: 12px 18px; background: var(--ink); color: var(--white); clip-path: var(--notch);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .3);
+  translate: -50% 140%; opacity: 0; pointer-events: none;
+  transition: translate .5s var(--ease), opacity .4s var(--ease);
+}
+.ntoast.is-in { translate: -50% 0; opacity: 1; pointer-events: auto; }
+.ntoast[hidden] { display: none; }
+.ntoast__dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--grey); }
+.ntoast.is-on .ntoast__dot { background: var(--lime); }
+.ntoast__text { margin: 0; font: 700 13px/1.4 var(--mono); }
+.ntoast.is-on .ntoast__text { color: var(--lime); }
+.ntoast__x { flex: none; width: 24px; height: 24px; margin: -4px -8px -4px 2px; display: grid; place-items: center; background: none; border: 0; color: rgba(255, 255, 255, .6); font-size: 20px; line-height: 1; cursor: pointer; }
+.ntoast__x:hover, .ntoast__x:focus-visible { color: var(--white); }
+/* Dikecilkan (tombol ✕ atau tersambung lagi secara diam-diam): titik kecil di
+   navbar, tepat di kanan logo, sampai sinyal kembali atau diklik untuk membuka
+   lagi. margin-right:auto pindah KE SINI dari .nav__brand (bukan ditambahkan
+   di sampingnya): hanya SATU elemen boleh membawa auto-margin ini, supaya
+   seluruh ruang kosong jatuh tepat sesudah titik (mendorong nav__links dkk ke
+   kanan) — bukan terbagi dua di depan & belakangnya, yang akan menjauhkannya
+   dari logo. width 0 (bukan [hidden]) saat tersembunyi: elemennya tetap ada
+   di flex layout sehingga auto-margin ini tetap bekerja walau titiknya tidak
+   sedang tampil. */
+.nav__status {
+  flex: none; width: 0; height: 10px; padding: 0; border: 0; border-radius: 50%; overflow: hidden;
+  background: var(--grey); cursor: pointer; margin-right: auto; opacity: 0;
+  transition: width .25s var(--ease), opacity .2s;
+}
+.nav__status:not(:disabled) { width: 10px; opacity: 1; animation: nav-status-pulse 1.8s ease-in-out infinite; }
+.nav__status:hover:not(:disabled), .nav__status:focus-visible { background: var(--ink-3); }
+@keyframes nav-status-pulse { 50% { opacity: .35; } }
+

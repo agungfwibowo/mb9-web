@@ -1,0 +1,3 @@
+/* ---------- Reveal defaults (only when JS+GSAP ready) ---------- */
+.gsap-ready .reveal-up { opacity: 0; transform: translateY(40px); }
+

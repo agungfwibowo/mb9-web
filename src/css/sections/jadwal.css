@@ -1,0 +1,458 @@
+/* ---------- Jadwal ---------- */
+.jadwal { background: var(--paper); background-image: linear-gradient(var(--grey-2) 1px, transparent 1px), linear-gradient(90deg, var(--grey-2) 1px, transparent 1px); background-size: 64px 64px; background-position: calc(50% + 32px) -1px; /* simetris: satu garis tepat di tengah */ }
+.jadwal::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 30%, var(--paper) 80%); pointer-events: none; }
+.jadwal .container { position: relative; }
+/* Simpan ke kalender — di mobile jadi dropdown <details>, di desktop dipaksa
+   terbuka lewat JS (atribut open) dan summary-nya disembunyikan */
+/* satu baris: aksi di kiri, panah hari di kanan */
+.jadwal__bar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; margin: -10px 0 26px; }
+.jadwal__actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; }
+.jadwal__bar .days-nav { margin: 0 0 0 auto; }
+.cal { margin: 0; position: relative; }
+.cal > summary { display: inline-flex; list-style: none; }
+.cal > summary::-webkit-details-marker { display: none; }
+/* Caret WAJIB elemen sendiri, bukan ::after. <summary> ini juga .btn, dan
+   .btn::after sudah dipakai menggambar garis diagonal sudut potong dengan
+   position:absolute; inset:-3px. Kalau caret-nya dititipkan ke ::after yang
+   sama, ia ikut terlempar ke pojok kiri-atas di luar tombol (terlihat sebagai
+   segitiga kecil nyasar) DAN garis diagonal sudut potongnya hilang. */
+.cal__caret { font-style: normal; font-size: 11px; line-height: 1; margin-left: -4px; }
+/* mengambang di atas konten, bukan mendorongnya turun */
+.cal__opts {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 20;
+  display: flex; flex-direction: column; gap: 8px; min-width: max(100%, 292px);
+  padding: 10px; background: var(--white); border: var(--bw) solid var(--ink); clip-path: var(--notch);
+}
+.cal__opts .btn { justify-content: flex-start; }
+/* Mobile: pemicu kalender & tombol bagikan diciutkan jadi kotak ikon 46px —
+   seukuran tombol panah, jadi ketiganya sejajar dalam satu baris.
+   Isi dropdown-nya tetap berteks; yang disembunyikan hanya label pemicunya. */
+@media (max-width: 860px) {
+  /* dropdown diposisikan terhadap bar (lebar penuh), bukan tombolnya — sejak
+     ada toggle Tabel/Durasi tombol kalender bergeser ke kanan dan dropdown
+     292px-nya meluber keluar layar */
+  .jadwal__bar { position: relative; margin-bottom: 16px; } /* badge tab (top:-11px) masih punya ruang ±5px */
+  .cal { position: static; }
+  .cal__opts { left: 0; right: 0; min-width: 0; max-width: 420px; }
+  .cal > summary > span, #shareBtn > span { display: none; }
+  .cal > summary { width: 46px; height: 46px; padding: 0; justify-content: center; gap: 0; position: relative; }
+  /* caret dikeluarkan dari alur flex: kalau ikut mengalir, yang dipusatkan
+     adalah PASANGAN ikon+caret sehingga ikonnya sendiri tergeser ke kiri.
+     Ditaruh di kanan-tengah: jauh dari dua sudut potong (kanan-atas &
+     kiri-bawah), jadi tidak bertabrakan dengan garis diagonalnya. */
+  .cal__caret { position: absolute; right: 3px; top: 50%; translate: 0 -50%; font-size: 12px; margin: 0; }
+  .cal > summary svg { width: 16px; height: 16px; }
+  #shareBtn { width: 46px; height: 46px; padding: 0; justify-content: center; gap: 0; }
+  /* potongan 12px pada kotak 46px memakan seperempat sisi; di ukuran ini
+     bentuknya jadi condong dan ikon terbaca melayang. Dikecilkan ke 9px,
+     --edge-s ikut agar garis diagonalnya tetap sepanjang potongannya. */
+  .cal > summary, #shareBtn {
+    --edge-s: 9px;
+    clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+  }
+}
+
+/* Navigasi panah — hanya tampil saat tab menumpuk (lihat .days.is-stacked) */
+.days-nav { display: none; justify-content: flex-end; margin-bottom: 14px; }
+.days-nav.is-on { display: flex; }
+.days-nav button {
+  width: 42px; height: 42px; display: grid; place-items: center; cursor: pointer;
+  background: var(--white); border: 2px solid var(--ink); color: var(--ink); transition: background .2s, color .2s;
+}
+.days-nav button + button { margin-left: -2px; }
+.days-nav button:hover:not(:disabled) { background: var(--lime); }
+.days-nav button:disabled { color: var(--grey); cursor: not-allowed; background: var(--paper); }
+.days-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; }
+
+/* Tab hari versi ringkas: menempel di bawah layar selama tab asli sudah
+   tergulir lewat dan daftar acara masih terlihat (lihat jadwal.js). */
+.dstick {
+  position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom, 0px) + 8px); z-index: 8800;
+  width: calc(100% - 2 * var(--gutter)); max-width: var(--maxw);
+  display: flex; align-items: stretch; background: var(--ink); color: var(--white); border: 2px solid var(--ink);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, .18);
+  /* muncul/hilang cukup memudar (tanpa meluncur) */
+  translate: -50% 0; opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .35s var(--ease), visibility 0s .35s;
+}
+.dstick.is-in { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+@media (min-width: 861px) { .dstick { display: none; } } /* khusus HP/tablet */
+.menu-open .dstick { visibility: hidden; opacity: 0; }
+.dstick button { flex: 0 0 44px; height: 44px; display: grid; place-items: center; cursor: pointer; background: var(--white); color: var(--ink); border: 0; transition: background .2s, color .2s; }
+/* putih = bisa ditekan, abu = mentok; hover (hanya perangkat berkursor) lime */
+@media (hover: hover) { .dstick button:hover:not(:disabled) { background: var(--lime); } }
+.dstick button:disabled { background: #3a3a3a; color: #777; cursor: not-allowed; }
+.dstick button.is-today { background: var(--blue); color: var(--white); } /* menuju hari ini */
+.dstick svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; }
+.dstick__label { flex: 1; min-width: 0; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 10px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; overflow: hidden; }
+.dstick__label small { font-size: inherit; color: var(--lime); }
+.dstick__label span { overflow: hidden; text-overflow: ellipsis; }
+.dstick__label em { font-style: normal; font-size: 10px; padding: 3px 6px; background: var(--blue); color: var(--white); }
+.dstick__label em.is-past { background: #555; }
+@media (max-width: 560px) {
+  /* HP: dua baris seperti kartu hari — "HARI KE-1" di atas, hari + badge di bawah */
+  /* flex-wrap (bukan grid 2 kolom): tanpa badge, baris bawah tetap tepat di tengah */
+  .dstick__label { flex-wrap: wrap; align-content: center; gap: 2px 6px; letter-spacing: .06em; line-height: 1.15; }
+  .dstick__label small { flex: 0 0 100%; text-align: center; font-size: 10px; }
+  .dstick__label em { font-size: 9px; padding: 2px 5px; align-self: center; }
+}
+
+.days {
+  /* ukuran tumpukan — dibaca JS lewat getComputedStyle, jadi titik responsifnya
+     cukup diatur di media query di bawah */
+  --day-min: 168px; --sliver: 38px; --lap: 8px;
+  display: flex; gap: 0;
+  /* padding-top memberi ruang badge (top:-11px) */
+  margin: -12px 0 -2px; padding-top: 12px;
+}
+.day { flex: 1 1 0; min-width: 0; }
+.days { touch-action: pan-y; } /* geser horizontal ditangani JS (jendela tab bergeser) */
+.day + .day { margin-left: -2px; }
+/* clip horizontal saja — badge yang menjorok ke atas (top:-11px) tetap utuh */
+.day { clip-path: inset(-26px 0 0 0); }
+/* transisi baru aktif setelah layout pertama, supaya tidak ada animasi saat load */
+/* warna tab (latar & teks) berganti SEKETIKA, tidak ditransisikan: kalau latar
+   putih→hitam dan teks hitam→putih memudar bersamaan, di tengah jalan keduanya
+   sama-sama abu → tulisan sempat hilang ("ngeblink"); kalau hanya latar yang
+   memudar, teks putih sempat di atas latar putih. Hanya lebar yang dianimasikan. */
+.days.is-ready .day { transition: flex-basis .3s cubic-bezier(.22, .9, .24, 1); }
+/* label menghilang cepat tanpa jeda, lalu muncul hanya setelah lebar kartu
+   selesai bergerak — supaya tidak ada teks terpotong di tengah transisi */
+.days.is-ready .day > * { transition: opacity .1s linear; }
+.days.is-ready .day.is-piled .day__edge,
+.days.is-ready .day:not(.is-piled) > *:not(.day__edge) { transition: opacity .14s linear .17s; }
+
+/* Tumpuk: kartu yang muat tampil normal, sisanya diciutkan jadi strip tipis
+   yang menumpuk di kiri dan/atau kanan (kelas .is-piled diatur di JS). */
+.days.is-stacked .day > * { white-space: nowrap; }
+/* label tegak khusus mode strip — ikut cross-fade dengan isi kartu */
+.day__edge {
+  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; pointer-events: none;
+  writing-mode: vertical-rl; font: 700 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--blue);
+}
+/* tanpa box-shadow blur: clip-path horizontal akan memotongnya, lagipula
+   tumpukan sudah terbaca dari border 2px yang saling menimpa */
+.day.is-piled { flex: 0 0 var(--sliver, 38px); }
+.day.is-piled + .day.is-piled { margin-left: calc(var(--lap, 8px) * -1); }
+.day.is-piled > * { opacity: 0; }
+.day.is-piled .day__edge { opacity: 1; }
+/* strip menggantikan badge, jadi warnanya ikut warna badge yang disembunyikan:
+   selesai = abu badge "Selesai", hari ini = biru badge "Hari ini" */
+.day.is-piled.is-past { background: var(--grey-2); }
+.day.is-piled.is-past .day__edge { color: var(--ink-2); text-decoration: line-through; text-decoration-thickness: 2px; }
+/* strip hari ini berdenyut agar tetap kelihatan walau tinggal sebilah.
+   Kotaknya yang membesar-mengecil, bukan ring box-shadow: .day dipotong
+   clip-path: inset(-26px 0 0 0), jadi apa pun yang digambar di luar sisi
+   kiri/kanan ikut terpotong. transform dikenakan SETELAH clip, jadi aman.
+   z-index menaikkannya di atas strip tetangga yang saling menimpa. */
+.day.is-piled.is-today { background: var(--blue); position: relative; z-index: 2; animation: day-pulse 1.15s ease-in-out infinite alternate; }
+.day.is-piled.is-today .day__edge { color: var(--white); }
+@media (hover: hover) { .day.is-piled.is-today:hover { animation: none; } }
+@keyframes day-pulse { from { transform: scale(1); } to { transform: scale(1.07); } }
+/* hover lime hanya untuk mouse — di layar sentuh :hover "menempel" setelah
+   strip disentuh/diseret */
+@media (hover: hover) {
+  .day.is-piled:hover { background: var(--lime); }
+  .day.is-piled:hover .day__edge { color: var(--ink); text-decoration: none; }
+}
+/* tab aktif yang sedang jadi strip (setelah deretan digeser jari): tetap hitam
+   seperti tab aktif biasa, termasuk saat disentuh; strip hari ini tetap biru */
+.day.is-piled[aria-selected="true"]:not(.is-today),
+.day.is-piled[aria-selected="true"]:not(.is-today):hover { background: var(--ink); }
+.day.is-piled[aria-selected="true"]:not(.is-today) .day__edge { color: var(--lime); text-decoration: none; }
+.day.is-piled[aria-selected="true"]::after { width: 10px; height: 10px; } /* segitiga sudut diperkecil di strip */
+.day {
+  position: relative; padding: 18px 16px; text-align: left; background: var(--white); border: 2px solid var(--ink); cursor: pointer;
+  display: grid; gap: 4px;
+}
+.day small { font: 700 11px/1 var(--mono); color: var(--blue); letter-spacing: .1em; text-transform: uppercase; }
+.day b { font: 700 clamp(17px, 2vw, 24px)/1.1 var(--mono); text-transform: uppercase; }
+.day span { font-size: 14px; color: var(--ink-3); }
+.day:focus-visible { outline-offset: -5px; }
+.day__badge { position: absolute; top: -11px; left: 12px; z-index: 1; box-shadow: 0 4px 10px rgba(0,0,0,.18); padding: 4px 7px; font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.day__badge--today { background: var(--blue); color: var(--white); }
+.day__badge--past { background: var(--grey-2); color: var(--ink-2); }
+.day__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--lime); animation: blink 1s steps(2) infinite; }
+.day.is-past { background: var(--paper); }
+.day.is-past b, .day.is-past span { color: var(--grey); }
+.day.is-past b { text-decoration: line-through; text-decoration-thickness: 2px; }
+.day[aria-selected="true"] { background: var(--ink); color: var(--white); }
+.day.is-past[aria-selected="true"] b, .day.is-past[aria-selected="true"] span { color: var(--grey-2); }
+.day[aria-selected="true"] span { color: var(--grey-2); }
+.day[aria-selected="true"] small { color: var(--lime); }
+.day[aria-selected="true"]::after { content: ''; position: absolute; right: 0; top: 0; width: 22px; height: 22px; background: var(--lime); clip-path: polygon(0 0, 100% 0, 100% 100%); }
+
+.jadwal__panel { background: var(--white); border: 2px solid var(--ink); min-height: 320px; position: relative; overflow: hidden; }
+/* heading "Pagi/Siang/Sore/Malam" — tampilan "Per Waktu" */
+.jperiode { padding: 8px 24px; background: #474747; }
+.jperiode span { font: 700 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--lime); }
+.jperiode small { font: inherit; text-transform: none; color: var(--grey-2); margin: 0 4px; }
+/* Durasi: blok-blok jadwal dipisah pita kosong; blok kedua dst. diberi judul */
+/* panel berisi blok: bingkai pindah ke tiap blok (tanpa jarak) → batas antar-blok jadi garis ganda */
+.jadwal__panel.has-blocks { border: 0; background: transparent; }
+.jadwal__panel.has-blocks > .jblock { position: relative; overflow: hidden; background: var(--white); border: 2px solid var(--ink); }
+.jadwal__panel.has-blocks.is-past > .jblock { background: var(--paper); border-color: var(--grey); }
+/* HP: tab hari + panel jadwal selebar layar (menembus gutter container);
+   bingkai kiri-kanan dilepas karena sudah menempel di tepi layar */
+@media (max-width: 560px) {
+  .jadwal .days, .jadwal__panel { margin-inline: calc(var(--gutter) * -1); }
+  .jadwal__panel, .jadwal__panel.has-blocks > .jblock { border-inline-width: 0; }
+  .jadwal .days .day:first-child { border-left-width: 0; }
+  .jadwal .days .day:last-child { border-right-width: 0; }
+}
+.jblock__title { padding: 14px 24px; background: var(--ink); font: 700 14px/1.2 var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--white); }
+/* Durasi: pilihan Kartu / Daftar di kanan tiap bar hitam — ukuran sama dengan
+   tombol panah ‹ › (44px, setinggi bar, menempel ke tepi kanan, garis pemisah kiri) */
+.jperiode[data-sec-head] { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; padding-top: 0; padding-bottom: 0; }
+.jperiode__view { display: inline-flex; align-self: stretch; margin-right: -24px; }
+.jperiode__view button { display: grid; place-items: center; width: 44px; padding: 0; border: 0; border-left: 1px solid rgba(255, 255, 255, .14); background: transparent; color: var(--grey-2); cursor: pointer; transition: background .25s, color .25s; }
+.jperiode__view button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.jperiode__view button:hover { color: var(--white); }
+.jperiode__view button[aria-pressed="true"] { background: var(--lime); color: var(--ink); }
+.jperiode__view button:focus-visible { outline: 2px solid var(--lime); outline-offset: -2px; }
+.jperiode:first-child { border-top: 0; }
+.jrow { display: grid; grid-template-columns: 170px 1fr auto; gap: 20px; align-items: center; padding: 12px 24px; border-bottom: 1px solid var(--grey-2); transition: background .25s; }
+.jrow:last-child { border-bottom: 0; }
+.jrow:hover { background: var(--lime-3); }
+/* Tabel: rangkaian acara berurutan (tanpa group) → titik + garis vertikal
+   yang menyambung antar baris, di sisi kiri jam */
+.jrow { position: relative; padding-left: 40px; --dot-y: 50%; }
+/* tanpa garis waktu (mis. Daftar layanan) → tidak perlu ruang kiri untuk titik */
+.jrow:not(.is-seq):not(.is-thru) { padding-left: 24px; }
+.jrow.is-seq::before, .jrow.is-thru::before { content: ""; position: absolute; left: 19px; top: 0; bottom: 0; width: 2px; background: var(--grey); }
+.jrow.is-thru::before { background: repeating-linear-gradient(to bottom, var(--grey) 0 5px, transparent 5px 10px); }
+.jrow.is-seq-first::before { top: var(--dot-y); }
+.jrow.is-seq-last::before { bottom: calc(100% - var(--dot-y)); }
+.jrow.is-seq-first.is-seq-last::before { display: none; }
+.jrow.is-seq::after { content: ""; position: absolute; left: 14px; top: var(--dot-y); width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 3px var(--white); transition: box-shadow .25s; }
+.jrow.is-seq:hover::after { box-shadow: 0 0 0 3px var(--lime-3); }
+.jrow.is-seq.is-pink::after { background: var(--pink); }
+.jrow.is-seq.is-pink:hover::after { box-shadow: 0 0 0 3px #fdeef5; }
+/* Sedang berlangsung (hanya rangkaian bertitik, lihat markLive di main.js) */
+.jrow.is-live { background: #edf1ff; }
+.jrow.is-live.is-pink { background: #fdeef5; }
+/* label menempel di jam: desktop di bawah jam, HP sebaris di kanannya */
+.jrow.is-live time { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.jlive { display: inline-flex; align-items: center; gap: 6px; width: max-content; margin: 0; padding: 3px 8px; background: var(--blue); color: var(--white); font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.jlive::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
+.is-pink .jlive { background: var(--pink); }
+.jrow.is-live::after { animation: live-pulse 1.4s ease-out infinite; }
+@keyframes live-pulse { 0% { box-shadow: 0 0 0 0 rgba(33, 80, 245, .55); } 100% { box-shadow: 0 0 0 9px rgba(33, 80, 245, 0); } }
+.jrow.is-live.is-pink::after { animation-name: live-pulse-pink; }
+@keyframes live-pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(224, 51, 138, .55); } 100% { box-shadow: 0 0 0 9px rgba(224, 51, 138, 0); } }
+/* Status layanan di stan: Buka 10.00 / Segera buka / Buka / Segera tutup / Tutup;
+   panggung: Selanjutnya / Segera dimulai / Berlangsung / Selesai */
+.jopen { display: inline-flex; align-items: center; gap: 6px; width: max-content; padding: 3px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.jopen::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.jopen.is-open { background: var(--lime); color: var(--ink); }
+.jopen.is-closed { background: var(--ink-3); color: var(--white); }
+.jopen.is-soon { background: #ffb020; color: var(--ink); }
+.jopen.is-wait { background: var(--white); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--grey-2); }
+.jopen.is-wait::before { background: var(--grey); }
+.jopen.is-break { background: var(--ink); color: var(--white); }
+.jopen.is-break::before { background: var(--lime); animation: blink 1s steps(2) infinite; }
+.jnext { display: inline-flex; align-items: center; width: max-content; padding: 3px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); background: var(--white); box-shadow: inset 0 0 0 1.5px var(--blue); }
+.is-pink .jnext, .jcard.is-pink > .jnext { color: var(--pink); box-shadow: inset 0 0 0 1.5px var(--pink); }
+/* akan mulai/buka ≤30 menit: biru muda (beda dari oranye "Segera tutup") */
+.jopen.is-starting, .jnext.is-starting { background: #dce5ff; color: var(--blue); box-shadow: none; }
+.jrow.is-pink .jnext.is-starting, .jcard.is-pink > .jnext.is-starting { background: #fbdcea; color: var(--pink); box-shadow: none; }
+.jrow:has(.jopen) time, .jrow:has(.jnext) time { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.jdur .jcard > .jnext, .jdur .jcard > .jopen { position: absolute; top: 0; right: 0; z-index: 2; box-sizing: border-box; height: 26px; padding: 0 8px; font-size: 10px; letter-spacing: .04em; }
+.jdur .jcard.is-piled > .jopen, .jdur .jcard.is-piled > .jnext { display: none; }
+/* Acara yang sudah lewat hari ini — gaya sama dengan hari yang sudah lewat
+   (.jadwal__panel.is-past): latar abu-abu muda, isi hitam-putih & pudar,
+   tanpa efek hover. Titik garis waktu diberi abu-abu tersendiri (pseudo). */
+.jrow.is-done, .jdur .jcard.is-done:not(.is-piled), .jdur .jcard.is-done .jstop time,
+.jrow.is-done:hover, .jdur .jcard.is-done:not(.is-piled):hover, .jdur .jcard.is-done:hover .jstop time { background: var(--paper); }
+.jrow.is-done > *, .jdur .jcard.is-done:not(.is-piled) > :not(.jcard__edge) { filter: grayscale(1); opacity: .5; }
+.jdur .jcard.is-done:not(.is-piled) > .jstop { filter: none; opacity: 1; }
+/* diredupkan lewat warna, bukan opacity — latar jam harus tetap pekat menutupi garis timeline */
+.jdur .jcard.is-done .jstop time { color: var(--grey-2); }
+/* label Tutup tetap jelas: jam diredupkan lewat warna, bukan opacity (opacity induk tidak bisa dibatalkan anaknya) */
+.jrow.is-done > time, .jrow.is-done.is-pink > time { filter: none; opacity: 1; color: var(--grey-2); }
+.jdur .jcard.is-done:not(.is-piled) > .jopen { filter: none; opacity: 1; }
+.jrow.is-seq.is-done::after, .jdur .jcard.is-done .jstop i { background: var(--grey); }
+/* Durasi: kartu yang sedang berjalan */
+.jdur .jcard.is-live:not(.is-piled) { background: #edf1ff; }
+.jdur .jcard.is-live.is-pink:not(.is-piled) { background: #fdeef5; }
+.jdur .jcard.is-live .jstop i { animation: live-pulse 1.4s ease-out infinite; }
+.jdur .jcard.is-live.is-pink .jstop i { animation-name: live-pulse-pink; }
+/* tinggi = tepi atas kartu → bawah garis waktu (menutupinya): padding-top 18 + ½ titik 7 + ½ garis 1 */
+.jdur .jcard > .jlive { position: absolute; top: 0; right: 0; z-index: 2; box-sizing: border-box; height: 26px; gap: 5px; padding: 0 6px; font-size: 10px; letter-spacing: .02em; }
+.jdur .jcard.is-piled > .jlive { display: none; }
+/* hover tetap menang atas sorotan "sedang berlangsung" (kartu & latar jam) */
+.jdur .jcard.is-live:not(.is-piled):hover, .jdur .jcard.is-live:hover .jstop time { background: var(--lime-3); }
+.jdur .jcard.is-live.is-pink:not(.is-piled):hover, .jdur .jcard.is-live.is-pink:hover .jstop time { background: #fdeef5; }
+.jdur .jcard.is-live .jstop time { background: #edf1ff; }
+.jdur .jcard.is-live.is-pink .jstop time { background: #fdeef5; }
+@media (prefers-reduced-motion: reduce) { .ustadz > .jlive .ustadz__go, .ustadz > .jlive::before, .jrow.is-live::after, .jdur .jcard.is-live .jstop i, .jdur .jcard.is-piled.is-live .jcard__edge i { animation: none; } }
+/* Tabel: acara yang berjalan bersamaan (field group di data-prod.js) → garis biru kiri */
+/* latar putih (abu-abu khusus untuk acara yang sudah lewat) — paralel cukup ditandai garis biru */
+.jrow.is-grp { box-shadow: inset 4px 0 0 var(--blue); }
+.jrow time { font: 700 15px/1 var(--mono); color: var(--blue); }
+.jrow h3 { font: 700 17px/1.3 var(--sans); }
+.jrow p { margin: 2px 0 0; padding-left: 30px; font-size: 14px; color: var(--ink-3); }
+/* nama asatidz di jadwal → tautan ke kartunya */
+.jnote-ust { color: inherit; text-decoration: underline; text-decoration-color: var(--grey-2); text-underline-offset: 3px; transition: color .2s, text-decoration-color .2s; }
+.jnote-ust:hover, .jnote-ust:focus-visible { color: var(--blue); text-decoration-color: currentColor; }
+.jrow .tag { justify-self: end; }
+.jrow h3, .jcard h3 { display: flex; align-items: flex-start; gap: 10px; }
+.is-pink .jico { stroke: var(--pink); }
+.jrow.is-pink time, .jcard.is-pink time { color: var(--pink); }
+.is-pink .jbar i { background: var(--pink); }
+.is-pink .tag { background: var(--pink-3); color: var(--pink); }
+.jrow.is-pink:hover, .jcard.is-pink:hover { background: #fdeef5; }
+/* pink yang sudah selesai: tetap abu-abu, termasuk saat hover */
+.jrow.is-done.is-pink, .jrow.is-done.is-pink:hover, .jdur .jcard.is-done.is-pink:not(.is-piled), .jdur .jcard.is-done.is-pink:not(.is-piled):hover, .jdur .jcard.is-done.is-pink:hover .jstop time { background: var(--paper); }
+.jico {flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* sesi yang jam-nya tumpang tindih (berjalan bersamaan) ditampilkan sebagai
+   kolom berdampingan, bukan ditumpuk — jelas kelihatan itu pilihan paralel */
+.jgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--grey-2); border-left: 4px solid var(--blue); border-bottom: 1px solid var(--grey-2); }
+.jcard { background: var(--white); padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; transition: background .25s; }
+.jcard:hover { background: var(--lime-3); }
+.jdur { border-bottom: 1px solid var(--grey-2); }
+@media (max-width: 860px) {
+  .jrail { --card-min: 240px; }
+}
+.jdur__head { background: var(--paper); padding: 12px 20px 10px; font: 400 13px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); border-bottom: 1px solid var(--grey-2); }
+.jdur__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.jdur__nav { display: inline-flex; align-self: stretch; margin: -12px -20px -10px 0; }
+.jdur__nav[hidden] { display: none; }
+.jdur__nav button { display: grid; place-items: center; width: 44px; padding: 0; border: 0; border-left: 1px solid var(--grey-2); background: transparent; color: var(--ink); cursor: pointer; transition: background .25s, opacity .25s; }
+.jdur__nav button:hover:not(:disabled) { background: var(--lime); }
+.jdur__nav button:disabled { opacity: .3; cursor: default; }
+.jdur__nav svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.jdur__head b { font-weight: 700; font-size: 15px; color: var(--blue); }
+/* Durasi: kartu berjajar 1 baris, geser horizontal; garis waktu bersambung
+   di atas kartu dengan titik di tiap jam selesai */
+.jrail { --card-min: 260px; --sliver: 38px; overflow: hidden; background: var(--white); touch-action: pan-y; } /* swipe horizontal ditangani JS */
+.jrail__track { display: flex; }
+.jdur .jcard { position: relative; flex: 1 1 0; min-width: 0; border-right: 1px solid var(--grey-2); padding-top: 18px; transition: background .25s, flex-basis .3s cubic-bezier(.22, .9, .24, 1); }
+/* tinggi minimum: cukup untuk jam tegak di strip (140px); grup >2 kartu
+   lebih tinggi karena strip-nya juga memuat badge "+N" */
+.jdur .jcard { min-height: 140px; }
+.jrail--many .jcard { min-height: 160px; }
+/* jam mulai beda-beda (mis. Kajian & Talkshow): strip memuat jam lengkap "19.00 - 20.00" */
+.jrail--range .jcard { min-height: 200px; }
+.jdur .jcard > * { transition: opacity .14s linear .17s; }
+.jrail.no-flex-anim .jcard { transition: none; }
+.jrail__track { position: relative; }
+.jdur .jcard:not(.is-piled) { z-index: 1; background: var(--white); }
+/* aturan di atas lebih spesifik dari .jcard:hover → hover dipasang ulang di sini */
+.jdur .jcard:not(.is-piled):hover { background: var(--lime-3); }
+.jdur .jcard.is-pink:not(.is-piled):hover { background: #fdeef5; }
+.jadwal__panel.is-past .jdur .jcard:not(.is-piled):hover { background: var(--white); }
+/* label strip langsung hilang saat strip melebar jadi kartu (tanpa jeda) */
+.jdur .jcard:not(.is-piled) > .jcard__edge { transition: opacity .06s linear; }
+/* strip tegak (seperti tab hari yang menumpuk) */
+.jdur .jcard.is-piled { flex: 0 0 var(--sliver); padding: 0; overflow: hidden; cursor: pointer; background: var(--white); contain: size; }
+/* contain: size → isi tersembunyi (terlipat di lebar 38px) tidak ikut menentukan tinggi baris */
+.jdur .jcard.is-piled > * { opacity: 0; transition: opacity .1s linear; }
+.jdur .jcard.is-piled > .jcard__edge { opacity: 1; transition: opacity .14s linear .17s; }
+.jdur .jcard.is-gone { display: none; }
+/* strip kiri: garis pemisah pindah ke kanan sudah dari border-right kartu */
+.jdur .jcard.is-piled:last-child { border-right: 0; border-left: 1px solid var(--grey-2); }
+/* masih ada kartu lain di balik strip → garis berlapis di tepi luar */
+/* +1 → satu garis lapis; +2 dst → dua garis */
+.jdur .jcard.is-piled { --b1: var(--white); --b2: var(--white); }
+.jdur .jcard.is-piled.has-more { box-shadow: inset -7px 0 0 var(--b1), inset -8px 0 0 var(--grey-2); }
+.jdur .jcard.is-piled.has-more.is-left { box-shadow: inset 7px 0 0 var(--b1), inset 8px 0 0 var(--grey-2); }
+.jdur .jcard.is-piled.has-more2 { box-shadow: inset -3px 0 0 var(--b2), inset -4px 0 0 var(--grey-2), inset -7px 0 0 var(--b1), inset -8px 0 0 var(--grey-2); }
+.jdur .jcard.is-piled.has-more2.is-left { box-shadow: inset 3px 0 0 var(--b2), inset 4px 0 0 var(--grey-2), inset 7px 0 0 var(--b1), inset 8px 0 0 var(--grey-2); }
+/* strip yang sudah selesai: abu-abu seperti kartu yang sudah lewat (hover tetap lime = bisa diklik).
+   Tiap lapis garis tumpukan (+N) ikut status kartunya: lapis dalam = kartu tersembunyi terdekat
+   (.near-done), lapis luar = kartu-kartu sesudahnya (.far-done) — diatur di syncRail */
+.jdur .jcard.is-piled.is-done { background: var(--paper); }
+.jdur .jcard.is-piled.is-done .jcard__edge { color: var(--grey); }
+.jdur .jcard.is-piled.is-done .jcard__edge i { background: var(--paper); }
+.jdur .jcard.is-piled.near-done { --b1: var(--paper); }
+.jdur .jcard.is-piled.far-done { --b2: var(--paper); }
+.jdur .jcard.is-piled:hover { background: var(--lime-3); }
+.jdur .jcard.is-piled.is-pink:hover { background: #fdeef5; }
+/* strip kartu yang sedang Berlangsung: latar & titik sama dengan versi terbukanya */
+.jdur .jcard.is-piled.is-live { background: #edf1ff; }
+.jdur .jcard.is-piled.is-live.is-pink { background: #fdeef5; }
+.jdur .jcard.is-piled.is-live .jcard__edge i { background: currentColor; animation: live-pulse 1.4s ease-out infinite; }
+.jdur .jcard.is-piled.is-live.is-pink .jcard__edge i { animation-name: live-pulse-pink; }
+.jdur .jcard.is-piled.is-live:hover { background: var(--lime-3); }
+/* kartu jeda/istirahat di rangkaian panggung: latar belang ala kartu "menyusul"
+   (jelas beda dari acara, tetap belang walau sudah lewat), garis waktu putus-putus,
+   titik kosong. Ditaruh setelah aturan .jcard:not(.is-piled) agar tidak tertimpa. */
+.jdur .jcard.jcard--gap, .jdur .jcard.jcard--gap:not(.is-piled), .jdur .jcard.jcard--gap.is-done:not(.is-piled) { background: repeating-linear-gradient(-45deg, var(--white) 0 10px, #f7f7f5 10px 20px); }
+.jdur .jcard.jcard--gap:hover, .jdur .jcard.jcard--gap:not(.is-piled):hover, .jdur .jcard.jcard--gap.is-done:not(.is-piled):hover, .jdur .jcard.jcard--gap:hover .jstop time { background: var(--lime-3); }
+.jcard--gap .jstop::before { background: repeating-linear-gradient(to right, var(--grey) 0 6px, transparent 6px 12px); }
+.jdur .jcard--gap .jstop i, .jdur .jcard--gap.is-done .jstop i { background: var(--white); border: 2px solid var(--grey); box-sizing: border-box; box-shadow: 0 0 0 4px var(--white); }
+.jdur .jcard--gap:hover .jstop i { background: var(--lime-3); box-shadow: 0 0 0 4px var(--lime-3); }
+.jdur .jcard--gap .jstop time, .jdur .jcard--gap.is-done .jstop time { background: var(--white); color: var(--ink-3); }
+.jcard--gap h3 { color: var(--ink-3); }
+/* versi Daftar: baris jeda dengan latar belang yang sama */
+.jrow.jrow--gap { background: repeating-linear-gradient(-45deg, var(--white) 0 10px, #f7f7f5 10px 20px); }
+.jrow.jrow--gap:hover { background: var(--lime-3); }
+.jrow--gap h3, .jrow--gap time { color: var(--ink-3); }
+.jrow--gap .jico { stroke: var(--ink-3); }
+.jrow--gap.is-seq::before { background: repeating-linear-gradient(to bottom, var(--grey) 0 5px, transparent 5px 10px); }
+.jrow--gap.is-seq::after { background: var(--white); border: 2px solid var(--grey); box-sizing: border-box; }
+.jrow--gap.is-seq:hover::after { background: var(--lime-3); }
+.jcard--gap .jico { stroke: var(--ink-3); }
+.jdur .jcard--gap .jcard__edge { color: var(--grey); }
+.jcard--gap .jcard__edge::before { background: repeating-linear-gradient(to right, var(--grey) 0 6px, transparent 6px 12px); }
+.jcard__edge { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 0 14px; opacity: 0; pointer-events: none; color: var(--blue); }
+/* lanjutan garis waktu + titik berongga, sejajar .jstop kartu yang terbuka */
+.jcard__edge::before { content: ""; position: absolute; left: 0; right: 0; top: 24px; height: 2px; background: var(--grey-2); }
+.jcard__edge i { position: relative; flex-shrink: 0; width: 14px; height: 14px; margin-top: 18px; border: 2px solid currentColor; border-radius: 50%; background: var(--white); box-sizing: border-box; transition: background .25s; }
+.jdur .jcard.is-piled:hover .jcard__edge i { background: currentColor; }
+.jcard__edge b { flex: 1; display: grid; place-items: center; writing-mode: vertical-rl; font: 700 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.jcard__edge em { font: 700 10px/1 var(--mono); font-style: normal; padding: 4px 5px; background: var(--ink); color: var(--lime); }
+.is-pink .jcard__edge { color: var(--pink); }
+.jdur .jcard:last-child { border-right: 0; }
+.jstop { position: relative; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.jstop::before { content: ""; position: absolute; left: -20px; right: -20px; top: 50%; height: 2px; transform: translateY(-50%); background: var(--grey-2); }
+.jstop i { position: relative; flex-shrink: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px var(--white); transition: background .25s, box-shadow .25s; }
+.jstop time { position: relative; padding: 0 6px; background: var(--white); transition: background .25s; } /* sama dengan .jcard → latar, cincin & jam berubah serempak saat hover */
+.jcard:hover .jstop i { box-shadow: 0 0 0 4px var(--lime-3); }
+.jcard:hover .jstop time { background: var(--lime-3); }
+.is-pink .jstop i { background: var(--pink); }
+.jcard.is-pink:hover .jstop i { box-shadow: 0 0 0 4px #fdeef5; }
+/* sudah selesai: cincin titik ikut latar abu-abu (termasuk saat hover) */
+.jdur .jcard.is-done .jstop i, .jdur .jcard.is-done:hover .jstop i { box-shadow: 0 0 0 4px var(--paper); }
+.jrow.is-seq.is-done::after, .jrow.is-seq.is-done:hover::after { box-shadow: 0 0 0 3px var(--paper); }
+.jcard.is-pink:hover .jstop time { background: #fdeef5; }
+.jbar { position: relative; display: block; height: 6px; margin: 4px 0 6px; background: var(--paper); }
+.jbar i { position: absolute; top: 0; bottom: 0; background: var(--blue); }
+.view-toggle { display: inline-flex; border: 3px solid var(--ink); }
+.view-toggle[hidden] { display: none; }
+.view-toggle button { padding: 10px 14px; font: 700 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink); background: transparent; border: 0; cursor: pointer; transition: background .25s, color .25s; }
+.view-toggle button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; }
+.view-toggle button span { display: none; } /* ikon saja di semua ukuran layar; nama ada di aria-label & title */
+.view-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; }
+.view-toggle button + button { border-left: 3px solid var(--ink); }
+.view-toggle button[aria-pressed="true"] { background: var(--ink); color: var(--lime); }
+.view-toggle button:not([aria-pressed="true"]):hover { background: var(--lime-3); }
+.jcard time { font: 700 14px/1 var(--mono); color: var(--blue); }
+.jcard h3 { font: 700 16px/1.3 var(--sans); }
+.jcard p { margin: 0; padding-left: 30px; font-size: 13px; color: var(--ink-3); }
+.jcard .tag { align-self: flex-start; margin: 6px 0 0 30px; }
+/* beberapa acara berjam sama dalam satu kartu Durasi */
+/* label (Layanan, Lomba, …) diputar tegak & menempel di tepi kanan kartu,
+   sejajar judul acaranya. Ikut alur grid (bukan absolute) → tinggi baris
+   acara minimal setinggi labelnya, jadi label di kartu gabungan berjarak. */
+.jcard__item { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto 1fr; column-gap: 8px; row-gap: 1px; align-items: start; }
+.jcard__item h3, .jcard__item p { grid-column: 1; }
+.jcard__item .tag { grid-column: 2; grid-row: 1 / 4; margin: 0 -20px 0 0; padding: 8px 3px; writing-mode: vertical-rl; line-height: 1; }
+.jcard__item + .jcard__item { margin-top: 10px; padding-top: 12px; border-top: 1px dashed var(--grey-2); }
+.jadwal__panel.is-past { background: var(--paper); border-color: var(--grey); }
+.jadwal__panel.is-past > :not(.jadwal__past) { filter: grayscale(1); opacity: .5; }
+.jadwal__panel.is-past .jrow:hover, .jadwal__panel.is-past .jcard:hover { background: transparent; }
+.jadwal__past { display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: var(--grey-2); color: var(--ink-2); font-size: 13px; font-weight: 500; border-bottom: 2px solid var(--grey); }
+.jadwal__past span { padding: 4px 8px; background: var(--ink-2); color: var(--white); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.soon { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; padding: clamp(28px, 5vw, 56px); }
+.soon__icon { width: 110px; height: 110px; display: grid; place-items: center; background: var(--lime); clip-path: var(--notch); }
+.soon__icon svg { width: 56px; height: 56px; fill: none; stroke: var(--ink); stroke-width: 2; }
+.soon__icon .hand { transform-origin: 28px 28px; animation: spin 6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.soon h3 { font: 700 clamp(22px, 3vw, 34px)/1.15 var(--mono); text-transform: uppercase; margin-bottom: 10px; }
+.soon p { color: var(--ink-3); margin: 0; }
+.soon__fixed { margin-top: 18px; display: inline-flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 16px; background: var(--paper); font: 600 14px/1.3 var(--mono); }
+.soon__fixed b { color: var(--blue); }
+

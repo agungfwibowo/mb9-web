@@ -1,0 +1,40 @@
+/* ---------- Tombol kembali ke atas (mengambang) ----------
+   Di bawah A2HS/ntoast (z-index lebih kecil): kartu itu menutupinya saat tampil. */
+.totop {
+  position: fixed; right: var(--gutter); bottom: max(18px, env(safe-area-inset-bottom, 0px) + 10px); z-index: 9200;
+  display: grid; place-items: center; width: 48px; height: 48px;
+  background: var(--ink); color: var(--lime); clip-path: var(--notch);
+  translate: 0 160%; opacity: 0; pointer-events: none;
+  transition: translate .45s var(--ease), opacity .3s var(--ease), background-color .2s, color .2s;
+}
+.totop.is-in { translate: none; opacity: 1; pointer-events: auto; }
+.totop svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; }
+.totop:hover, .totop:focus-visible { background: var(--lime); color: var(--ink); }
+.menu-open .totop { translate: 0 160%; opacity: 0; pointer-events: none; }
+
+/* ---------- Sembunyikan brand (mengambang, tenant.js) ----------
+   Tampil selama daftar brand terbuka & terlihat sementara tombol aslinya sudah
+   tergulir lewat. Desktop: kanan bawah; HP: ikon X saja di tengah bawah. */
+.btn.tenant-hide {
+  position: fixed; right: var(--gutter); bottom: max(18px, env(safe-area-inset-bottom, 0px) + 10px); z-index: 8900;
+  justify-content: center; padding: 10px 18px; box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
+  translate: 0 160%; opacity: 0; pointer-events: none;
+  transition: translate .45s var(--ease), opacity .3s var(--ease), color .35s var(--ease), bottom .35s var(--ease);
+}
+.btn.tenant-hide.is-in { translate: none; opacity: 1; pointer-events: auto; }
+.btn.tenant-hide:hover svg { transform: translateY(-3px); }
+.menu-open .btn.tenant-hide { translate: 0 160%; opacity: 0; pointer-events: none; }
+.btn.tenant-hide .th-x { display: none; }
+/* HP: ikon X saja (kotak 48px, seperti .totop), teks tetap terbaca pembaca layar */
+@media (max-width: 860px) {
+  .btn.tenant-hide { width: 48px; height: 48px; padding: 0; gap: 0; right: auto; left: 50%; translate: -50% 160%; }
+  .btn.tenant-hide.is-in { translate: -50% 0; }
+  .menu-open .btn.tenant-hide { translate: -50% 160%; }
+  .btn.tenant-hide .th-up { display: none; }
+  .btn.tenant-hide .th-x { display: block; width: 22px; height: 22px; }
+  .btn.tenant-hide:hover svg { transform: none; }
+  .btn.tenant-hide span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+/* desktop (kanan bawah): naik di atas .totop bila tombol itu sedang tampil */
+@media (min-width: 861px) { body:has(.totop.is-in) .btn.tenant-hide { bottom: calc(max(18px, env(safe-area-inset-bottom, 0px) + 10px) + 58px); } }
+

@@ -1,0 +1,66 @@
+/* =========================================================
+   LAYAR PENDEK (HP landscape, ±375-440px)
+   Di tinggi segini isi hero (kicker + judul 3 baris + tanggal + fakta +
+   2 tombol + countdown) dan section layanan/asatidz mustahil muat satu
+   layar. Memaksanya 100svh hanya membuat isinya terpotong — apalagi
+   section yang di-pin tidak bisa di-scroll vertikal. Jadi di sini
+   paksaan satu-layar dilepas: halaman di-scroll biasa, dan kartu
+   digeser mendatar dengan jari (pin GSAP-nya dimatikan di main.js).
+   Nav tidak diperhitungkan karena ikut tersembunyi saat scroll turun.
+   ========================================================= */
+@media (orientation: landscape) and (max-height: 520px) {
+  /* menu mobile: 2 kolom & huruf mengikuti tinggi layar → muat tanpa digulir */
+  .mmenu { padding-top: 96px; padding-bottom: 24px; gap: 20px; }
+  .mmenu nav { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, auto); grid-auto-flow: column; gap: 2px 32px; }
+  .mmenu nav a { font-size: clamp(20px, 6.5vh, 30px); }
+  .mmenu__foot { grid-template-columns: 1fr auto; align-items: end; }
+  .mmenu__home { grid-column: 2; grid-row: 1; }
+  .mmenu__logo { width: clamp(48px, 14vh, 72px); }
+  .hero { min-height: 0; padding: 24px 0 24px; }
+  .hero__scroll, .layanan__scroll { display: none; }
+
+  .layanan__pin, .asatidz__pin { min-height: 0; padding: 28px 0; }
+  .layanan__head, .asatidz .sec-head { margin-bottom: 16px; }
+
+  /* track berhenti jadi "lebar penuh yang digeser GSAP" dan kembali jadi
+     baris biasa yang bisa di-swipe */
+  .layanan__track, .asatidz__grid {
+    width: auto; min-width: 0; justify-content: flex-start;
+    overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory; scroll-padding: 0 var(--gutter);
+    padding-bottom: 10px;
+    touch-action: auto; /* swipe native di mode ini */
+    scrollbar-width: none; /* tetap bisa digeser, scrollbar disembunyikan */
+  }
+  .layanan__track::-webkit-scrollbar { display: none; }
+  .lcard, .asatidz__grid > .ustadz { flex: 0 0 auto; scroll-snap-align: center; }
+  .lcard { width: min(72vw, 360px); min-height: 0; }
+  .asatidz__grid > .ustadz { flex-basis: min(30vw, 200px); min-width: 0; scroll-snap-align: start; }
+}
+
+/* Lightbox gambar asli denah */
+.zoom {
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: #161616; color: var(--white); overflow: hidden; overscroll-behavior: contain;
+}
+.zoom::backdrop { background: transparent; }
+.zoom[open] { animation: fadeIn .25s var(--ease); }
+.zoom__stage { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.zoom__stage.is-drag { cursor: grabbing; }
+.zoom__stage img { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; will-change: transform; -webkit-user-drag: none; }
+.zoom__bar {
+  position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+  display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--white); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--lime);
+}
+.zoom__bar button, .zoom__bar a {
+  width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; color: var(--ink);
+  font: 700 20px/1 var(--mono); text-decoration: none; cursor: pointer;
+}
+.zoom__bar button:hover, .zoom__bar a:hover, .zoom__bar :focus-visible { background: var(--lime); }
+.zoom__bar [data-zoom="close"] { background: var(--ink); color: var(--lime); margin-left: 4px; }
+.zoom__bar [data-zoom="close"]:hover { background: var(--ink-2); }
+.zoom__bar output { min-width: 56px; text-align: center; font-size: 13px; color: var(--ink); }
+.zoom__hint { position: absolute; left: 0; right: 0; top: 16px; margin: 0; text-align: center; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: 0; pointer-events: none;
+  text-shadow: 0 1px 3px #000; animation: zoom-hint 4s var(--ease); }
+/* petunjuk muncul sebentar tiap lightbox dibuka, lalu memudar (tidak menutupi gambar) */
+@keyframes zoom-hint { 0%, 75% { opacity: .85; } }
