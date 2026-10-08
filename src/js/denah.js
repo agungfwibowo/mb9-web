@@ -1,7 +1,7 @@
-import { $, $$, BULAN, D, esc, hasGsap, lenis, reduced, root, stripIndex } from './core.js';
+import { $, $$, D, esc, hasGsap, lenis, reduced, root, stripIndex } from './core.js';
 import { lockNav } from './navbar.js';
 import { MB9_LOGO, shareMenu } from './bagikan.js';
-import { JICONS, fmtMin, iconKey, openDayAt, tendaName, toMin, wibNow } from './jadwal.js';
+import { JICONS, dayLabel, fmtMin, iconKey, openDayAt, tendaName, toMin, wibNow } from './jadwal.js';
 import { focusSession } from './asatidz.js';
 import { boothsOf } from './tenant.js';
 
@@ -129,7 +129,7 @@ const linkOf = (g) => {
 // Jam buka–tutup tenda yang punya jadwal (judul / r.tenda sama dengan nama
 // pemilik tenda) di hari terdekat: hari ini selama masih ada sesi yang belum
 // selesai (status Buka / Tutup / Buka jam …), kalau tidak hari acara
-// berikutnya yang memuatnya (label Besok / tanggal). Tak ada lagi → kosong.
+// berikutnya yang memuatnya (label Besok / "Sab, 26 Des"). Tak ada lagi → kosong.
 const sessOn = (d, who) => ((d && D.jadwal && D.jadwal[d.key]) || []).filter((r) => tendaName(r) === who);
 const hoursOf = (who) => {
   const now = wibNow();
@@ -142,11 +142,9 @@ const hoursOf = (who) => {
   }
   if (!rs.length) return '';
   const i = D.days.indexOf(day);
-  const [, m, dd] = day.iso.split('-').map(Number);
-  const besok = i > 0 && D.days[i - 1].iso === now.iso;
   return rs.map((r) => {
     const [a, b] = r.time.split(' - ').map(toMin);
-    const [st, cls] = day !== today ? [besok ? 'Besok' : `${dd} ${BULAN[m - 1].slice(0, 3)}`, 'is-wait']
+    const [st, cls] = day !== today ? [dayLabel(day, now.iso), 'is-wait']
       : now.min < a ? [`Buka ${fmtMin(a)}`, 'is-wait'] : now.min >= b ? ['Tutup', 'is-closed'] : ['Buka', 'is-open'];
     const when = day === today ? 'Hari ini' : `Hari ke-${i + 1}`;
     // tautan ke sesinya di jadwal: dibuka & dikedipkan lewat focusSession (handler di tip)
