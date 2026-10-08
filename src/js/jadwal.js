@@ -830,7 +830,7 @@ const tabsOffset = (px, anim) => {
 };
 tabs.addEventListener('pointerdown', (e) => {
   tabSwipe = e.pointerType !== 'mouse' && tabs.classList.contains('is-stacked') && !reduced
-    ? { x: e.clientX, y: e.clientY, lock: null, steps: 0, edge: false } : null;
+    ? { x: e.clientX, y: e.clientY, lock: null, steps: 0, edge: false, dx: 0 } : null;
 });
 tabs.addEventListener('pointermove', (e) => {
   const sw = tabSwipe;
@@ -838,6 +838,7 @@ tabs.addEventListener('pointermove', (e) => {
   const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
   if (!sw.lock && Math.max(Math.abs(dx), Math.abs(dy)) > 8) sw.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
   if (sw.lock !== 'x') return;
+  sw.dx = dx;
   const steps = Math.trunc(dx / TAB_STEP);
   if (steps !== sw.steps) {
     const before = winStart;
@@ -851,7 +852,9 @@ tabs.addEventListener('pointermove', (e) => {
 });
 const endTabSwipe = () => {
   if (!tabSwipe) return;
-  if (tabSwipe.lock === 'x') tabSwipedAt = Date.now();
+  // klik sesudahnya dibuang hanya bila memang tergeser (ada kartu bergeser /
+  // jari pindah ≥24px) — ketukan biasa yang jarinya sedikit goyang tetap klik
+  if (tabSwipe.lock === 'x' && (tabSwipe.steps || Math.abs(tabSwipe.dx) >= 24)) tabSwipedAt = Date.now();
   tabSwipe = null;
   tabsOffset(0, true);
 };
