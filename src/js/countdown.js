@@ -55,14 +55,17 @@ const tick = () => {
     label.textContent = 'Jazakumullahu khairan atas kehadiran Anda';
     return false;
   }
-  // Sebelum mulai → hitung ke start. Selama rangkaian hitung ke akhir acara;
-  // lewat jam tutup (sampai tengah malam) hitung ke jam buka hari berikutnya.
+  // Sebelum mulai → hitung ke start. Selama jam acara hitung ke jam tutup
+  // HARI INI; lewat jam tutup / sebelum jam buka hitung ke jam buka berikutnya.
   const running = now >= start;
   // "hari ini" = sudah masuk tanggalnya & belum lewat jam tutup (WIB)
   const today = openDayAt(now);
-  const reopen = running && !today ? nextOpenAt(now) : 0;
+  const openAt = (d, hhmm) => new Date(`${d.iso}T${hhmm}:00+07:00`).getTime();
+  const live = today && now >= openAt(today, D.hours.open);
+  const reopen = running && !live ? nextOpenAt(now) : 0;
+  const closeToday = live ? openAt(today, D.hours.close) : 0;
   // hari pertama sebelum jam buka sudah "hari ini" → bukan lagi "Menuju hari H"
-  const text = !running ? (today ? 'Dibuka dalam' : 'Menuju hari H') : reopen ? 'Dibuka kembali dalam' : 'Acara berakhir dalam';
+  const text = !running ? (today ? 'Dibuka dalam' : 'Menuju hari H') : reopen ? 'Dibuka kembali dalam' : 'Selesai dalam';
   if (label.textContent !== text) label.textContent = text;
   // Hari acara (belum lewat jam tutup): link ke jadwal hari ini. Selain itu: "Lihat jadwal".
   if (today) {
@@ -79,7 +82,7 @@ const tick = () => {
   // penanda di menu mobile; ikut tick agar berganti sendiri lewat tengah malam
   if (menuFlag) menuFlag.hidden = !today;
   if (navFlag) navFlag.hidden = !today;
-  let t = Math.floor(((!running ? start : reopen || end) - now) / 1000);
+  let t = Math.floor(((!running ? start : reopen || closeToday || end) - now) / 1000);
   const v = { d: Math.floor(t / 86400), h: Math.floor((t %= 86400) / 3600), m: Math.floor((t %= 3600) / 60), s: t % 60 };
   Object.keys(v).forEach((k) => {
     const txt = k === 'd' ? String(v[k]) : pad(v[k]);

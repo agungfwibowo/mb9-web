@@ -495,6 +495,8 @@ html.snap-hero .hero { scroll-snap-align: start; }
 @media (max-width: 380px) { .countdown__head { gap: 8px 10px; } .countdown__label { font-size: 10px; letter-spacing: .06em; } .countdown__label::before { margin-right: 7px; } .countdown__today { letter-spacing: .04em; } }
 .countdown__today { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); text-decoration: none; padding: 6px 10px; background: var(--lime); border: 1px solid var(--lime); transition: background .25s, color .25s, border-color .25s; }
 .countdown__today:hover, .countdown__today:focus-visible { background: var(--white); border-color: var(--white); }
+/* desktop: tombol jadwal di kiri, label hitung mundur di kanannya */
+@media (min-width: 561px) { .countdown__today { order: -1; } }
 .countdown__units { --cdn: clamp(28px, 4vw, 44px); --cdg: clamp(26px, 5.5vw, 64px); display: flex; gap: var(--cdg); }
 .countdown__units div { display: grid; justify-items: center; min-width: 54px; }
 .countdown__units div + div { position: relative; }
