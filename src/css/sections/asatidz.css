@@ -110,9 +110,11 @@
 .ustadz.is-live:not(.ustadz--akhwat) .sil { color: #a9bcf3; }
 .ustadz.is-live:not(.ustadz--akhwat) .ustadz__body { background: var(--blue); }
 .ustadz.is-live:not(.ustadz--akhwat) .ustadz__body small { color: #dfe7ff; }
-/* pemateri akhwat: latar & siluet pink */
+/* pemateri akhwat: latar pink, siluet hitam keabu-abuan di semua state
+   (berlangsung, hover, segera) — spesifisitas .ustadz.ustadz--akhwat agar
+   tidak tertimpa aturan state di atas */
 .ustadz--akhwat { background: var(--pink-3); }
-.ustadz--akhwat .sil { color: #f3a9cc; }
+.ustadz.ustadz--akhwat .sil, .ustadz.ustadz--akhwat:hover .sil { color: #4a4a4a; }
 /* kotak nama ikut berwarna hanya saat kajiannya berlangsung */
 .ustadz--akhwat.is-live .ustadz__body { background: var(--pink); }
 .ustadz--akhwat.is-live .ustadz__body small { color: var(--pink-3); }
