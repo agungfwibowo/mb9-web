@@ -9,6 +9,20 @@ const ICONS = {
   bazar: '<svg viewBox="0 0 24 24"><path d="M3 9 5 4h14l2 5M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0V9ZM5 13v7h14v-7M10 20v-4h4v4"/></svg>',
 };
 
+// Butir layanan yang punya acara di jadwal disiapkan sebagai <a> tanpa href;
+// asatidz.js memberi href (= jadi tautan) hanya bila acaranya ada HARI INI.
+// Dicocokkan lewat kata kunci: `cari` di data, atau kata pertama butir
+// ("Bekam (Khusus Ikhwan)" → "bekam" ↔ judul jadwal "Bekam").
+export const layananKey = (it) => (typeof it === 'string' ? it.split(' ')[0] : it.cari || it.text.split(' ')[0]).toLowerCase();
+const inJadwal = (kw) => Object.values(D.jadwal || {}).some((rs) => rs.some((r) => r.title.toLowerCase().includes(kw)));
+const itemHTML = (it) => {
+  const text = typeof it === 'string' ? it : it.text;
+  const kw = layananKey(it);
+  return inJadwal(kw)
+    ? `<a class="lcard__go" data-cari="${esc(kw)}">${esc(text)}</a>`
+    : esc(text);
+};
+
 // Layanan cards
 export const track = $('#layananTrack');
 track.innerHTML = D.layanan.map((l, i) => `
@@ -17,7 +31,7 @@ track.innerHTML = D.layanan.map((l, i) => `
       ${l.free === false ? '' : '<span class="lcard__free">GRATIS</span>'}
       <div class="lcard__icon">${ICONS[l.icon] || ''}</div>
       <h3>${esc(l.title)}</h3>
-      ${l.items ? `<ul>${l.items.map((it) => `<li>${esc(it)}</li>`).join('')}</ul>` : `<p>${l.text}</p>`}
+      ${l.items ? `<ul>${l.items.map((it) => `<li>${itemHTML(it)}</li>`).join('')}</ul>` : `<p>${l.text}</p>`}
     </article>`).join('') + `
     <article class="lcard lcard--cta">
       <span class="lcard__num mono">AYO DATANG</span>

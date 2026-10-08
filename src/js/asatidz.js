@@ -142,6 +142,56 @@ agrid.addEventListener('click', (e) => {
     e.stopPropagation();
   }
 });
+// Butir di kartu Layanan jadi tautan ke sesi terdekat yang belum selesai:
+// hari ini bila masih ada, kalau tidak hari acara berikutnya yang memuatnya.
+// Semua sesinya sudah lewat → teks biasa. Dicek tiap menit (ikut ganti hari).
+// Label hari ini mengikuti jadwal (markLive): Buka 10.00 › Segera buka › Buka ›
+// Segera tutup; hari lain: "Hari ke-4".
+const SOON = 30;
+const sessOf = (day, kw) => ((D.jadwal && D.jadwal[day.key]) || [])
+  .filter((r) => r.title.toLowerCase().includes(kw)).map((r) => r.time.split(' - ').map(toMin));
+const targetOf = (kw) => {
+  const now = wibNow();
+  const today = openDayAt(Date.now());
+  if (today) {
+    const ss = sessOf(today, kw).filter(([, b]) => b > now.min).sort((p, q) => p[0] - q[0]);
+    const s = ss.find(([x]) => now.min >= x) || ss[0];
+    if (s) {
+      const [a, b] = s;
+      const st = now.min < a ? (a - now.min <= SOON ? ['is-starting', 'Segera buka'] : ['is-wait', `Buka ${fmtMin(a)}`])
+        : b - now.min <= SOON ? ['is-soon', 'Segera tutup'] : ['is-open', 'Buka'];
+      return { day: today, a, st };
+    }
+  }
+  for (const d of D.days) {
+    if (d.iso <= now.iso) continue;
+    const ss = sessOf(d, kw).sort((p, q) => p[0] - q[0]);
+    if (ss.length) return { day: d, a: ss[0][0], st: ['is-wait', `Hari ke-${D.days.indexOf(d) + 1}`] };
+  }
+  return null;
+};
+const syncLayananLinks = () => $$('.lcard__go[data-cari]', track).forEach((a) => {
+  const t = targetOf(a.dataset.cari);
+  if (t) a.setAttribute('href', '#jadwal'); else a.removeAttribute('href');
+  const html = t ? `<span class="jopen mono ${t.st[0]}">${t.st[1]}</span>` : '';
+  const old = a.nextElementSibling;
+  if ((old ? old.outerHTML : '') === html) return;
+  if (old) old.remove();
+  if (html) a.insertAdjacentHTML('afterend', html);
+});
+syncLayananLinks();
+everyMinute(syncLayananLinks);
+// klik → buka tab hari sasaran, gulir ke sesinya & kedipkan
+track.addEventListener('click', (e) => {
+  const a = e.target.closest('.lcard__go[href]');
+  if (!a) return;
+  const kw = a.dataset.cari;
+  const t = targetOf(kw);
+  if (!t) return;
+  const ok = focusSession(t.day.key, (pn) => $$('.jrow[data-t], .jcard__item[data-t]:not([data-gap])', pn)
+    .find((x) => toMin(x.dataset.t.split(' - ')[0]) === t.a && ($('h3 span', x)?.textContent || '').toLowerCase().includes(kw)));
+  if (ok) { e.preventDefault(); e.stopPropagation(); }
+});
 if (agrid.querySelector('.ustadz[data-id]')) { markAsatidzLive(); everyMinute(markAsatidzLive); }
 // Deretan kartu Layanan yang di-pin GSAP di HP: kartu digerakkan
 // gulir halaman (lihat scrollAnims). Geser jari ke kiri/kanan diterjemahkan jadi

@@ -786,6 +786,14 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .jadwal__panel.has-blocks { border: 0; background: transparent; }
 .jadwal__panel.has-blocks > .jblock { position: relative; overflow: hidden; background: var(--white); border: 2px solid var(--ink); }
 .jadwal__panel.has-blocks.is-past > .jblock { background: var(--paper); border-color: var(--grey); }
+/* HP: tab hari + panel jadwal selebar layar (menembus gutter container);
+   bingkai kiri-kanan dilepas karena sudah menempel di tepi layar */
+@media (max-width: 560px) {
+  .jadwal .days, .jadwal__panel { margin-inline: calc(var(--gutter) * -1); }
+  .jadwal__panel, .jadwal__panel.has-blocks > .jblock { border-inline-width: 0; }
+  .jadwal .days .day:first-child { border-left-width: 0; }
+  .jadwal .days .day:last-child { border-right-width: 0; }
+}
 .jblock__title { padding: 14px 24px; background: var(--ink); font: 700 14px/1.2 var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--white); }
 /* Durasi: pilihan Kartu / Daftar di kanan tiap bar hitam — ukuran sama dengan
    tombol panah ‹ › (44px, setinggi bar, menempel ke tepi kanan, garis pemisah kiri) */
@@ -1061,6 +1069,9 @@ html.snap-hero .hero { scroll-snap-align: start; }
 }
 .lcard:hover { background: var(--lime); color: var(--ink); }
 .lcard__num { font: 700 13px/1 var(--mono); color: var(--lime); margin-bottom: auto; }
+/* isi kartu layanan rata atas → ikon sejajar walau panjang daftarnya beda;
+   kartu ajakan (CTA) tetap rata bawah */
+.lcard:not(.lcard--cta) .lcard__num { margin-bottom: 0; }
 .lcard:hover .lcard__num, .lcard.is-active .lcard__num { color: var(--blue); }
 .lcard__icon { width: 64px; height: 64px; margin: 30px 0 22px; display: grid; place-items: center; background: var(--lime); color: var(--ink); transition: background .4s, color .4s, transform .6s var(--ease); }
 .lcard:hover .lcard__icon, .lcard.is-active .lcard__icon { background: var(--ink); color: var(--lime); transform: rotate(-8deg); }
@@ -1070,6 +1081,17 @@ html.snap-hero .hero { scroll-snap-align: start; }
 .lcard li { position: relative; padding-left: 26px; font-size: 16px; line-height: 1.4; }
 .lcard li::before { content: ''; position: absolute; left: 0; top: 5px; width: 12px; height: 12px; background: var(--lime); clip-path: polygon(0 0, 100% 50%, 0 100%); transition: background .4s; }
 .lcard:hover li::before, .lcard.is-active li::before { background: var(--blue); }
+/* butir yang acaranya ada hari ini → tautan (href dipasang asatidz.js);
+   tanpa href tampil sebagai teks biasa */
+.lcard__go { color: inherit; text-decoration: none; }
+/* jarak ke label ada di teks (bukan di label) → label yang turun baris tetap rata kiri */
+.lcard__go[href] { margin-right: 8px; text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.lcard__go[href]:hover, .lcard__go[href]:focus-visible { text-decoration-style: solid; }
+/* label status (Buka/Tutup/…) di belakang tautan; "Buka" lime ditukar saat kartu
+   lime (hover/aktif) supaya tidak hilang di latar yang sama */
+.lcard li .jopen { vertical-align: 2px; padding: 2px 7px; font-size: 10px; }
+.lcard li .jopen::before { display: none; } /* tanpa titik di kartu layanan */
+.lcard:hover li .jopen.is-open, .lcard.is-active li .jopen.is-open { background: var(--ink); color: var(--lime); }
 .lcard p { margin: 0; font-size: 16px; }
 .lcard p b { color: var(--lime); transition: color .4s; }
 .lcard:hover p b, .lcard.is-active p b { color: var(--ink); }
@@ -1953,7 +1975,9 @@ img.lazy-img.is-loaded.is-seen { opacity: 1; translate: none; }
     scroll-snap-type: x mandatory; scroll-padding: 0 var(--gutter);
     padding-bottom: 10px;
     touch-action: auto; /* swipe native di mode ini */
+    scrollbar-width: none; /* tetap bisa digeser, scrollbar disembunyikan */
   }
+  .layanan__track::-webkit-scrollbar { display: none; }
   .lcard, .asatidz__grid > .ustadz { flex: 0 0 auto; scroll-snap-align: center; }
   .lcard { width: min(72vw, 360px); min-height: 0; }
   .asatidz__grid > .ustadz { flex-basis: min(30vw, 200px); min-width: 0; scroll-snap-align: start; }

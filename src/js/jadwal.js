@@ -80,6 +80,10 @@ export const JICONS = {
   bekam: 'M2 20h4.5c1.5 0 2.5-2 5.5-2s4 2 5.5 2H22M6.5 20v-7c0-2.6 2.5-4.5 5.5-4.5s5.5 1.9 5.5 4.5v7M12 8.5V5.5M10 5.5h4',
   // dua balon chat saling menimpa, ekor berlawanan (bergantian bicara); titik di balon depan
   talkshow: 'M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v3l3-3M11 9h8a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v3l-3.5-3H11a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2zM13 13.5h.01M15 13.5h.01M17 13.5h.01',
+  // benang & jarum: gulungan benang (kiri), benangnya menuju lubang jarum (kanan)
+  benang: 'M3 4h8M3 20h8M4.5 4v16M9.5 4v16M4.5 9h5M4.5 12h5M4.5 15h5M9.5 9c3 0 4.5-4 8.5-4M18 8v13M18 3a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1z',
+  // pita peresmian: pita membentang dengan simpul kupu-kupu di tengah
+  pita: 'M2 12h5M17 12h5M12 12c-1.5-3-5-4.5-5-1.5s3.5 3 5 1.5zM12 12c1.5-3 5-4.5 5-1.5s-3.5 3-5 1.5zM12 12l-2.5 7M12 12l2.5 7',
   cincin: 'M12 21a6 6 0 1 1 0-12 6 6 0 0 1 0 12zM12 9l-2-2.5L12 4l2 2.5z',
   titik: 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z',
   masjid: 'M3 21h18M5 21v-8h14v8M12 3c-3.2 2-5 4.2-5 7h10c0-2.8-1.8-5-5-7zM12 3V1M10 21v-3a2 2 0 0 1 4 0v3',
@@ -91,6 +95,7 @@ const ICON_RULES = [
   [/bazar|foodcourt/, 'toko'], [/khitan/, 'grup'], [/lomba|musabaqah|grand final/, 'piala'],
   [/donor/, 'tetes'], [/periksa|kesehatan/, 'nadi'], [/bekam/, 'bekam'], [/cut|cukur/, 'gunting'],
   [/konsultasi/, 'obrolan'], [/nikah/, 'cincin'], [/muslimah/, 'muslimah'], [/talkshow/, 'talkshow'], [/kajian/, 'mic'],
+  [/macrame|workshop|kerajinan|jahit|rajut/, 'benang'], [/pembukaan|penutupan|peresmian/, 'pita'],
 ];
 const TAG_ICON = { lomba: 'piala', kajian: 'mic', talkshow: 'talkshow' };
 export const iconKey = (r) => {
