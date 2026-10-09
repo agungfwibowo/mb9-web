@@ -115,9 +115,11 @@
   .layanan__head { margin-bottom: 3vh; }
   .deco--blocks { width: 64px; left: 12%; bottom: calc(100% + 10px); }
   .layanan__head .sec-num { margin-bottom: 10px; }
-  /* petunjuk scroll HP: tengah bawah di bawah kartu; meniru .hero__scroll */
-  .layanan__pin { padding-bottom: calc(2vh + 28px); }
-  .layanan__scroll { position: absolute; left: 50%; bottom: 1.2vh; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--grey-2); }
+  /* petunjuk scroll HP: ikut alur tepat di bawah kartu (bukan menempel di dasar
+     layar) — isi pin rata tengah, jadi di layar panjang dasar layar jauh dari
+     kartu & petunjuknya nyaris tak terlihat. Gaya meniru .hero__scroll */
+  .layanan__scroll { align-self: center; margin-top: 2.6vh; display: flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--grey-2); }
+  @media (max-height: 700px) { .layanan__scroll { margin-top: 6px; } } /* HP pendek: kartu hampir memenuhi layar */
   .layanan__scroll i { width: 2px; height: 20px; background: rgba(255, 255, 255, .2); position: relative; overflow: hidden; }
   .layanan__scroll i::after { content: ''; position: absolute; inset: 0; background: var(--lime); animation: scrollline 1.8s var(--ease) infinite; }
   .layanan__head .title { font-size: clamp(24px, min(7vw, 4.4vh), 34px); }
