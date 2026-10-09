@@ -80,7 +80,7 @@ const markAsatidzLive = () => {
     card.classList.toggle('is-pink', live && o.live.akhwat);
     // badge = tautan ke sesi yang dituju di jadwal (tab dipilih di handler klik agrid)
     const s = !o ? null : o.live || o.next || o.done;
-    const badge = (cls, text) => `<a href="#jadwal" class="ustadz__badge ${cls} mono" data-day="${s.day.key}" data-t="${esc(s.time)}" aria-label="${text} — buka jadwalnya">${text}<span class="ustadz__go" aria-hidden="true">→</span></a>`;
+    const badge = (cls, text) => `<a href="#jadwal" class="ustadz__badge ${cls} mono" data-day="${s.day.key}" data-t="${esc(s.time)}" aria-label="${text} — buka jadwalnya">${text}<span class="ustadz__go" aria-hidden="true">Cek jadwal</span></a>`;
     const jam = s && fmtMin(toMin(s.time.split(' - ')[0]));
     const html = !s ? ''
       : live ? badge('jlive', 'Berlangsung')
