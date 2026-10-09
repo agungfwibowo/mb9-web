@@ -49,8 +49,8 @@ if (linkedIdx >= 0 && isPastDay(D.days[linkedIdx].key)) {
 }
 const tabsHTML = (sel) => D.days.map((d, i) => `
     <button class="day${i === todayIdx ? ' is-today' : ''}${isPast(d) ? ' is-past' : ''}" role="tab" id="tab-${d.key}" aria-selected="${i === sel}" aria-controls="jadwalPanel" data-day="${d.key}" tabindex="${i === sel ? 0 : -1}" aria-label="Hari ke-${i + 1}, ${esc(d.full || d.short)} ${esc(d.date)} ${d.year}">
-      <small>Hari ke-${i + 1}</small><b>${esc(d.short)}</b><span>${esc(d.date)} ${d.year}</span><i class="day__edge" aria-hidden="true">${i === todayIdx ? 'Hari ini' : `Hari ke-${i + 1}`}</i>
-      ${i === todayIdx ? '<em class="day__badge day__badge--today mono">Hari ini</em>' : isPast(d) ? '<em class="day__badge day__badge--past mono">Selesai</em>' : ''}
+      <small>Hari ke-${i + 1}</small><b>${esc(d.short)}</b><span>${esc(d.date)} ${d.year}</span><i class="day__edge" aria-hidden="true"><span>${i === todayIdx ? 'Hari ini' : `Hari ke-${i + 1}`}</span><span class="day__edge-d">${esc(d.date)}</span></i>
+      ${i === todayIdx ? `<em class="day__badge day__badge--today mono">Hari ini<span class="day__badge-n"> · Ke-${i + 1}</span></em>` : isPast(d) ? `<em class="day__badge day__badge--past mono">Selesai<span class="day__badge-n"> · Ke-${i + 1}</span></em>` : ''}
     </button>`).join('');
 tabs.innerHTML = tabsHTML(defaultIdx);
 

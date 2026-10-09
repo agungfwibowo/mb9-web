@@ -1,6 +1,6 @@
 import { $, $$, hasGsap, reduced, root } from './core.js';
 import { track } from './konten.js';
-import { pinSwipe } from './asatidz.js';
+import { asatidzEntered, pinSwipe } from './asatidz.js';
 import { scramble } from './teks.js';
 
 /* ---------------------------------------------------------
@@ -192,8 +192,9 @@ export const scrollAnims = () => {
 
   // asatidz cards
   // clearProps: GSAP membekukan `scale` CSS (kartu depan/tetangga di HP) ke inline
-  // transform — dibersihkan setelah selesai agar CSS kembali yang mengatur
-  gsap.from('.ustadz', { y: 60, rotateX: -20, opacity: 0, duration: .9, stagger: .08, ease: 'power3.out', transformPerspective: 800, clearProps: 'transform,translate,rotate,scale', scrollTrigger: { trigger: '.asatidz__grid', start: 'top 85%', once: true } });
+  // transform — dibersihkan setelah selesai agar CSS kembali yang mengatur.
+  // onComplete: selama animasi titik snap ikut bergeser → deretan dilabuhkan ulang
+  gsap.from('.ustadz', { y: 60, rotateX: -20, opacity: 0, duration: .9, stagger: .08, ease: 'power3.out', transformPerspective: 800, clearProps: 'transform,translate,rotate,scale', onComplete: asatidzEntered, scrollTrigger: { trigger: '.asatidz__grid', start: 'top 85%', once: true } });
 
   // denah booths pop-in
   gsap.from('#boothLayer .booth', {

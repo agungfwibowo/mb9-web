@@ -41,38 +41,57 @@ export const goToHash = (id) => {
   history.replaceState(null, '', url);
   return true;
 };
-// Snap hanya di hero: hero jadi satu "layar" yang menempel — berhenti menggulir
-// (roda/trackpad diam 260ms) selagi posisi tujuan masih di dalam hero → halaman
-// meluncur ke tepi hero sesuai arah bila sudah terdorong ≥25% (turun → tepi bawah
-// hero, naik → atas hero); kurang dari itu kembali ke tepi asal. Di luar hero gulir bebas. Dihitung dari roda (bukan dari
-// luncuran Lenis yang masih ±1 dtk) agar snap terasa segera. HP memakai CSS
-// scroll-snap proximity (lihat .snap-hero di CSS).
-// hanya bila isi hero muat satu layar — kalau lebih tinggi (layar pendek/landscape)
-// snap akan melompati sebagian isinya, jadi dimatikan
+// Snap hanya di hero: hero jadi satu "layar" yang menempel. Selagi posisi masih
+// di dalam hero, setelah gulir berhenti halaman meluncur ke tepi hero sesuai
+// arah bila sudah terdorong ≥25% (turun → tepi bawah hero, naik → atas hero);
+// kurang dari itu kembali ke tepi asal. Di luar hero gulir bebas. Luncurannya
+// 1,2 dtk easeInOutSine (berangkat & mendarat pelan) — di perangkat sentuh
+// juga lewat JS, bukan CSS scroll-snap yang kecepatannya diatur browser (terlalu cepat).
+// Hanya bila isi hero muat satu layar — kalau lebih tinggi (layar pendek/landscape)
+// snap akan melompati sebagian isinya, jadi dimatikan.
 const heroEl = $('#home');
 const heroFits = () => !!heroEl && heroEl.offsetHeight <= innerHeight + 2;
-if (lenis && finePointer && !reduced) {
-  const hero = heroEl;
-  let snapping = false, idleT = 0, dir = 0;
+const easeSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
+let snapping = false, snapDir = 0;
+const snapHero = (y) => {
+  if (!heroEl || snapping || navLocked || root.classList.contains('menu-open') || root.classList.contains('snap-boot') || (lenis && lenis.isStopped) || !heroFits()) return;
+  const end = heroEl.offsetHeight;
+  if (y <= 2 || y >= end - 2) return;
+  // butuh dorongan cukup (≥25% hero) ke arah itu; kurang dari itu kembali ke tepi asal
+  const to = snapDir > 0 ? (y > end * 0.25 ? end : 0) : (y < end * 0.75 ? 0 : end);
+  snapping = true;
+  const done = () => { snapping = false; };
+  if (lenis) lenis.scrollTo(to, { duration: 1.2, easing: easeSine, lock: true, force: true, onComplete: done });
+  else { scrollTo({ top: to, behavior: 'smooth' }); setTimeout(done, 900); }
+};
+if (!reduced && finePointer && lenis) {
+  // mouse/trackpad: dihitung dari roda (diam 260ms), bukan dari luncuran Lenis
+  // yang masih ±1 dtk, agar snap terasa segera
+  let idleT = 0;
   addEventListener('wheel', (e) => {
-    if (!hero || snapping || navLocked || root.classList.contains('menu-open') || lenis.isStopped || !heroFits()) return;
-    if (e.deltaY) dir = Math.sign(e.deltaY);
+    if (e.deltaY) snapDir = Math.sign(e.deltaY);
     clearTimeout(idleT);
-    idleT = setTimeout(() => {
-      const end = hero.offsetHeight;
-      const y = lenis.targetScroll ?? lenis.scroll; // posisi tujuan luncuran saat ini
-      if (snapping || navLocked || y <= 2 || y >= end - 2) return;
-      // butuh dorongan cukup (≥25% hero) ke arah itu; kurang dari itu kembali ke tepi asal
-      const to = dir > 0 ? (y > end * 0.25 ? end : 0) : (y < end * 0.75 ? 0 : end);
-      snapping = true;
-      // easeInOutSine: berangkat & mendarat pelan
-      lenis.scrollTo(to, { duration: 1.2, easing: (t) => -(Math.cos(Math.PI * t) - 1) / 2, lock: true, force: true, onComplete: () => { snapping = false; } });
-    }, 260);
+    idleT = setTimeout(() => snapHero(lenis.targetScroll ?? lenis.scroll), 260); // posisi tujuan luncuran saat ini
+  }, { passive: true });
+} else if (!reduced && !finePointer) {
+  // sentuh: setelah jari diangkat DAN guliran momentum berhenti (140ms tanpa
+  // event scroll). Menyentuh lagi saat meluncur → luncuran dibatalkan.
+  let touching = false, lastY = scrollY, idleT = 0;
+  const later = () => { clearTimeout(idleT); idleT = setTimeout(() => { if (!touching) snapHero(scrollY); }, 140); };
+  addEventListener('touchstart', () => {
+    touching = true;
+    clearTimeout(idleT);
+    if (snapping) { snapping = false; if (lenis) lenis.scrollTo(scrollY, { immediate: true, force: true }); }
+  }, { passive: true });
+  addEventListener('touchend', () => { touching = false; later(); }, { passive: true });
+  addEventListener('touchcancel', () => { touching = false; later(); }, { passive: true });
+  addEventListener('scroll', () => {
+    const y = scrollY;
+    if (y !== lastY) snapDir = Math.sign(y - lastY);
+    lastY = y;
+    if (!touching && !snapping) later();
   }, { passive: true });
 }
-const syncSnap = () => root.classList.toggle('snap-hero', !finePointer && !reduced && heroFits());
-syncSnap();
-addEventListener('resize', syncSnap, { passive: true });
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href^="#"]');
   if (!a) return;
