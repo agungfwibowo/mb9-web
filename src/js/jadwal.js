@@ -854,18 +854,33 @@ daysNav.addEventListener('click', (e) => {
 });
 // Geser jari di deretan tab (saat ada yang menumpuk) → jendela kartu ikut
 // bergeser SELAMA diseret (tiap TAB_STEP px = 1 kartu, dianimasikan transisi
-// flex-basis yang sudah ada); sisa seretan menggeser deretan sedikit mengikuti
-// jari, di ujung deretan terasa kenyal. Tab aktif TIDAK berubah — memilih hari
-// tetap dengan klik.
+// flex-basis yang sudah ada). Sisa seretan (belum genap 1 kartu) & seretan di
+// ujung deretan → strip/kartu di sisi yang sedang dibuka MELEBAR mengikuti
+// jari, kartu lain menyusut (flex-shrink) — tepi kiri/kanan deretan tetap
+// menempel (dulu seluruh baris digeser → tepinya lepas & celahnya terlihat).
+// Tab aktif TIDAK berubah — memilih hari tetap dengan klik.
 const TAB_STEP = 70;
 let tabSwipe = null, tabSwipedAt = 0;
-const tabsOffset = (px, anim) => {
-  tabs.style.transition = anim ? 'transform .35s cubic-bezier(.22, .9, .24, 1)' : 'none';
-  tabs.style.transform = px ? `translateX(${px}px)` : '';
+const unstretch = (sw, anim) => {
+  if (!sw.el) return;
+  sw.el.style.transition = anim ? '' : 'none';
+  sw.el.style.flexBasis = `${sw.base}px`;
+  sw.el = null;
+};
+const stretchTab = (sw, dir, px) => {
+  const list = $$('.day', tabs);
+  const full = list.map((b, i) => (b.classList.contains('is-piled') ? -1 : i)).filter((i) => i >= 0);
+  if (!full.length) return;
+  // seret ke kanan → sisi kiri yang dibuka; ujung deretan → kartu penuh terluar
+  const i = dir > 0 ? full[0] - 1 : full[full.length - 1] + 1;
+  const el = list[i] || list[dir > 0 ? full[0] : full[full.length - 1]];
+  if (sw.el !== el) { unstretch(sw, false); sw.el = el; sw.base = parseFloat(el.style.flexBasis) || el.offsetWidth; }
+  el.style.transition = 'none';
+  el.style.flexBasis = `${sw.base + px}px`;
 };
 tabs.addEventListener('pointerdown', (e) => {
   tabSwipe = e.pointerType !== 'mouse' && tabs.classList.contains('is-stacked') && !reduced
-    ? { x: e.clientX, y: e.clientY, lock: null, steps: 0, edge: false, dx: 0 } : null;
+    ? { x: e.clientX, y: e.clientY, lock: null, steps: 0, dx: 0, edge: false, el: null } : null;
 });
 tabs.addEventListener('pointermove', (e) => {
   const sw = tabSwipe;
@@ -877,14 +892,16 @@ tabs.addEventListener('pointermove', (e) => {
   const steps = Math.trunc(dx / TAB_STEP);
   if (steps !== sw.steps) {
     const before = winStart;
+    sw.el = null; // layoutDays menulis ulang semua flex-basis
     winStart -= steps - sw.steps;
     freeWin = true;
     layoutDays();
     sw.edge = winStart === before; // tidak bisa bergeser lagi → ujung deretan
     sw.steps = steps;
   }
-  sw.offset = true;
-  tabsOffset(sw.edge ? dx * 0.15 : (dx - steps * TAB_STEP) * 0.35, false);
+  // kenyal: di ujung 15% seretan (maks 40px), selain itu 35% sisa seretan
+  const px = sw.edge ? Math.min(40, Math.abs(dx) * 0.15) : Math.abs(dx - sw.steps * TAB_STEP) * 0.35;
+  stretchTab(sw, Math.sign(dx), px);
 });
 // Sentuhan: hari dipilih langsung saat jari diangkat (tidak menunggu event
 // click bawaan — di HP asli klik pertama sesudah menggeser bisa tertahan/hilang,
@@ -895,7 +912,7 @@ const endTabSwipe = (e) => {
   const sw = tabSwipe;
   if (!sw) return;
   tabSwipe = null;
-  if (sw.offset) tabsOffset(0, true);
+  unstretch(sw, true); // kembali ke lebarnya lewat transisi flex-basis
   const swiped = sw.lock === 'x' && (sw.steps || Math.abs(sw.dx) >= 24);
   if (swiped) { tabSwipedAt = Date.now(); return; }
   if (e.type !== 'pointerup' || sw.lock === 'y') return;
