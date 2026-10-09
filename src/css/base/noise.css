@@ -77,6 +77,7 @@
 .anim-off .ustadz__badge--today::before,
 .anim-off .ustadz.is-live .ustadz__body::after,
 .anim-off .ustadz.is-live .ustadz__body::before,
+.anim-off .ustadz > .jlive::before,
 .anim-off .day.is-piled.is-today,
 .anim-off .peta__pin i::after { animation-play-state: paused; }
 

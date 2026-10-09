@@ -116,12 +116,12 @@
 .ustadz__go { margin-left: auto; padding-left: 10px; white-space: nowrap; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; opacity: .9; }
 .ustadz__badge:hover .ustadz__go, .ustadz__badge:focus-visible .ustadz__go { opacity: 1; text-decoration-thickness: 2px; }
 /* denyut di titik badge (cincin di luar badge terpotong tepi kartu) */
-.ustadz > .jlive::before { width: 8px; height: 8px; animation: dot-pulse 1.2s ease-out infinite; }
+/* titik "Berlangsung": kotak kedip (sama dengan badge "Hari ini" tab hari), bukan bulat berdenyut */
+.ustadz > .jlive::before { width: 7px; height: 7px; border-radius: 0; animation: blink 1s steps(2) infinite; }
 /* latar badge Berlangsung: polos (kilau berjalan dihapus — denyut sudah ada di ikon mic) */
 .ustadz > .jlive { background: var(--blue); }
 .ustadz.is-pink > .jlive { background: var(--pink); }
 /* panah badge Berlangsung bergerak maju-mundur → mengajak membuka jadwal */
-@keyframes dot-pulse { 0% { box-shadow: 0 0 0 0 rgba(197, 250, 1, .95); transform: scale(1); } 50% { transform: scale(1.25); } 100% { box-shadow: 0 0 0 9px rgba(197, 250, 1, 0); transform: scale(1); } }
 /* punya jadwal hari ini (belum mulai / sudah selesai) — gaya sama dengan badge tab hari */
 .ustadz__badge--today, .ustadz__badge--next, .ustadz__badge--done { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,.18); }
 .ustadz__badge--today { background: var(--blue); color: var(--white); } /* biru polos (Berlangsung: gradien + titik berdenyut) */

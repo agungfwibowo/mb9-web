@@ -82,3 +82,21 @@ $$('.lqip').forEach((box) => {
   img.addEventListener('load', done, { once: true });
   img.addEventListener('error', done, { once: true });
 });
+
+// Petunjuk SCROLL layanan (HP): di TENGAH ruang kosong antara kartu & dasar
+// section. Isi section rata tengah, jadi ruang itu berubah-ubah menurut tinggi
+// layar — menempel di bawah kartu terlalu tinggi di layar panjang, menempel di
+// dasar layar terlalu rendah (bisa tertutup bilah browser). Dihitung ulang tiap
+// kali section/kartu berubah ukuran (layar, font, label "Buka" yang diperbarui).
+const lhint = $('.layanan__scroll');
+if (lhint && 'ResizeObserver' in window) {
+  const pin = lhint.parentElement;
+  const place = () => {
+    if (getComputedStyle(lhint).display === 'none') return;
+    const below = track.offsetTop + track.offsetHeight; // offsetParent = pin (relative)
+    const gap = pin.clientHeight - below;
+    lhint.style.top = `${Math.round(below + Math.max(4, (gap - lhint.offsetHeight) / 2))}px`;
+  };
+  new ResizeObserver(place).observe(pin);
+  new ResizeObserver(place).observe(track);
+}
