@@ -297,7 +297,7 @@
 .jdur .jcard.is-live.is-pink:not(.is-piled):hover, .jdur .jcard.is-live.is-pink:hover .jstop time { background: #fdeef5; }
 .jdur .jcard.is-live .jstop time { background: #edf1ff; }
 .jdur .jcard.is-live.is-pink .jstop time { background: #fdeef5; }
-@media (prefers-reduced-motion: reduce) { .ustadz > .jlive .ustadz__go, .ustadz > .jlive::before, .jrow.is-live::after, .jdur .jcard.is-live .jstop i, .jdur .jcard.is-piled.is-live .jcard__edge i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ustadz > .jlive::before, .jrow.is-live::after, .jdur .jcard.is-live .jstop i, .jdur .jcard.is-piled.is-live .jcard__edge i { animation: none; } }
 /* Tabel: acara yang berjalan bersamaan (field group di data-prod.js) → garis biru kiri */
 /* latar putih (abu-abu khusus untuk acara yang sudah lewat) — paralel cukup ditandai garis biru */
 .jrow.is-grp { box-shadow: inset 4px 0 0 var(--blue); }
