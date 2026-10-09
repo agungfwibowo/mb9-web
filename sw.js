@@ -10,6 +10,7 @@ const V = VERSION.slice(VERSION.indexOf('-') + 1);
 const CORE = [
   './', './index.html', './privasi/', './manifest.webmanifest',
   `assets/css/style.css?v=${V}`, `assets/js/data-prod.js?v=${V}`, `assets/js/data-dev.js?v=${V}`, `assets/js/main.js?v=${V}`, `assets/js/privasi.js?v=${V}`,
+  `assets/img/peta-lokasi.svg?v=${V}`, // peta lokasi (pengganti iframe Google) — wajib ada saat offline
   'assets/fonts/public-sans-latin.woff2', 'assets/fonts/roboto-mono-latin.woff2', 'assets/fonts/noto-sans-mono-blocks.woff2',
 ];
 
