@@ -190,11 +190,29 @@ export const scrollAnims = () => {
   // jadwal days
   gsap.from('.day', { y: 40, opacity: 0, duration: .7, stagger: .08, ease: 'power3.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: '.days', start: 'top 88%', once: true } });
 
-  // asatidz cards — naik + muncul, sama dengan kartu layanan (dulu flip rotateX)
-  // clearProps: GSAP membekukan `scale` CSS (kartu depan/tetangga di HP) ke inline
-  // transform — dibersihkan setelah selesai agar CSS kembali yang mengatur.
-  // onComplete: selama animasi titik snap ikut bergeser → deretan dilabuhkan ulang
-  gsap.from('.ustadz', { opacity: 0, y: 80, duration: .9, stagger: .1, ease: 'power3.out', clearProps: 'transform,translate,rotate,scale,opacity', onComplete: asatidzEntered, scrollTrigger: { trigger: '.asatidz__grid', start: 'top 85%', once: true } });
+  // asatidz cards — naik + muncul, sama dengan kartu layanan (y 80px, .9 dtk,
+  // jeda .1 dtk per kartu). Lewat CSS (`translate` + opacity, lihat asatidz.css),
+  // BUKAN gsap.from: GSAP membekukan `scale` CSS kartu (depan 1 / tetangga .86
+  // di HP) ke transform sebelum kartu depan ditentukan, lalu melepasnya di akhir
+  // → kartu melompat ukuran. `translate` berdiri sendiri, tak menyentuh `scale`.
+  const ag = $('.asatidz__grid');
+  if (ag) {
+    ag.classList.add('will-in');
+    ScrollTrigger.create({
+      trigger: ag, start: 'top 85%', once: true,
+      onEnter: () => {
+        const cards = $$('.ustadz', ag);
+        cards.forEach((c, i) => c.style.setProperty('--i', i));
+        ag.classList.add('is-in');
+        // selesai (kartu terakhir tiba) → kelas & delay dilepas, deretan dilabuhkan
+        setTimeout(() => {
+          ag.classList.remove('will-in', 'is-in');
+          cards.forEach((c) => c.style.removeProperty('--i'));
+          asatidzEntered();
+        }, 900 + (cards.length - 1) * 100 + 50);
+      },
+    });
+  } else asatidzEntered();
 
   // denah booths pop-in
   gsap.from('#boothLayer .booth', {
