@@ -113,7 +113,7 @@
 #jadwalPanel .jrow.is-seq.is-flash::before, #jadwalPanel .jcard.is-flash .jstop::before { background: var(--ink-3); }
 /* panah dibesarkan & ditebalkan (mono 13px terlalu tipis/kecil); margin negatif
    menjaga tinggi badge tetap */
-.ustadz__go { margin: -4px 0 -4px auto; padding-left: 8px; font: 700 19px/1 var(--sans); transition: transform .25s var(--ease); }
+.ustadz__go { margin: -3px 0 -3px auto; padding-left: 8px; font: 700 16px/1 var(--sans); transition: transform .25s var(--ease); }
 .ustadz__badge:hover .ustadz__go, .ustadz__badge:focus-visible .ustadz__go { transform: translateX(3px); }
 /* denyut di titik badge (cincin di luar badge terpotong tepi kartu) */
 .ustadz > .jlive::before { width: 8px; height: 8px; animation: dot-pulse 1.2s ease-out infinite; }
