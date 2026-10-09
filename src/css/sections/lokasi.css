@@ -1,11 +1,29 @@
 /* ---------- Lokasi (full-bleed map + floating card) ---------- */
 .lokasi { position: relative; background: var(--paper); border-block: 6px solid var(--ink); }
-.lokasi__map { --crop: 230px; position: relative; overflow: hidden; height: clamp(520px, 70vh, 720px); background: var(--grey-2); }
-/* iframe diperbesar & digeser ke atas → kartu info bawaan Google (pojok kiri atas) terpotong; atribusi bawah tetap tampil */
-.lokasi__map iframe { pointer-events: none; position: absolute; left: 0; top: calc(var(--crop) * -1); display: block; width: 100%; height: calc(100% + var(--crop)); border: 0; filter: grayscale(1) contrast(1.05); transition: filter .6s var(--ease); }
-.lokasi__map:hover iframe { filter: grayscale(.2); }
-/* Desktop: geser pusat peta (pin) ke kanan agar tidak tertutup kartu di kiri */
-@media (min-width: 861px) { .lokasi__map { --shift: 240px; } .lokasi__map iframe { width: calc(100% + var(--shift) * 2); } }
+/* Peta sendiri (tools/peta-lokasi.py → assets/img/peta-lokasi.svg), bukan iframe:
+   tetap tampil saat offline. Kanvas = jendela peta 2500×1000 m, titik (0,0) = pin
+   di (1500, 500) m dari pojok kiri atas. --k = skala (px per meter); --px/--py =
+   letak pin di dalam kotak peta. Desktop: pin digeser ke kanan agar tidak
+   tertutup kartu lokasi di kiri (sama seperti iframe dulu). */
+.lokasi__map { --k: .9; --px: 50%; --py: 50%; position: relative; overflow: hidden; height: clamp(520px, 70vh, 720px); background: #e7e6e2; }
+@media (min-width: 861px) { .lokasi__map { --px: calc(50% + 240px); } }
+.peta__canvas { position: absolute; left: calc(var(--px) - 1500px * var(--k)); top: calc(var(--py) - 500px * var(--k)); width: calc(2500px * var(--k)); height: calc(1000px * var(--k)); }
+.peta__canvas > img, .peta__labels { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.peta__labels path { fill: none; }
+/* label jalan: ukuran huruf tetap dalam px layar, berapa pun skala peta;
+   halo warna daratan agar terbaca di atas garis jalan & bangunan */
+.peta__road { font: 600 calc(10.5px / var(--k)) var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: var(--ink-3); paint-order: stroke; stroke: #e7e6e2; stroke-width: calc(3px / var(--k)); stroke-linejoin: round; }
+.peta__road--main { font-weight: 700; fill: var(--ink); }
+/* pin: kotak lime berdenyut + label nama tempat */
+.peta__pin { position: absolute; left: calc(1500px * var(--k)); top: calc(500px * var(--k)); width: 0; height: 0; }
+.peta__pin i { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; background: var(--lime); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.peta__pin i::after { content: ''; position: absolute; inset: -9px; border: 2px solid var(--ink); opacity: 0; animation: peta-pulse 2s ease-out infinite; }
+@keyframes peta-pulse { from { transform: scale(.6); opacity: .7; } to { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .peta__pin i::after { animation: none; } }
+.peta__pin b { position: absolute; left: 18px; top: -12px; white-space: nowrap; padding: 4px 8px; background: var(--ink); color: var(--lime); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+/* atribusi wajib data OpenStreetMap (ODbL) */
+.peta__osm { position: absolute; right: 8px; bottom: 8px; z-index: 1; padding: 2px 6px; background: rgba(255, 255, 255, .85); color: var(--ink-3); font-size: 10.5px; text-decoration: none; }
+.peta__osm:hover { color: var(--ink); text-decoration: underline; }
 .lokasi__overlay { position: absolute; inset: 0; display: flex; align-items: center; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); pointer-events: none; }
 .loc-card { width: min(100%, 440px); background: var(--ink-2); color: var(--white); box-shadow: 10px 10px 0 var(--lime); pointer-events: auto; }
 .loc-card__head { padding: 14px 24px; background: var(--lime); color: var(--ink); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }

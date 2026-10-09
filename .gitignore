@@ -31,3 +31,6 @@ npm-debug.log*
 
 # --- Materi mentah dari panitia (logo asli, PDF, layout) — bukan untuk deploy ---
 bahan/
+
+# --- Data mentah OpenStreetMap untuk tools/peta-lokasi.py (unduh ulang: python3 tools/peta-lokasi.py ambil) ---
+tools/osm/
