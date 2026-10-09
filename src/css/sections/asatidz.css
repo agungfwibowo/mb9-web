@@ -125,7 +125,7 @@
 /* punya jadwal hari ini (belum mulai / sudah selesai) — gaya sama dengan badge tab hari */
 .ustadz__badge--today, .ustadz__badge--next, .ustadz__badge--done { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,.18); }
 .ustadz__badge--today { background: var(--blue); color: var(--white); } /* biru polos (Berlangsung: gradien + titik berdenyut) */
-.ustadz__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--lime); animation: blink 1s steps(2) infinite; }
+.ustadz__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--lime); } /* diam — kedip hanya untuk "Berlangsung" */
 .ustadz__badge--next { background: var(--ink); color: var(--lime); } /* sesi di hari acara berikutnya */
 .ustadz__badge--done { background: var(--grey-2); color: var(--ink-2); }
 .ustadz--soon { background: repeating-linear-gradient(-45deg, var(--paper) 0 14px, #e2e2df 14px 28px); }
