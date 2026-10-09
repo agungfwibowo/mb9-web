@@ -86,11 +86,11 @@
   /* HP/tablet: foto selebar layar penuh, rasio lebih lebar agar tidak terlalu tinggi */
   .tema__media { margin-right: calc(var(--gutter) * -1); }
   .tema__media .img-reveal { aspect-ratio: 2 / 1; }
-  /* peta HP dipendekkan: iframe tetap setinggi semula (610px) supaya kotak info
-     Google tetap terpotong, lalu digeser agar pin (di tengah iframe) jatuh di
-     ±120px — tengah area yang tidak tertutup kartu lokasi (margin-top: -60px) */
-  .lokasi__map { height: 300px; }
-  .lokasi__map iframe { height: 610px; top: -185px; }
+  /* peta HP dipendekkan; pin di tengah mendatar & ±120px dari atas — tengah
+     area yang tidak tertutup kartu lokasi (margin-top: -60px). Skala lebih
+     kecil (0,6 px/m) agar jalan sekitar tetap terlihat di layar sempit. */
+  .lokasi__map { height: 300px; --k: .6; --px: 50%; --py: 120px; }
+  .peta__osm { bottom: 64px; }
   .lokasi__overlay { position: static; padding: 0 var(--gutter); margin-top: -60px; position: relative; }
   .loc-card { margin: 0 auto 36px; width: 100%; box-shadow: 6px 6px 0 var(--lime); }
     .deco--zigzag { right: -2%; width: 24%; }

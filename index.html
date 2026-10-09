@@ -459,8 +459,23 @@
 
     <!-- ============ 8. LOKASI ============ -->
     <section class="lokasi" id="lokasi">
-      <div class="lokasi__map">
-        <iframe title="Peta Asrama Haji Embarkasi Medan" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3982.204224983481!2d98.669455688855!3d3.540293900000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30312fff648e55c3%3A0xf1310432b9476107!2sAsrama%20Haji%20Embarkasi%20Medan!5e0!3m2!1sen!2sid!4v1765634045823!5m2!1sen!2sid" width="100%" height="100%" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      <!-- Peta sendiri dari OpenStreetMap (tools/peta-lokasi.py), bukan iframe
+           Google: ikut di-cache service worker → tetap tampil saat offline.
+           Koordinat SVG dalam meter, (0,0) = pin; ukuran & posisi lewat CSS (--k). -->
+      <div class="lokasi__map peta" role="img" aria-label="Peta lokasi: Lapangan Asrama Haji Medan, Jl. A.H. Nasution">
+        <div class="peta__canvas" aria-hidden="true">
+          <img src="assets/img/peta-lokasi.svg?v=1.1.366" alt="" width="2500" height="1000" decoding="async">
+          <svg class="peta__labels" viewBox="-1500 -500 2500 1000">
+            <path id="petaJ1" d="M-110 -208L290 -199"/>
+            <path id="petaJ2" d="M-150 181L52 181"/>
+            <path id="petaJ3" d="M98 30L98 190"/>
+            <text class="peta__road peta__road--main"><textPath href="#petaJ1" startOffset="50%" text-anchor="middle">Jl. A.H. Nasution</textPath></text>
+            <text class="peta__road"><textPath href="#petaJ2" startOffset="50%" text-anchor="middle">Jl. Karya Tani</textPath></text>
+            <text class="peta__road"><textPath href="#petaJ3" startOffset="50%" text-anchor="middle">Jl. Karyawan</textPath></text>
+          </svg>
+          <span class="peta__pin"><i></i><b class="mono">Asrama Haji Medan</b></span>
+        </div>
+        <a class="peta__osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
       </div>
       <div class="lokasi__overlay">
         <article class="loc-card">
