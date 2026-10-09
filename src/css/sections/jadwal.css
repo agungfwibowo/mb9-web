@@ -127,10 +127,19 @@
 .days.is-stacked .day > * { white-space: nowrap; }
 /* label tegak khusus mode strip — ikut cross-fade dengan isi kartu */
 .day__edge {
-  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; pointer-events: none;
+  position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; opacity: 0; pointer-events: none;
   writing-mode: vertical-rl; font: 700 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
   color: var(--blue);
 }
+/* dua kolom tegak: "HARI KE-3" (kanan) + tanggal kecil "24 Des" (kiri).
+   Selektor .days .day .day__edge > span mengalahkan gaya .day span &
+   .day[aria-selected] span (teks tanggal kartu) — warna ikut .day__edge. */
+.days .day .day__edge > span { font: inherit; color: inherit; }
+.days .day .day__edge > .day__edge-d { font: 500 9.5px/1 var(--mono); letter-spacing: .08em; text-transform: none; color: var(--ink-2); }
+/* strip berlatar gelap/biru → tanggal terang: "Hari ini" (biru) ikut putih,
+   strip terpilih (hitam) abu terang seperti tanggal di kartu terpilih */
+.day.is-today .day__edge > .day__edge-d { color: inherit; }
+.day[aria-selected="true"]:not(.is-today) .day__edge > .day__edge-d { color: var(--grey-2); }
 /* tanpa box-shadow blur: clip-path horizontal akan memotongnya, lagipula
    tumpukan sudah terbaca dari border 2px yang saling menimpa */
 .day.is-piled { flex: 0 0 var(--sliver, 38px); }
@@ -172,6 +181,8 @@
 .day:focus-visible { outline-offset: -5px; }
 .day__badge { position: absolute; top: -11px; left: 12px; z-index: 1; box-shadow: 0 4px 10px rgba(0,0,0,.18); padding: 4px 7px; font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .day__badge--today { background: var(--blue); color: var(--white); }
+/* nomor hari di badge hanya untuk bilah HP (lihat responsive.css) */
+.day .day__badge > .day__badge-n { display: none; font: inherit; color: inherit; }
 .day__badge--past { background: var(--grey-2); color: var(--ink-2); }
 .day__badge--today::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: var(--lime); animation: blink 1s steps(2) infinite; }
 .day.is-past { background: var(--paper); }

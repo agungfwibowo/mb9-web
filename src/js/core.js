@@ -96,8 +96,8 @@ export const bootBooth = (() => {
 // pemulihan itu dikira guliran pengunjung dan lompatan ke tujuan batal.
 export let userScrolled = false;
 // Selama deep link berjalan (preloader → luncur → koreksi posisi), snap hero
-// (perangkat sentuh) dimatikan lewat .snap-boot — kalau tidak, Safari menarik
-// guliran kembali ke hero dan tujuan tak pernah tercapai. Dilepas saat
+// (perangkat sentuh, lenis.js) ditahan lewat .snap-boot — kalau tidak, guliran
+// bisa ditarik kembali ke hero dan tujuan tak pernah tercapai. Dilepas saat
 // pengunjung mengambil alih, atau oleh hemat.js setelah koreksi terakhir.
 export const releaseBootSnap = () => root.classList.remove('snap-boot');
 if (bootHash || bootBooth) {

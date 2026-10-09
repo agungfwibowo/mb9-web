@@ -1,4 +1,4 @@
-import { $, $$, D, esc, lenis, reduced } from './core.js';
+import { $, $$, D, esc, hasGsap, lenis, reduced, root } from './core.js';
 import { lockNav } from './navbar.js';
 import { lazyWatch, track } from './konten.js';
 import { dayLabel, everyMinute, fmtMin, moveRail, openDayAt, panel, selectDay, toMin, wibNow } from './jadwal.js';
@@ -296,25 +296,68 @@ const dragScroll = (el) => {
 dragScroll(agrid);
 // Jaring pengaman: gulir jari/trackpad yang berhenti di luar titik labuh (snap
 // browser kadang meleset setelah urutan kartu berubah) → labuhkan ke terdekat.
-agrid.addEventListener('scrollend', () => {
+// Safari lama tak punya 'scrollend' → cadangan: 180ms setelah 'scroll' terakhir.
+const settle = () => {
   if (agrid.classList.contains('is-dragging')) return;
   const x = snapLeft(agrid);
   if (Math.abs(x - agrid.scrollLeft) > 2) agrid.scrollTo({ left: x, behavior: reduced ? 'auto' : 'smooth' });
-});
+};
+if ('onscrollend' in window) agrid.addEventListener('scrollend', settle);
+else {
+  let settleT = 0;
+  agrid.addEventListener('scroll', () => { clearTimeout(settleT); settleT = setTimeout(settle, 180); }, { passive: true });
+}
+// Labuhkan deretan ke kartu ke-i (default: terdekat) TANPA snap browser.
+// Snap browser memakai kotak kartu SETELAH transform — selama animasi masuk
+// GSAP (scale/rotateX) titik labuhnya bergeser, dan setelah animasi selesai
+// Chrome tidak melabuhkan ulang → kartu pertama tertinggal menempel di tepi.
+// Posisi dihitung dari offsetLeft (tata letak, kebal transform); snap
+// dimatikan sebentar agar tidak ikut menarik, lalu dinyalakan lagi.
+// Snap browser baru dinyalakan setelah animasi masuk kartu selesai (lihat bawah).
+let entered = !(hasGsap && !reduced);
+export const realignAsatidz = (i) => {
+  const cards = $$('.ustadz', agrid);
+  const snapOn = () => { if (entered) requestAnimationFrame(() => requestAnimationFrame(() => { agrid.style.scrollSnapType = ''; })); };
+  if (!cards.length || agrid.scrollWidth <= agrid.clientWidth) { snapOn(); return; }
+  agrid.style.scrollSnapType = 'none';
+  const pad = parseFloat(getComputedStyle(agrid).scrollPaddingLeft) || 0;
+  agrid.scrollLeft = i == null ? snapLeft(agrid)
+    : Math.min(agrid.scrollWidth - agrid.clientWidth, Math.max(0, cards[i].offsetLeft - pad));
+  snapOn();
+};
+// Sampai animasi masuk selesai (intro.js → asatidzEntered), snap browser
+// dimatikan: kalau tidak, ia berlabuh ke titik yang bergeser oleh transform
+// animasi dan kartu pertama tampak menempel di tepi kiri.
+if (!entered) agrid.style.scrollSnapType = 'none';
+export const asatidzEntered = () => { entered = true; realignAsatidz(); };
 // Jarak sisi deretan (--ast-pad) agar kartu yang muat penuh (1/2/3…) berada tepat
 // di tengah layar saat berlabuh. Hanya bila deretan meluber; kalau semua muat,
-// kartu sudah rata tengah lewat margin auto. Saat meluber, lebar kartu sudah
-// tetap (HP) atau sudah di batas susutnya (desktop), jadi padding baru tidak
-// mengubah ukurannya lagi.
+// kartu sudah rata tengah lewat margin auto. Lebar kartu & deretan tidak
+// bergantung pada padding, jadi dihitung tanpa melepas --ast-pad: dulu
+// dilepas-pasang tiap resize — di iOS resize terjadi terus selama halaman
+// digulir (bilah alamat), dan di sela itu Safari melabuhkan ulang deretan ke
+// posisi tanpa padding → kartu paling kiri menempel di tepi layar.
 const centerSnap = () => {
-  agrid.style.removeProperty('--ast-pad');
-  if (agrid.scrollWidth <= agrid.clientWidth) return;
   const cards = $$('.ustadz', agrid);
-  const gap = parseFloat(getComputedStyle(agrid).columnGap) || 0; // jarak antar kartu
+  if (!cards.length) return;
+  const cs = getComputedStyle(agrid);
+  const gap = parseFloat(cs.columnGap) || 0; // jarak antar kartu
   const cw = cards[0].offsetWidth, step = cw + gap;
   const W = agrid.clientWidth;
+  // --gutter berisi clamp() → baca nilai jadinya dari padding .container
+  const gutter = parseFloat(getComputedStyle($('.asatidz .container') || root).paddingLeft) || 16;
+  const overflow = cards.length * step - gap + 2 * gutter > W;
   const k = Math.max(1, Math.floor((W - 32 + gap) / step)); // sisakan ≥16px tiap sisi
-  agrid.style.setProperty('--ast-pad', `${Math.round((W - (k * step - gap)) / 2)}px`);
+  const pad = overflow ? `${Math.round((W - (k * step - gap)) / 2)}px` : '';
+  if (agrid.style.getPropertyValue('--ast-pad') === pad) return; // tak berubah → jangan sentuh
+  // Padding berubah → Chrome melabuhkan ulang deretan sendiri ke posisi yang
+  // salah (kartu pertama menempel di tepi). Maka snap dimatikan sebentar,
+  // kartu yang sedang di depan dipasang langsung di posisi labuhnya (tanpa
+  // animasi), baru snap dinyalakan lagi — posisinya sudah pas, tak bergeser.
+  const oldPad = parseFloat(cs.scrollPaddingLeft) || 0;
+  const at = cards.reduce((best, c, i) => (Math.abs(c.offsetLeft - oldPad - agrid.scrollLeft) < Math.abs(cards[best].offsetLeft - oldPad - agrid.scrollLeft) ? i : best), 0);
+  if (pad) agrid.style.setProperty('--ast-pad', pad); else agrid.style.removeProperty('--ast-pad');
+  realignAsatidz(at);
 };
 centerSnap();
 addEventListener('resize', centerSnap);

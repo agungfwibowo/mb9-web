@@ -8,16 +8,14 @@ import { $, root } from './core.js';
 export const nav = $('#nav');
 const bar = $('.scroll-progress span');
 let lastY = 0;
-// Saat scroll otomatis (klik menu/anchor), navbar dikunci tetap tampil.
-// Snap hero (CSS, perangkat sentuh) ikut dimatikan selama itu: Safari
-// menarik tiap langkah guliran Lenis kembali ke hero, jadi anchor tak sampai.
+// Saat scroll otomatis (klik menu/anchor), navbar dikunci tetap tampil —
+// snap hero (lenis.js) juga tidak jalan selama terkunci.
 export let navLocked = false, navLockT;
 export const lockNav = (ms = 1600) => {
   navLocked = true;
-  root.classList.add('snap-off');
   nav.classList.remove('is-hidden');
   clearTimeout(navLockT);
-  navLockT = setTimeout(() => { navLocked = false; root.classList.remove('snap-off'); lastY = scrollY; }, ms);
+  navLockT = setTimeout(() => { navLocked = false; lastY = scrollY; }, ms);
 };
 export const onScroll = (y) => {
   const max = document.documentElement.scrollHeight - innerHeight;
