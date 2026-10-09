@@ -190,11 +190,11 @@ export const scrollAnims = () => {
   // jadwal days
   gsap.from('.day', { y: 40, opacity: 0, duration: .7, stagger: .08, ease: 'power3.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: '.days', start: 'top 88%', once: true } });
 
-  // asatidz cards
+  // asatidz cards — naik + muncul, sama dengan kartu layanan (dulu flip rotateX)
   // clearProps: GSAP membekukan `scale` CSS (kartu depan/tetangga di HP) ke inline
   // transform — dibersihkan setelah selesai agar CSS kembali yang mengatur.
   // onComplete: selama animasi titik snap ikut bergeser → deretan dilabuhkan ulang
-  gsap.from('.ustadz', { y: 60, rotateX: -20, opacity: 0, duration: .9, stagger: .08, ease: 'power3.out', transformPerspective: 800, clearProps: 'transform,translate,rotate,scale', onComplete: asatidzEntered, scrollTrigger: { trigger: '.asatidz__grid', start: 'top 85%', once: true } });
+  gsap.from('.ustadz', { opacity: 0, y: 80, duration: .9, stagger: .1, ease: 'power3.out', clearProps: 'transform,translate,rotate,scale,opacity', onComplete: asatidzEntered, scrollTrigger: { trigger: '.asatidz__grid', start: 'top 85%', once: true } });
 
   // denah booths pop-in
   gsap.from('#boothLayer .booth', {
