@@ -65,7 +65,25 @@
   72% { transform: scale(.97); }
   78% { transform: scale(1.24); }
 }
-@media (prefers-reduced-motion: reduce) { .ustadz.is-live .ustadz__body::after { animation: none; } }
+/* cincin pulse di belakang kotak mic (box-shadow ::before), satu putaran 2,4 dtk
+   sama dengan mic-beat: dipancarkan tepat di ketukan kuat ikon — "dug" pertama
+   (6%), awal tiga ketukan (54%) & ketukan terakhir (78%). Saat cincin di-reset
+   (24%, 72%, 96%) ia sudah transparan → tak terlihat melompat. */
+.ustadz.is-live .ustadz__body::before { --ring: 33, 80, 245; animation: mic-ring 2.4s ease-out infinite; }
+.ustadz.is-live.is-pink .ustadz__body::before { --ring: 224, 51, 138; }
+@keyframes mic-ring {
+  0%, 4%   { box-shadow: 0 0 0 0 rgba(var(--ring), 0); }
+  6%       { box-shadow: 0 0 0 0 rgba(var(--ring), .75); }
+  24%      { box-shadow: 0 0 0 16px rgba(var(--ring), 0); }
+  25%, 52% { box-shadow: 0 0 0 0 rgba(var(--ring), 0); }
+  54%      { box-shadow: 0 0 0 0 rgba(var(--ring), .75); }
+  72%      { box-shadow: 0 0 0 13px rgba(var(--ring), 0); }
+  73%, 76% { box-shadow: 0 0 0 0 rgba(var(--ring), 0); }
+  78%      { box-shadow: 0 0 0 0 rgba(var(--ring), .65); }
+  96%      { box-shadow: 0 0 0 15px rgba(var(--ring), 0); }
+  97%, 100% { box-shadow: 0 0 0 0 rgba(var(--ring), 0); }
+}
+@media (prefers-reduced-motion: reduce) { .ustadz.is-live .ustadz__body::after, .ustadz.is-live .ustadz__body::before { animation: none; } }
 .ustadz__body small { display: block; color: var(--lime); font: 12px/1.25 var(--mono); }
 /* Kajiannya sedang berlangsung (markAsatidzLive di main.js) */
 /* dibuka dari nama di jadwal: kotak nama berkedip lime (teks jadi gelap) */
