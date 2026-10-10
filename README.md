@@ -10,11 +10,13 @@ Produksi: <https://www.muslimberdedikasi.com/>
 ```
 index.html              Halaman utama (satu halaman, semua section)
 privasi/index.html      Ketentuan Layanan & Kebijakan Privasi → diakses di /privasi/
+ringkas/index.html      Tampilan Sederhana (huruf besar, untuk orang tua) → /ringkas/, isi dari data-*.js
 assets/css/style.css    HASIL BUILD dari src/css (jangan diedit langsung) + style.css.map
 assets/js/data-prod.js  Data konten produksi (jadwal, tenant, sponsor, dll.)
 assets/js/data-dev.js   Data uji, aktif selain di muslimberdedikasi.com (menimpa data-prod.js)
 assets/js/main.js       HASIL BUILD dari src/js (jangan diedit langsung) + main.js.map
 assets/js/privasi.js    Penanda tombol navigasi di halaman Ketentuan & Privasi (tidak dibundel)
+assets/js/ringkas.js    Isi & ukuran huruf halaman Tampilan Sederhana (tidak dibundel)
 src/css/                Sumber CSS per bagian, entry: src/css/main.css
   base/                 Token :root, reset, noise, kursor, tipografi, util kecil
   components/           Preloader, tombol, nav, menu bagikan, tombol mengambang, toast
@@ -88,7 +90,7 @@ Catatan: GitHub Pages gratis untuk repo **public**. Untuk repo private butuh aku
 0. Bila mengubah `src/js` atau `src/css`: `npm run build`.
 1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.312` → `mb9-1.1.313`).
 2. Samakan semua `?v=` di [index.html](index.html) dengan angka versi tersebut
-   (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`) dan `privasi.js` di [privasi/index.html](privasi/index.html). Cache lama otomatis dibuang saat worker baru aktif.
+   (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`), `privasi.js` di [privasi/index.html](privasi/index.html), serta `data-prod.js`, `data-dev.js`, `ringkas.js` di [ringkas/index.html](ringkas/index.html). Cache lama otomatis dibuang saat worker baru aktif.
 3. Perbarui `<lastmod>` di [sitemap.xml](sitemap.xml) bila konten berubah.
 
 Menambah halaman baru: buat sebagai `nama/index.html` (agar URL-nya `/nama/` tanpa `.html`),
@@ -96,7 +98,7 @@ pakai path aset `../assets/...`, lalu tambahkan `'./nama/'` ke daftar `CORE` di 
 
 ## Checklist sebelum tayang
 
-- [ ] Hapus `<meta name="robots" content="noindex, nofollow">` di `index.html` **dan** `privasi/index.html`.
+- [ ] Hapus `<meta name="robots" content="noindex, nofollow">` di `index.html`, `privasi/index.html`, **dan** `ringkas/index.html`.
 - [ ] Pastikan domain memakai HTTPS.
 - [ ] Buka situs dan cek Console browser: tidak boleh ada
       error `Content Security Policy`. Uji juga peta, menu Bagikan/QR, dan mode offline.

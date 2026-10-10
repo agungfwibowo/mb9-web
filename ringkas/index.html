@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Tampilan Sederhana — Muslim Berdedikasi 9</title>
+  <meta name="description" content="Info ringkas Muslim Berdedikasi 9 dengan huruf besar: tanggal, jam buka, lokasi, jadwal per hari, dan layanan gratis.">
+  <!-- Samakan dengan index.html: hapus noindex saat situs siap tayang. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#c5fa01">
+  <script src="../assets/js/data-prod.js?v=1.1.370" defer></script>
+  <script src="../assets/js/data-dev.js?v=1.1.370" defer></script>
+  <script src="../assets/js/ringkas.js?v=1.1.370" defer></script>
+  <link rel="icon" type="image/png" href="../assets/img/logo/favicon.png?v=2">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="canonical" href="https://www.muslimberdedikasi.com/ringkas/">
+  <link rel="preload" href="../assets/fonts/public-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Tampilan untuk orang tua / layar kecil: satu kolom, huruf besar, tanpa
+       animasi. Khusus iPad & HP (≤1080px) — di layar lebar ringkas.js
+       mengalihkan ke tampilan lengkap. Tidak memuat style.css/main.js — isi diambil dari data-prod.js
+       (dan data-dev.js di luar domain produksi) lewat ringkas.js.
+       Semua ukuran memakai rem agar ikut setelan "ukuran teks" di HP; tombol
+       A / A+ / A++ hanya menaikkan font-size <html>. -->
+  <style>
+    @font-face { font-family: 'Public Sans'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(../assets/fonts/public-sans-latin.woff2) format('woff2'); }
+    :root {
+      --lime: #c5fa01; --ink: #1f1f1f; --ink-2: #444; --paper: #ececea; --white: #fff; --pink: #ffd6e7; --line: #1f1f1f33;
+      --sans: 'Public Sans', system-ui, -apple-system, sans-serif;
+      --gutter: 1rem;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; font-size: 112.5%; }
+    html[data-ukuran="2"] { font-size: 131.25%; }
+    html[data-ukuran="3"] { font-size: 150%; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1rem/1.55 var(--sans); }
+    a { color: inherit; text-underline-offset: .2em; }
+    :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .wrap { max-width: 40rem; margin: 0 auto; padding: 0 var(--gutter); }
+
+    .bar { background: var(--ink); color: var(--white); }
+    .bar .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .25rem .75rem; min-height: 3.5rem; padding-top: .5rem; padding-bottom: .5rem; }
+    .bar__brand { font-weight: 800; font-size: 1rem; line-height: 1.2; white-space: nowrap; }
+    .bar__brand span { color: var(--lime); }
+    .bar a { font-weight: 700; font-size: .9rem; white-space: nowrap; }
+
+    .ukuran { display: flex; align-items: center; gap: .5rem; margin: 1rem 0 0; font-size: .9rem; font-weight: 700; }
+    .ukuran button { min-width: 3rem; min-height: 3rem; padding: 0 .6rem; border: 2px solid var(--ink); background: var(--white); color: var(--ink); font: 800 1rem/1 var(--sans); border-radius: .5rem; cursor: pointer; }
+    .ukuran button[aria-pressed="true"] { background: var(--ink); color: var(--lime); }
+
+    h1 { font-size: 2rem; line-height: 1.15; font-weight: 800; margin: 1.25rem 0 .25rem; }
+    .sub { margin: 0; font-size: 1.1rem; color: var(--ink-2); }
+    .status { margin: 1rem 0 0; padding: .75rem 1rem; background: var(--lime); border: 2px solid var(--ink); border-radius: .5rem; font-weight: 800; font-size: 1.1rem; }
+    .status:empty { display: none; }
+
+    section { margin: 2rem 0; }
+    h2 { font-size: 1.5rem; line-height: 1.2; font-weight: 800; margin: 0 0 .75rem; }
+    .card { background: var(--white); border: 2px solid var(--ink); border-radius: .75rem; padding: 1rem; }
+    .info { margin: 0; display: grid; gap: .75rem; }
+    .info dt { font-size: .9rem; font-weight: 700; color: var(--ink-2); }
+    .info dd { margin: 0; font-size: 1.2rem; font-weight: 800; }
+    .info dd small { display: block; font-size: 1rem; font-weight: 400; }
+
+    .btns { display: grid; gap: .75rem; margin-top: 1rem; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 3.5rem; padding: .75rem 1rem; border: 2px solid var(--ink); border-radius: .75rem; background: var(--white); color: var(--ink); font: 800 1.1rem/1.2 var(--sans); text-align: center; text-decoration: none; }
+    .btn--main { background: var(--ink); color: var(--lime); }
+    .btn--wa { background: var(--lime); }
+
+    .hari { display: grid; grid-template-columns: 3.5rem 1fr 3.5rem; gap: .5rem; align-items: stretch; margin-bottom: 1rem; }
+    .hari button { min-height: 3.5rem; border: 2px solid var(--ink); border-radius: .75rem; background: var(--white); color: var(--ink); font: 800 1.5rem/1 var(--sans); cursor: pointer; }
+    .hari button:disabled { opacity: .3; cursor: default; }
+    .hari__label { display: flex; flex-direction: column; justify-content: center; text-align: center; background: var(--ink); color: var(--white); border-radius: .75rem; padding: .4rem .5rem; }
+    .hari__label b { font-size: 1.1rem; line-height: 1.25; }
+    .hari__label span { font-size: .9rem; color: var(--lime); font-weight: 700; }
+
+    .acara { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
+    .acara li { background: var(--white); border: 2px solid var(--ink); border-radius: .75rem; padding: .85rem 1rem; }
+    .acara li.akhwat { background: var(--pink); }
+    .acara li.now { box-shadow: 0 0 0 4px var(--lime), 0 0 0 6px var(--ink); }
+    .acara li.lewat { opacity: .55; }
+    .acara__jam { font-size: 1.05rem; font-weight: 800; }
+    .acara__judul { font-size: 1.2rem; font-weight: 800; line-height: 1.3; margin: .15rem 0 0; }
+    .acara__ket { margin: .25rem 0 0; color: var(--ink-2); }
+    .label { display: inline-block; margin-left: .4rem; padding: .05rem .5rem; border-radius: 99px; background: var(--ink); color: var(--lime); font-size: .8rem; font-weight: 800; vertical-align: .1em; }
+    .kosong { margin: 0; font-size: 1.1rem; }
+
+    .layanan h3 { font-size: 1.15rem; margin: 0 0 .5rem; }
+    .layanan + .layanan { margin-top: .75rem; }
+    .layanan ul { margin: 0; padding-left: 1.25rem; }
+    .layanan li + li { margin-top: .35rem; }
+    .layanan p { margin: 0; }
+
+    /* Pita offline: menempel di atas selama tidak ada sinyal; "tersambung
+       kembali" tampil sebentar lalu hilang sendiri (ringkas.js). */
+    .net { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: .75rem; padding: .75rem var(--gutter); background: #ffd84d; color: var(--ink); border-bottom: 2px solid var(--ink); font-weight: 800; line-height: 1.3; }
+    .net[hidden] { display: none; }
+    .net.is-on { background: var(--lime); }
+    .net span { flex: 1; }
+    .net button { flex: none; min-width: 3rem; min-height: 3rem; border: 2px solid var(--ink); border-radius: .5rem; background: var(--white); color: var(--ink); font: 800 1.1rem/1 var(--sans); cursor: pointer; }
+    .footer { background: var(--ink); color: var(--white); padding: 1.5rem 0 2rem; margin-top: 3rem; }
+    .footer p { margin: 0 0 .75rem; }
+    .footer .btn { background: var(--lime); }
+    .footer small { display: block; margin-top: 1rem; color: #ffffffb3; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <div class="net" id="net" role="status" hidden>
+    <span id="netText"></span>
+    <button type="button" id="netClose" aria-label="Tutup pemberitahuan">✕</button>
+  </div>
+  <header class="bar">
+    <div class="wrap">
+      <span class="bar__brand">Muslim Berdedikasi <span>9</span></span>
+      <a href="../">Tampilan lengkap →</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="ukuran" role="group" aria-label="Ukuran huruf">
+      <span>Ukuran huruf:</span>
+      <button type="button" data-ukuran="1" aria-pressed="true" aria-label="Huruf normal">A</button>
+      <button type="button" data-ukuran="2" aria-pressed="false" aria-label="Huruf besar">A+</button>
+      <button type="button" data-ukuran="3" aria-pressed="false" aria-label="Huruf sangat besar">A++</button>
+    </div>
+
+    <h1>Festival Islam &amp; Keluarga</h1>
+    <p class="sub">Kajian ilmiah, layanan sosial gratis, lomba, bazar &amp; foodcourt.</p>
+    <p class="status" id="status" role="status"></p>
+
+    <section aria-labelledby="h-info">
+      <h2 id="h-info">Kapan &amp; di mana</h2>
+      <div class="card">
+        <dl class="info">
+          <div><dt>Tanggal</dt><dd id="tanggal">23 – 27 Desember 2026<small>Rabu – Ahad</small></dd></div>
+          <div><dt>Jam buka</dt><dd id="jam">08.00 – 21.00 WIB<small>Setiap hari</small></dd></div>
+          <div><dt>Tempat</dt><dd>Komplek Lapangan Asrama Haji Medan<small>Jl. Jenderal Besar A.H. Nasution, Medan</small></dd></div>
+        </dl>
+      </div>
+      <div class="btns">
+        <a class="btn btn--main" href="https://maps.app.goo.gl/SZnxMJuUs6qJ5r7R9" target="_blank" rel="noopener">📍 Petunjuk Arah (Google Maps)</a>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-jadwal">
+      <h2 id="h-jadwal">Jadwal acara</h2>
+      <div class="hari" id="hari" hidden>
+        <button type="button" id="hariPrev" aria-label="Hari sebelumnya">‹</button>
+        <div class="hari__label" aria-live="polite"><b id="hariNama"></b><span id="hariKe"></span></div>
+        <button type="button" id="hariNext" aria-label="Hari berikutnya">›</button>
+      </div>
+      <ul class="acara" id="acara"></ul>
+      <p class="kosong" id="kosong">Jadwal InsyaAllah menyusul.</p>
+    </section>
+
+    <section aria-labelledby="h-layanan" id="layananSec" hidden>
+      <h2 id="h-layanan">Layanan</h2>
+      <div id="layanan"></div>
+    </section>
+
+    <section aria-labelledby="h-kontak">
+      <h2 id="h-kontak">Butuh bantuan?</h2>
+      <p>Hubungi panitia:</p>
+      <div class="btns">
+        <a class="btn btn--wa" id="wa" href="https://wa.me/6281255557120" target="_blank" rel="noopener">💬 WhatsApp Panitia</a>
+        <a class="btn" id="tel" href="tel:+6281255557120">📞 Telepon <span id="telLabel">0812-5555-7120</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>Ingin melihat denah, daftar tenant, dan info lengkap lainnya?</p>
+      <a class="btn" href="../">Buka tampilan lengkap</a>
+      <small><a href="../privasi/">Ketentuan &amp; Privasi</a></small>
+    </div>
+  </footer>
+</body>
+</html>
