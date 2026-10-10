@@ -21,6 +21,8 @@
   cursor: grab; user-select: none; -webkit-user-select: none;
 }
 .asatidz__grid::-webkit-scrollbar { display: none; }
+/* panah ‹ › di kanan bawah deretan — tampilan dari .days-nav (jadwal.css) */
+.asatidz__nav { margin: min(20px, 2.4vh) 0 0; }
 .asatidz__grid.is-dragging { cursor: grabbing; scroll-snap-type: none; } /* seret mouse: snap menyusul saat dilepas */
 /* ukuran tetap (tidak menyusut): dulu boleh s/d 85% agar semua muat, tapi
    dengan banyak pemateri kartu jadi kecil & foto tergencet nama — lebih baik

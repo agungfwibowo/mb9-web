@@ -333,6 +333,42 @@ const dragScroll = (el) => {
   el.addEventListener('dragstart', (e) => e.preventDefault()); // gambar tidak ikut terseret
 };
 dragScroll(agrid);
+// Panah ‹ › di bawah deretan: geser ke titik labuh berikutnya/sebelumnya.
+// Tampil hanya bila deretan meluber. Tombol nonaktif bila ke arah itu tidak
+// ada titik labuh lagi — dihitung sama persis dengan saat diklik, bukan dari
+// scrollLeft vs ujung: setelah layar berubah ukuran --ast-pad dibulatkan dan
+// kartu terakhir bisa berlabuh 1–2px sebelum ujung (tombol › tetap aktif).
+const anav = $('#asatidzNav');
+if (anav) {
+  const [prevBtn, nextBtn] = $$('button', anav);
+  const navTarget = (dir) => {
+    const pad = parseFloat(getComputedStyle(agrid).scrollPaddingLeft) || 0;
+    const max = agrid.scrollWidth - agrid.clientWidth;
+    const cur = agrid.scrollLeft;
+    const pts = $$('.ustadz', agrid).map((c) => Math.min(max, Math.max(0, c.offsetLeft - pad)));
+    return dir > 0 ? pts.filter((x) => x > cur + 2).sort((p, q) => p - q)[0] : pts.filter((x) => x < cur - 2).sort((p, q) => q - p)[0];
+  };
+  let navRaf = 0;
+  const syncNav = () => {
+    navRaf = 0;
+    anav.classList.toggle('is-on', agrid.scrollWidth - agrid.clientWidth > 1);
+    prevBtn.disabled = navTarget(-1) == null;
+    nextBtn.disabled = navTarget(1) == null;
+  };
+  const queueNav = () => { if (!navRaf) navRaf = requestAnimationFrame(syncNav); };
+  anav.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-dir]');
+    if (!b || b.disabled) return;
+    const to = navTarget(Number(b.dataset.dir));
+    if (to != null) agrid.scrollTo({ left: to, behavior: reduced ? 'auto' : 'smooth' });
+  });
+  agrid.addEventListener('scroll', queueNav, { passive: true });
+  // resize: --ast-pad & posisi labuh baru dipasang centerSnap/realignAsatidz
+  // (snap menyala lagi 2 frame kemudian) → cek ulang setelah semuanya selesai
+  addEventListener('resize', () => { queueNav(); setTimeout(queueNav, 150); });
+  addEventListener('load', queueNav);
+  syncNav();
+}
 // Jaring pengaman: gulir jari/trackpad yang berhenti di luar titik labuh (snap
 // browser kadang meleset setelah urutan kartu berubah) → labuhkan ke terdekat.
 // Safari lama tak punya 'scrollend' → cadangan: 180ms setelah 'scroll' terakhir.
