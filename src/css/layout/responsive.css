@@ -149,10 +149,18 @@
   /* kartu yang paling terlihat di frame (.is-front, diatur asatidz.js) ukuran
      penuh; tetangganya mengecil ke arah kartu depan. Pakai properti `scale`
      (bukan transform) agar tidak bentrok dengan transform animasi masuk GSAP
-     dan tidak mengubah tata letak → snap geser tetap pas */
-  .asatidz__grid > .ustadz { scale: .86; transform-origin: 100% 100%; transition: scale .35s var(--ease); }
+     dan tidak mengubah tata letak.
+     Snap browser mengukur kotak kartu SETELAH scale: tepi yang ikut bergeser
+     saat mengecil tidak boleh dipakai berlabuh. Maka tiap kartu berlabuh di
+     tepi yang menjadi titik tumpu scale-nya (diam saat mengecil/membesar):
+     kartu depan & sebelum-nya → tepi kanan (end), sesudahnya → tepi kiri
+     (start). Dengan scroll-padding kiri = kanan (--ast-pad) posisinya sama
+     dengan start biasa. Dulu semua start: geser balik ke kartu kiri (masih
+     .86, tumpu kanan → tepi kirinya +14% lebar) berlabuh ~40px kelewat dan
+     kartu pertama menempel di tepi layar. */
+  .asatidz__grid > .ustadz { scale: .86; transform-origin: 100% 100%; transition: scale .35s var(--ease); scroll-snap-align: end; }
   .asatidz__grid > .ustadz.is-front { scale: 1; }
-  .asatidz__grid > .ustadz.is-front ~ .ustadz { transform-origin: 0 100%; } /* HP: ukuran tetap, digeser */
+  .asatidz__grid > .ustadz.is-front ~ .ustadz { transform-origin: 0 100%; scroll-snap-align: start; } /* HP: ukuran tetap, digeser */
   .ustadz__body { padding: 12px; min-height: 73px; }
   .ustadz:not(.ustadz--soon) .ustadz__body::before, .ustadz:not(.ustadz--soon) .ustadz__body::after { left: 12px; width: 38px; height: 38px; }
   .ustadz:not(.ustadz--soon) .ustadz__body::after { background-size: 21px; }
