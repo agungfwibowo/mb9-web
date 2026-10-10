@@ -6,8 +6,10 @@
 (() => {
   'use strict';
   // Khusus iPad & HP (sama dengan tombol Aa di halaman utama, ≤1080px):
-  // dibuka di layar lebar → kembali ke tampilan lengkap.
-  if (window.matchMedia('(min-width: 1081px)').matches) { location.replace('../'); return; }
+  // dibuka di layar lebar → kembali ke tampilan lengkap. Hanya di domain
+  // produksi — di localhost/github.io halaman ini tetap bisa diuji di laptop.
+  const PROD = ['muslimberdedikasi.com', 'www.muslimberdedikasi.com'];
+  if (PROD.includes(location.hostname) && window.matchMedia('(min-width: 1081px)').matches) { location.replace('../'); return; }
   const $ = (id) => document.getElementById(id);
   const root = document.documentElement;
 
@@ -43,7 +45,16 @@
   const KEY_SIZE = 'mb9-ukuran';
   // Sudah pernah membuka tampilan sederhana → petunjuk di halaman utama
   // (ringkas-hint.js) tidak perlu muncul lagi
-  try { localStorage.setItem('mb9-ringkas-hint', '1'); } catch (_) { /* private mode */ }
+  // dan pilihan tampilan diingat: kunjungan berikutnya ke halaman utama
+  // menawarkan "buka tampilan sederhana lagi". Kembali ke tampilan lengkap
+  // lewat tautan di sini = sengaja → tawaran tidak muncul di sesi ini.
+  try {
+    localStorage.setItem('mb9-ringkas-hint', '1');
+    localStorage.setItem('mb9-view', 'ringkas');
+  } catch (_) { /* private mode */ }
+  document.querySelectorAll('a[href="../"]').forEach((a) => a.addEventListener('click', () => {
+    try { sessionStorage.setItem('mb9-view-skip', '1'); } catch (_) { /* private mode */ }
+  }));
   const sizeBtns = [...document.querySelectorAll('.ukuran button')];
   const setSize = (n, save) => {
     if (!['1', '2', '3'].includes(n)) n = '1';
