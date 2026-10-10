@@ -3,13 +3,13 @@
    di lokasi acara. Naikkan VERSION setiap rilis: cache lama
    otomatis dibuang saat worker baru aktif.
    ========================================================= */
-const VERSION = 'mb9-1.1.378';
+const VERSION = 'mb9-1.1.379';
 // Versi aset diambil dari VERSION, jadi cukup satu kali naik versi dan URL
 // ?v= di sini selalu sama persis dengan yang ditulis index.html.
 const V = VERSION.slice(VERSION.indexOf('-') + 1);
 const CORE = [
   './', './index.html', './privasi/', './ringkas/', './manifest.webmanifest',
-  `assets/css/style.css?v=${V}`, `assets/js/data-prod.js?v=${V}`, `assets/js/data-dev.js?v=${V}`, `assets/js/main.js?v=${V}`, `assets/js/privasi.js?v=${V}`, `assets/js/ringkas.js?v=${V}`,
+  `assets/css/style.css?v=${V}`, `assets/js/data-prod.js?v=${V}`, `assets/js/data-dev.js?v=${V}`, `assets/js/main.js?v=${V}`, `assets/js/privasi.js?v=${V}`, `assets/js/ringkas.js?v=${V}`, `assets/js/akhir.js?v=${V}`,
   `assets/img/peta-lokasi.svg?v=${V}`, // peta lokasi (pengganti iframe Google) — wajib ada saat offline
   'assets/fonts/public-sans-latin.woff2', 'assets/fonts/roboto-mono-latin.woff2', 'assets/fonts/noto-sans-mono-blocks.woff2',
 ];
