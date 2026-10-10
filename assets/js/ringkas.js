@@ -87,13 +87,7 @@
   $('jam').firstChild.nodeValue = `${open} – ${close} WIB`;
 
   // ---- Kontak ----
-  if (D.hotline) {
-    if (D.hotline.wa) $('wa').href = D.hotline.wa;
-    if (D.hotline.label) {
-      $('telLabel').textContent = D.hotline.label;
-      $('tel').href = `tel:+62${D.hotline.label.replace(/\D/g, '').replace(/^0/, '')}`;
-    }
-  }
+  if (D.hotline && D.hotline.wa) $('wa').href = D.hotline.wa;
 
   // ---- Status hari ini ----
   // Memakai D.days (bukan prodDays) agar status bisa diuji dengan data-dev.js
