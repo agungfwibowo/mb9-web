@@ -220,11 +220,11 @@
 .jperiode__view button { display: grid; place-items: center; width: 44px; padding: 0; border: 0; border-left: 1px solid rgba(255, 255, 255, .14); background: transparent; color: var(--grey-2); cursor: pointer; transition: background .25s, color .25s; }
 .jperiode__view button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .jperiode__view button:hover { color: var(--white); }
-/* aktif: isi putih, ikon & bingkai 2px hitam. Garis pemisah kiri (1px) ikut
-   hitam — kalau tidak, latar putih tembus di situ jadi celah putih — dan
+/* aktif: isi lime, ikon & bingkai 2px hitam. Garis pemisah kiri (1px) ikut
+   hitam — kalau tidak, latar terang tembus di situ jadi celah — dan
    bayangan inset kiri cukup 1px agar keempat sisi sama 2px. */
 .jperiode__view button[aria-pressed="true"] {
-  background: var(--white); color: var(--ink); border-left-color: var(--ink);
+  background: var(--lime); color: var(--ink); border-left-color: var(--ink);
   box-shadow: inset 1px 0 var(--ink), inset 0 2px var(--ink), inset -2px 0 var(--ink), inset 0 -2px var(--ink);
 }
 /* fokus keyboard mengikuti warna ikon: putih di tombol gelap, hitam di tombol aktif */
