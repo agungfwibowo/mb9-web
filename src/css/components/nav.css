@@ -24,6 +24,32 @@
 /* penanda "ada jadwal hari ini" di link Jadwal — hanya tampil selama acara */
 .nav__flag { position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; background: var(--blue); animation: blink 1s steps(2) infinite; }
 .nav__flag[hidden] { display: none; }
+/* Tombol ke /ringkas/ (tampilan sederhana, huruf besar) — khusus iPad & HP
+   (≤1080px, layar ber-burger — lihat responsive.css), menempel di kiri tombol menu. */
+.nav__simple {
+  display: none; place-items: center; width: 46px; height: 46px; margin-right: -10px; flex: none;
+  border: 2px solid var(--ink); background: var(--white); color: var(--ink);
+  font: 700 18px/1 var(--mono); letter-spacing: -.04em; text-decoration: none;
+}
+.nav__simple:hover, .nav__simple:focus-visible { background: var(--lime); }
+/* Petunjuk sekali (ringkas-hint.js) di bawah navbar, caret menunjuk tombol
+   Aa. Ikut .nav, jadi ikut sembunyi bersama navbar. right caret = padding
+   kanan nav 10 + burger 46 + jarak 10 + setengah tombol Aa 23 − setengah caret 10. */
+.nav__hint {
+  position: absolute; top: calc(100% + 12px); right: -2px; width: min(300px, calc(100vw - 2 * var(--gutter)));
+  display: flex; align-items: flex-start; gap: 8px; padding: 12px 12px 12px 14px;
+  background: var(--ink); color: var(--white); box-shadow: 0 14px 30px rgba(0, 0, 0, .3);
+  opacity: 0; translate: 0 -8px; transition: opacity .4s var(--ease), translate .4s var(--ease);
+}
+.nav__hint.is-in { opacity: 1; translate: 0 0; }
+.nav__hint[hidden] { display: none; }
+.nav__hint::before {
+  content: ''; position: absolute; bottom: 100%; right: 80px;
+  border: 10px solid transparent; border-top: 0; border-bottom-color: var(--ink);
+}
+.nav__hint a { flex: 1; font: 400 14px/1.4 var(--sans); color: rgba(255, 255, 255, .85); text-decoration: none; }
+.nav__hint b { display: block; color: var(--lime); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.nav__hint-x { flex: none; width: 32px; height: 32px; margin: -6px -6px 0 0; display: grid; place-items: center; background: none; border: 0; color: var(--grey-2); font-size: 22px; line-height: 1; cursor: pointer; }
 .nav__burger { --t: 7px; display: none; width: 46px; height: 46px; border: 0; background: var(--ink); cursor: pointer; position: relative; }
 /* Ikon piksel dalam kisi 3x3 sel berukuran --t: satu kotak nyata (sel kiri-atas)
    + 5 box-shadow. Jumlah bayangannya sama di kedua state, jadi perpindahannya

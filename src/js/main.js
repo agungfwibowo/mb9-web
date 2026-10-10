@@ -27,4 +27,5 @@ import './teks.js';
 import './intro.js';
 import './hemat.js';
 import './grain.js';
+import './ringkas-hint.js';
 import './sw-register.js';
