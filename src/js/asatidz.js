@@ -249,10 +249,11 @@ const swipeToScroll = (el, key) => {
 };
 // Posisi gulir berlabuh terdekat (kartu rata --ast-pad, sama dengan CSS snap).
 // dir: 1 = condong ke kanan, -1 = ke kiri, 0 = yang paling dekat.
-const snapLeft = (el, dir = 0) => {
+// at: hitung dari posisi lain (mis. titik akhir lontaran), default posisi kini.
+const snapLeft = (el, dir = 0, at = el.scrollLeft) => {
   const pad = parseFloat(getComputedStyle(el).scrollPaddingLeft) || 0;
   const max = el.scrollWidth - el.clientWidth;
-  const cur = el.scrollLeft;
+  const cur = Math.min(max, Math.max(0, at));
   const pts = $$('.ustadz', el).map((c) => Math.min(max, Math.max(0, c.offsetLeft - pad)));
   // seretan pendek (< 1/5 kartu) tetap di kartu terdekat
   const near = pts.reduce((a, b) => (Math.abs(b - cur) < Math.abs(a - cur) ? b : a), 0);
@@ -273,21 +274,33 @@ const dragScroll = (el) => {
     if (el.scrollWidth <= el.clientWidth) return;
     const touch = e.pointerType === 'touch' && getComputedStyle(el).touchAction === 'pan-y';
     if (!touch && (e.pointerType !== 'mouse' || e.button !== 0)) return;
-    d = { id: e.pointerId, x: e.clientX, left: el.scrollLeft, moved: false };
+    d = { id: e.pointerId, x: e.clientX, left: el.scrollLeft, moved: false, trail: [] };
   });
   addEventListener('pointermove', (e) => {
     if (!d || e.pointerId !== d.id) return;
     const dx = e.clientX - d.x;
+    // jejak 100ms terakhir → kecepatan saat dilepas (lontaran)
+    d.trail.push([e.timeStamp, e.clientX]);
+    while (d.trail.length > 2 && e.timeStamp - d.trail[0][0] > 100) d.trail.shift();
     if (!d.moved && Math.abs(dx) > 5) { d.moved = true; el.classList.add('is-dragging'); }
     if (d.moved) el.scrollLeft = d.left - dx;
   });
   // snap tidak selalu dipasang ulang browser setelah dimatikan (Safari) →
   // labuhkan sendiri (dir: condong searah seretan, 0 = terdekat), baru snap
   // diaktifkan lagi
-  const release = (dir) => {
+  // Lontaran: usapan cepat diteruskan sejauh kecepatan x FLING_MS, lalu
+  // berlabuh di kartu terdekat titik itu (bisa melewati beberapa kartu);
+  // usapan pelan → satu kartu searah seretan.
+  const FLING_MS = 450;
+  const release = (dir, v = 0) => {
     d = null;
     if (!el.classList.contains('is-dragging')) return;
-    el.scrollTo({ left: snapLeft(el, dir), behavior: reduced ? 'auto' : 'smooth' });
+    let left = snapLeft(el, dir);
+    if (Math.abs(v) > .4) {
+      const far = snapLeft(el, 0, el.scrollLeft - v * FLING_MS);
+      if (Math.sign(far - el.scrollLeft) === Math.sign(left - el.scrollLeft) && Math.abs(far - el.scrollLeft) > Math.abs(left - el.scrollLeft)) left = far;
+    }
+    el.scrollTo({ left, behavior: reduced ? 'auto' : 'smooth' });
     const done = () => { clearTimeout(t); el.removeEventListener('scrollend', done); el.classList.remove('is-dragging'); };
     const t = setTimeout(done, 600);
     el.addEventListener('scrollend', done);
@@ -295,7 +308,9 @@ const dragScroll = (el) => {
   addEventListener('pointerup', (e) => {
     if (!d || e.pointerId !== d.id) return;
     if (d.moved) draggedAt = Date.now();
-    release(-Math.sign(e.clientX - d.x));
+    const [t0, x0] = d.trail[0] || [e.timeStamp, e.clientX];
+    const v = e.timeStamp - t0 > 0 && e.timeStamp - t0 < 150 ? (e.clientX - x0) / (e.timeStamp - t0) : 0; // px/ms
+    release(-Math.sign(e.clientX - d.x), v);
   });
   // browser mengambil alih (usapan vertikal) → kartu terdekat
   addEventListener('pointercancel', (e) => { if (d && e.pointerId === d.id) release(0); });
