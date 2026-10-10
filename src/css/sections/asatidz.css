@@ -29,6 +29,11 @@
 .asatidz__grid > .ustadz:first-child { margin-left: auto; }
 .asatidz__grid > .ustadz:last-child { margin-right: auto; }
 @media (max-width: 860px) { .layanan__track { touch-action: pan-y; } } /* HP: geser horizontal ditangani JS (→ gulir halaman) */
+/* Layar sentuh: browser hanya menangani gulir vertikal di atas kartu; geser
+   horizontal ditangani asatidz.js (dragScroll). Dengan pan-x bawaan, usapan
+   vertikal yang sedikit miring "terkunci" ke deretan (Chrome Android) →
+   kartu bergeser & halaman tidak ikut tergulir. */
+@media (pointer: coarse) { .asatidz__grid { touch-action: pan-y; } }
 /* animasi masuk (intro.js): .will-in = posisi awal, .is-in = meluncur ke posisi.
    Properti `translate` (bukan transform) → tidak bentrok dengan `scale` kartu
    depan/tetangga di HP; transisi scale ikut ditulis agar tidak hilang. */

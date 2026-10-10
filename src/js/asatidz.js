@@ -262,33 +262,43 @@ const snapLeft = (el, dir = 0) => {
   const pick = dir > 0 ? pts.filter((x) => x >= cur).sort((a, b) => a - b)[0] : pts.filter((x) => x <= cur).sort((a, b) => b - a)[0];
   return pick ?? near;
 };
-// Asatidz: deretan digeser biasa (overflow-x, scrollbar disembunyikan). Sentuh &
-// trackpad sudah bisa; mouse tidak (roda hanya vertikal) → bisa diseret.
+// Asatidz: deretan digeser biasa (overflow-x, scrollbar disembunyikan). Trackpad
+// sudah bisa; mouse tidak (roda hanya vertikal) → bisa diseret. Layar sentuh
+// (touch-action: pan-y, lihat asatidz.css): browser hanya menggulir vertikal —
+// usapan yang dominan horizontal sampai ke sini dan diseret dengan cara yang
+// sama; usapan vertikal diambil browser (pointercancel) → halaman tergulir.
 const dragScroll = (el) => {
   let d = null, draggedAt = 0;
   el.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'mouse' || e.button !== 0 || el.scrollWidth <= el.clientWidth) return;
-    d = { x: e.clientX, left: el.scrollLeft, moved: false };
+    if (el.scrollWidth <= el.clientWidth) return;
+    const touch = e.pointerType === 'touch' && getComputedStyle(el).touchAction === 'pan-y';
+    if (!touch && (e.pointerType !== 'mouse' || e.button !== 0)) return;
+    d = { id: e.pointerId, x: e.clientX, left: el.scrollLeft, moved: false };
   });
   addEventListener('pointermove', (e) => {
-    if (!d) return;
+    if (!d || e.pointerId !== d.id) return;
     const dx = e.clientX - d.x;
     if (!d.moved && Math.abs(dx) > 5) { d.moved = true; el.classList.add('is-dragging'); }
     if (d.moved) el.scrollLeft = d.left - dx;
   });
-  addEventListener('pointerup', (e) => {
-    if (!d) return;
-    const dx = e.clientX - d.x;
-    if (d.moved) draggedAt = Date.now();
+  // snap tidak selalu dipasang ulang browser setelah dimatikan (Safari) →
+  // labuhkan sendiri (dir: condong searah seretan, 0 = terdekat), baru snap
+  // diaktifkan lagi
+  const release = (dir) => {
     d = null;
     if (!el.classList.contains('is-dragging')) return;
-    // snap tidak selalu dipasang ulang browser setelah dimatikan (Safari) →
-    // labuhkan sendiri ke kartu terdekat searah seretan, baru snap diaktifkan lagi
-    el.scrollTo({ left: snapLeft(el, -Math.sign(dx)), behavior: reduced ? 'auto' : 'smooth' });
+    el.scrollTo({ left: snapLeft(el, dir), behavior: reduced ? 'auto' : 'smooth' });
     const done = () => { clearTimeout(t); el.removeEventListener('scrollend', done); el.classList.remove('is-dragging'); };
     const t = setTimeout(done, 600);
     el.addEventListener('scrollend', done);
+  };
+  addEventListener('pointerup', (e) => {
+    if (!d || e.pointerId !== d.id) return;
+    if (d.moved) draggedAt = Date.now();
+    release(-Math.sign(e.clientX - d.x));
   });
+  // browser mengambil alih (usapan vertikal) → kartu terdekat
+  addEventListener('pointercancel', (e) => { if (d && e.pointerId === d.id) release(0); });
   // klik di akhir seretan (mis. badge kartu) diabaikan
   el.addEventListener('click', (e) => { if (Date.now() - draggedAt < 300) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
   el.addEventListener('dragstart', (e) => e.preventDefault()); // gambar tidak ikut terseret
