@@ -100,31 +100,41 @@
   // ---- Kontak ----
   if (D.hotline && D.hotline.wa) $('wa').href = D.hotline.wa;
 
-  // ---- Status hari ini ----
-  // Memakai D.days (bukan prodDays) agar status bisa diuji dengan data-dev.js
+  // ---- Status hari ini & jadwal per hari ----
+  // Memakai D.days (bukan prodDays) agar status bisa diuji dengan data-dev.js.
+  // Dihitung ulang tiap menit (dan saat tab kembali dibuka): halaman sering
+  // dibiarkan terbuka di HP — lewat jam tutup / tengah malam, status & hari
+  // jadwal ikut berganti sendiri, sama seperti tab hari di halaman lengkap.
   const days = D.days;
-  const now = wibNow();
-  const idxToday = days.findIndex((d) => d.iso === now.iso);
   const first = days[0].iso, last = days[days.length - 1].iso;
-  let status = '';
-  if (now.iso < first) {
-    const n = selisihHari(now.iso, first);
-    status = n === 1 ? `InsyaAllah dimulai besok, pukul ${open} WIB.` : `InsyaAllah dimulai ${n} hari lagi.`;
-  } else if (now.iso > last) {
-    status = 'Acara telah selesai. Jazakumullahu khairan atas kehadirannya.';
-  } else if (idxToday >= 0) {
-    const o = menit(open), c = menit(close);
-    if (now.min < o) status = `Hari ini buka pukul ${open} WIB.`;
-    else if (now.min < c) status = `Sedang berlangsung — buka sampai pukul ${close} WIB.`;
-    else status = idxToday < days.length - 1 ? `Hari ini sudah tutup. Besok buka lagi pukul ${open} WIB.` : 'Acara telah selesai. Jazakumullahu khairan atas kehadirannya.';
-  }
-  $('status').textContent = status;
+  const oMin = menit(open), cMin = menit(close);
+  let now = wibNow();
+  const closed = () => now.min >= cMin;
+  // Hari otomatis: hari ini selama belum lewat jam tutup, selain itu hari
+  // berikutnya yang belum lewat (seperti autoIdx di jadwal.js). Acara sudah
+  // selesai semua → tetap di hari terakhir, bukan kembali ke hari pertama.
+  const autoIdx = () => {
+    const i = days.findIndex((d) => d.iso > now.iso || (d.iso === now.iso && !closed()));
+    return i >= 0 ? i : days.length - 1;
+  };
+  const statusText = () => {
+    const idxToday = days.findIndex((d) => d.iso === now.iso);
+    if (now.iso < first) {
+      const n = selisihHari(now.iso, first);
+      return n === 1 ? `InsyaAllah dimulai besok, pukul ${open} WIB.` : `InsyaAllah dimulai ${n} hari lagi.`;
+    }
+    if (now.iso > last) return 'Acara telah selesai. Jazakumullahu khairan atas kehadirannya.';
+    if (idxToday < 0) return '';
+    if (now.min < oMin) return `Hari ini buka pukul ${open} WIB.`;
+    if (now.min < cMin) return `Sedang berlangsung — buka sampai pukul ${close} WIB.`;
+    return idxToday < days.length - 1 ? `Hari ini sudah tutup. Besok buka lagi pukul ${open} WIB.` : 'Acara telah selesai. Jazakumullahu khairan atas kehadirannya.';
+  };
 
-  // ---- Jadwal per hari ----
   const J = D.jadwal || {};
   const ustadzById = Object.fromEntries((D.asatidz || []).map((u) => [u.id, u.name]));
   const adaJadwal = days.some((d) => (J[d.key] || []).length);
-  let cur = idxToday >= 0 ? idxToday : 0;
+  let cur = autoIdx();
+  let chosen = null; // hari yang dipilih sendiri lewat tombol ‹ ›
 
   const el = (tag, cls, text) => {
     const e = document.createElement(tag);
@@ -167,12 +177,34 @@
     $('kosong').textContent = adaJadwal ? 'Belum ada acara di hari ini.' : 'Jadwal InsyaAllah menyusul.';
   };
 
+  $('status').textContent = statusText();
   if (adaJadwal) {
     $('hari').hidden = false;
-    $('hariPrev').addEventListener('click', () => { if (cur > 0) { cur -= 1; render(); } });
-    $('hariNext').addEventListener('click', () => { if (cur < days.length - 1) { cur += 1; render(); } });
+    const go = (i) => { cur = i; chosen = days[cur].key; render(); };
+    $('hariPrev').addEventListener('click', () => { if (cur > 0) go(cur - 1); });
+    $('hariNext').addEventListener('click', () => { if (cur < days.length - 1) go(cur + 1); });
     render();
   }
+
+  // Tiap menit: status, penanda "Sedang berlangsung"/lewat, dan hari otomatis.
+  // Hari pilihan sendiri dipertahankan selama bukan hari otomatis lama dan
+  // belum lewat; selain itu ikut pindah ke hari otomatis yang baru.
+  const tick = () => {
+    const prevAuto = days[autoIdx()].key;
+    now = wibNow();
+    const auto = autoIdx();
+    if (days[auto].key !== prevAuto) {
+      const ci = days.findIndex((d) => d.key === chosen);
+      const keep = ci >= 0 && chosen !== prevAuto && ci >= auto;
+      cur = keep ? ci : auto;
+      if (!keep) chosen = null;
+    }
+    $('status').textContent = statusText();
+    if (adaJadwal) render();
+  };
+  const toNextMinute = () => setTimeout(() => { tick(); toNextMinute(); }, 60000 - (Date.now() % 60000) + 50);
+  toNextMinute();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 
   // ---- Layanan ----
   const L = D.layanan || [];

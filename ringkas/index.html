@@ -10,9 +10,10 @@
   <!-- Samakan dengan index.html: hapus noindex saat situs siap tayang. -->
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#c5fa01">
-  <script src="../assets/js/data-prod.js?v=1.1.378" defer></script>
-  <script src="../assets/js/data-dev.js?v=1.1.378" defer></script>
-  <script src="../assets/js/ringkas.js?v=1.1.378" defer></script>
+  <script src="../assets/js/data-prod.js?v=1.1.379" defer></script>
+  <script src="../assets/js/data-dev.js?v=1.1.379" defer></script>
+  <script src="../assets/js/ringkas.js?v=1.1.379" defer></script>
+  <script src="../assets/js/akhir.js?v=1.1.379" defer></script>
   <link rel="icon" type="image/png" href="../assets/img/logo/favicon.png?v=2">
   <link rel="manifest" href="../manifest.webmanifest">
   <link rel="canonical" href="https://www.muslimberdedikasi.com/ringkas/">
@@ -63,6 +64,8 @@
     .status:empty { display: none; }
 
     section { margin: 2rem 0; }
+    /* judul tujuan anchor (#h-jadwal dari modal hari terakhir) tidak tertutup bilah menempel */
+    h2[id] { scroll-margin-top: 5rem; }
     h2 { font-size: 1.5rem; line-height: 1.2; font-weight: 800; margin: 0 0 .75rem; }
     .card { background: var(--white); border: 2px solid var(--ink); border-radius: .75rem; padding: 1rem; }
     .info { margin: 0; display: grid; gap: .75rem; }

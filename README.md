@@ -17,6 +17,7 @@ assets/js/data-dev.js   Data uji, aktif selain di muslimberdedikasi.com (menimpa
 assets/js/main.js       HASIL BUILD dari src/js (jangan diedit langsung) + main.js.map
 assets/js/privasi.js    Penanda tombol navigasi di halaman Ketentuan & Privasi (tidak dibundel)
 assets/js/ringkas.js    Isi & ukuran huruf halaman Tampilan Sederhana (tidak dibundel)
+assets/js/akhir.js      Modal hari terakhir & penutup acara, di index & ringkas (tidak dibundel)
 src/css/                Sumber CSS per bagian, entry: src/css/main.css
   base/                 Token :root, reset, noise, kursor, tipografi, util kecil
   components/           Preloader, tombol, nav, menu bagikan, tombol mengambang, toast
@@ -90,7 +91,7 @@ Catatan: GitHub Pages gratis untuk repo **public**. Untuk repo private butuh aku
 0. Bila mengubah `src/js` atau `src/css`: `npm run build`.
 1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.312` → `mb9-1.1.313`).
 2. Samakan semua `?v=` di [index.html](index.html) dengan angka versi tersebut
-   (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`), `privasi.js` di [privasi/index.html](privasi/index.html), serta `data-prod.js`, `data-dev.js`, `ringkas.js` di [ringkas/index.html](ringkas/index.html). Cache lama otomatis dibuang saat worker baru aktif.
+   (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`, `akhir.js`), `privasi.js` di [privasi/index.html](privasi/index.html), serta `data-prod.js`, `data-dev.js`, `ringkas.js`, `akhir.js` di [ringkas/index.html](ringkas/index.html). Cache lama otomatis dibuang saat worker baru aktif.
 3. Perbarui `<lastmod>` di [sitemap.xml](sitemap.xml) bila konten berubah.
 
 Menambah halaman baru: buat sebagai `nama/index.html` (agar URL-nya `/nama/` tanpa `.html`),

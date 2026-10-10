@@ -42,7 +42,8 @@ import { $, root } from './core.js';
   const onScroll = () => { if (scrollY > 80) hide(); };
   const show = () => {
     // menu terbuka / sudah menggulir jauh → lewati, coba lagi kunjungan berikutnya
-    if (root.classList.contains('menu-open') || scrollY > 80) return;
+    // modal (mis. hari terakhir, akhir.js) sedang terbuka → lewati juga
+    if (root.classList.contains('menu-open') || scrollY > 80 || document.querySelector('dialog[open]')) return;
     if (!again) try { localStorage.setItem(KEY, '1'); } catch (e) { /* mode privat */ }
     hint.hidden = false;
     void hint.offsetWidth; // reflow agar transisi masuk jalan
