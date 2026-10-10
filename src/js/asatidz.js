@@ -269,8 +269,10 @@ const snapLeft = (el, dir = 0, at = el.scrollLeft) => {
 // usapan yang dominan horizontal sampai ke sini dan diseret dengan cara yang
 // sama; usapan vertikal diambil browser (pointercancel) → halaman tergulir.
 const dragScroll = (el) => {
-  let d = null, draggedAt = 0;
+  let d = null, draggedAt = 0, anim = 0;
+  const stopAnim = () => { if (anim) { cancelAnimationFrame(anim); anim = 0; } };
   el.addEventListener('pointerdown', (e) => {
+    stopAnim(); // jari menyentuh lagi saat kartu masih meluncur → tangkap di tempat
     if (el.scrollWidth <= el.clientWidth) return;
     const touch = e.pointerType === 'touch' && getComputedStyle(el).touchAction === 'pan-y';
     if (!touch && (e.pointerType !== 'mouse' || e.button !== 0)) return;
@@ -285,25 +287,37 @@ const dragScroll = (el) => {
     if (!d.moved && Math.abs(dx) > 5) { d.moved = true; el.classList.add('is-dragging'); }
     if (d.moved) el.scrollLeft = d.left - dx;
   });
-  // snap tidak selalu dipasang ulang browser setelah dimatikan (Safari) →
-  // labuhkan sendiri (dir: condong searah seretan, 0 = terdekat), baru snap
-  // diaktifkan lagi
-  // Lontaran: usapan cepat diteruskan sejauh kecepatan x FLING_MS, lalu
-  // berlabuh di kartu terdekat titik itu (bisa melewati beberapa kartu);
-  // usapan pelan → satu kartu searah seretan.
-  const FLING_MS = 450;
+  // Saat dilepas, snap browser tetap mati (.is-dragging) — tidak selalu
+  // dipasang ulang dengan benar (Safari) — dan deretan dilabuhkan sendiri
+  // (dir: condong searah seretan, 0 = terdekat).
+  // Lontaran: usapan cepat diteruskan sejauh kecepatan x FLING_MS lalu
+  // berlabuh di kartu terdekat titik itu (bisa melewati kartu); usapan pelan →
+  // satu kartu. Luncuran memakai ease-out yang kecepatan awalnya = kecepatan
+  // jari saat dilepas (durasi = 3 x jarak / kecepatan), bukan scrollTo smooth
+  // bawaan yang kurvanya tetap dan tidak nyambung dengan gerak jari.
+  const FLING_MS = 200;
   const release = (dir, v = 0) => {
     d = null;
     if (!el.classList.contains('is-dragging')) return;
-    let left = snapLeft(el, dir);
-    if (Math.abs(v) > .4) {
-      const far = snapLeft(el, 0, el.scrollLeft - v * FLING_MS);
-      if (Math.sign(far - el.scrollLeft) === Math.sign(left - el.scrollLeft) && Math.abs(far - el.scrollLeft) > Math.abs(left - el.scrollLeft)) left = far;
+    const from = el.scrollLeft;
+    let to = snapLeft(el, dir);
+    if (Math.abs(v) > .5) {
+      const far = snapLeft(el, 0, from + -v * FLING_MS);
+      if (Math.sign(far - from) === Math.sign(to - from) && Math.abs(far - from) > Math.abs(to - from)) to = far;
     }
-    el.scrollTo({ left, behavior: reduced ? 'auto' : 'smooth' });
-    const done = () => { clearTimeout(t); el.removeEventListener('scrollend', done); el.classList.remove('is-dragging'); };
-    const t = setTimeout(done, 600);
-    el.addEventListener('scrollend', done);
+    const done = () => { anim = 0; el.classList.remove('is-dragging'); };
+    const dist = to - from;
+    if (reduced || Math.abs(dist) < 1) { el.scrollLeft = to; done(); return; }
+    // kecepatan jari searah luncuran → durasi yang menyambung; selain itu 300ms
+    const speed = Math.sign(-v) === Math.sign(dist) ? Math.abs(v) : 0;
+    const dur = Math.min(650, Math.max(220, speed > .1 ? (3 * Math.abs(dist)) / speed : 300));
+    const t0 = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      el.scrollLeft = from + dist * (1 - (1 - p) ** 3);
+      if (p < 1) anim = requestAnimationFrame(step); else done();
+    };
+    anim = requestAnimationFrame(step);
   };
   addEventListener('pointerup', (e) => {
     if (!d || e.pointerId !== d.id) return;
