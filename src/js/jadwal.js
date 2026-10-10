@@ -328,8 +328,8 @@ const renderDay = (key, quiet) => {
   // disimpan di localStorage). Daftar = baris biasa seperti Tabel, urut jam mulai.
   const secHead = (key, label) => {
     const mode = secMode(key);
-    const btn = (m, title, d) => `<button type="button" data-sec="${key}" data-mode="${m}" aria-pressed="${mode === m}" aria-label="Tampilkan sebagai ${title}" title="${title}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg></button>`;
-    return `<div class="jperiode" data-sec-head="${key}"><span>${label}</span><span class="jperiode__view" role="group" aria-label="Tampilan ${esc(label.replace(/<[^>]+>/g, ''))}">${btn('list', 'Daftar', 'M4 6h16M4 12h16M4 18h16')}${btn('card', 'Kartu', 'M3 5h8v14H3zM13 5h8v14h-8z')}</span></div>`;
+    const btn = (m, title, d) => `<button type="button" data-sec="${key}" data-mode="${m}" aria-pressed="${mode === m}" aria-label="Tampilkan sebagai ${title}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg></button>`;
+    return `<div class="jperiode" data-sec-head="${key}"><span>${label}</span><span class="jperiode__view" role="group" aria-label="Tampilan ${esc(label.replace(/<[^>]+>/g, ''))}">${btn('list', 'List', 'M4 6h16M4 12h16M4 18h16')}${btn('card', 'Kartu', 'M3 5h8v14H3zM13 5h8v14h-8z')}</span></div>`;
   };
   // gaps: rangkaian panggung → sela kosong jadi baris jeda/istirahat (seperti kartu jeda)
   const asList = (list, gaps) => {

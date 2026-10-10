@@ -220,8 +220,15 @@
 .jperiode__view button { display: grid; place-items: center; width: 44px; padding: 0; border: 0; border-left: 1px solid rgba(255, 255, 255, .14); background: transparent; color: var(--grey-2); cursor: pointer; transition: background .25s, color .25s; }
 .jperiode__view button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .jperiode__view button:hover { color: var(--white); }
-.jperiode__view button[aria-pressed="true"] { background: var(--lime); color: var(--ink); }
-.jperiode__view button:focus-visible { outline: 2px solid var(--lime); outline-offset: -2px; }
+/* aktif: isi putih, ikon & bingkai 2px hitam. Garis pemisah kiri (1px) ikut
+   hitam — kalau tidak, latar putih tembus di situ jadi celah putih — dan
+   bayangan inset kiri cukup 1px agar keempat sisi sama 2px. */
+.jperiode__view button[aria-pressed="true"] {
+  background: var(--white); color: var(--ink); border-left-color: var(--ink);
+  box-shadow: inset 1px 0 var(--ink), inset 0 2px var(--ink), inset -2px 0 var(--ink), inset 0 -2px var(--ink);
+}
+/* fokus keyboard mengikuti warna ikon: putih di tombol gelap, hitam di tombol aktif */
+.jperiode__view button:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
 .jperiode:first-child { border-top: 0; }
 .jrow { display: grid; grid-template-columns: 170px 1fr auto; gap: 20px; align-items: center; padding: 12px 24px; border-bottom: 1px solid var(--grey-2); transition: background .25s; }
 .jrow:last-child { border-bottom: 0; }
