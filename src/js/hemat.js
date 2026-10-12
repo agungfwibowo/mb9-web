@@ -8,11 +8,18 @@ import { finishPreloader, intro, scrollAnims, seenThisSession } from './intro.js
    pada section yang sedang di luar layar.
    --------------------------------------------------------- */
 (() => {
-  const blocks = [...$$('main > section'), ...$$('main > .marquee'), $('.footer')].filter(Boolean);
-  if (!blocks.length || !('IntersectionObserver' in window)) return;
+  const blocks = [...$$('main > section'), ...$$('main > .marquee')];
+  if (!('IntersectionObserver' in window)) return;
+  // footer sticky selalu "terlihat" → diwakili penanda akhir main (#footerEnd)
+  const footer = $('.footer'), end = $('#footerEnd');
+  if (footer && end) blocks.push(end);
   blocks.forEach((el) => el.classList.add('anim-off'));
+  if (footer && end) footer.classList.add('anim-off');
   const animIO = new IntersectionObserver((entries) => {
-    entries.forEach((en) => en.target.classList.toggle('anim-off', !en.isIntersecting));
+    entries.forEach((en) => {
+      if (en.target === end) footer.classList.toggle('anim-off', !(en.isIntersecting || en.boundingClientRect.top < 0));
+      else en.target.classList.toggle('anim-off', !en.isIntersecting);
+    });
   }, { rootMargin: '150px 0px' });
   blocks.forEach((el) => animIO.observe(el));
 })();

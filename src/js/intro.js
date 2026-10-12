@@ -227,7 +227,7 @@ export const scrollAnims = () => {
   $$('.pgroup').forEach((g) => gsap.fromTo($$('.plogo', g), { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .7, stagger: .08, ease: 'power3.out', clearProps: 'transform,opacity,visibility', scrollTrigger: { trigger: g, start: 'top 90%', once: true } }));
 
   // footer big text
-  gsap.from('.footer__grid > *', { y: 40, opacity: 0, duration: .8, stagger: .1, ease: 'power3.out', scrollTrigger: { trigger: '.footer__grid', start: 'top 92%', once: true } });
+  gsap.from('.footer__grid > *', { y: 40, opacity: 0, duration: .8, stagger: .1, ease: 'power3.out', scrollTrigger: { trigger: '#footerEnd', start: 'top 70%', once: true } }); // footer sticky → ukur dari akhir main
 
   // images loaded → recalc
   addEventListener('load', () => ScrollTrigger.refresh());
