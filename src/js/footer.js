@@ -17,12 +17,12 @@ if (footer) {
   };
   // Noise + blur pekat penuh selama footer tersingkap; setelah ambang tercapai dan
   // bertahan 600ms baru glitch lalu jelas (.is-clearing, seperti sinyal baru
-  // tertangkap). Hanya sekali per muat halaman. Ambang: 90% tersingkap (efek tirai)
+  // tertangkap). Hanya sekali per muat halaman. Ambang: 65% tersingkap (efek tirai)
   // atau 25% masuk layar (.is-flat, footer mengalir biasa & lebih tinggi dari layar).
   // Terlihat = jarak #footerEnd ke dasar layar — footer persis di bawahnya, jadi
   // rumusnya sama di kedua mode.
   const end = $('#footerEnd');
-  const CLEAR = .9, CLEAR_FLAT = .25, HOLD = 600, FADE = 900; // FADE = durasi foot-glitch + jeda terbesar (footer.css)
+  const CLEAR = .65, CLEAR_FLAT = .25, HOLD = 600, FADE = 900; // FADE = durasi foot-glitch + jeda terbesar (footer.css)
   let raf = 0, last = -1, done = false, holdT = 0;
   const noise = () => {
     raf = 0;
