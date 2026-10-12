@@ -6,11 +6,14 @@ import { $ } from './core.js';
    Klik ditangani handler anchor umum (lenis.js → gulir halus ke #home).
    --------------------------------------------------------- */
 const toTop = $('#toTop');
-const footer = $('footer');
-if (toTop && footer) {
+const end = $('#footerEnd');
+if (toTop && end) {
+  // footer sticky selalu "terlihat" → amati penanda akhir main; di atas layar
+  // (footer lebih tinggi dari layar & sudah tergulir habis) tetap dihitung tersingkap
   new IntersectionObserver(([en]) => {
-    toTop.classList.toggle('is-in', en.isIntersecting);
+    const on = en.isIntersecting || en.boundingClientRect.top < 0;
+    toTop.classList.toggle('is-in', on);
     // tersembunyi = tidak bisa difokus Tab
-    toTop.tabIndex = en.isIntersecting ? 0 : -1;
-  }).observe(footer);
+    toTop.tabIndex = on ? 0 : -1;
+  }).observe(end);
 }

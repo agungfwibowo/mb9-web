@@ -1,5 +1,69 @@
 /* ---------- Footer ---------- */
-.footer { background: var(--ink); color: var(--grey-2); padding: 0 0 30px; overflow: hidden; position: relative; }
+/* Footer reveal: footer menempel di dasar layar DI BELAKANG main (z-index -1; body
+   tidak membuat stacking context, jadi latar section di main menutupinya). Saat main
+   habis, main tergulir ke atas dan footer tersingkap seperti tirai. Syaratnya semua
+   section di main berlatar solid. */
+.footer { background: var(--ink); color: var(--grey-2); padding: 0 0 30px; overflow: hidden; position: sticky; bottom: 0; z-index: -1; }
+/* footer + navbar lebih tinggi dari layar → bagian atas footer tak akan pernah
+   terlihat (tertutup navbar); footer.js memasang .is-flat agar mengalir biasa */
+.footer.is-flat { position: relative; z-index: auto; }
+/* z-index -1 menaruh footer di bawah kotak <body> dalam urutan klik → body (tanpa latar,
+   tak terlihat) menelan semua klik di footer. Body dibuat tembus klik, anak-anaknya
+   dikembalikan; semua aturan pointer-events:none lain memakai kelas (lebih spesifik) */
+body { pointer-events: none; }
+body > * { pointer-events: auto; }
+/* noise selama tersingkap (--fn 1→0 diatur footer.js: efek tirai → penuh sampai
+   90% tersingkap + 600ms lalu berkedip jelas sekali; .is-flat → bertahap, bersih di 35%).
+   Tekstur sama dengan .noise (noise.css), di atas isi footer seperti TV mencari sinyal */
+.footer::after {
+  content: ''; position: absolute; inset: -60px; z-index: 2; pointer-events: none; opacity: 0;
+  background-color: var(--ink);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.3' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.footer.is-noise::after { opacity: calc(var(--fn) * .9); animation: foot-static .32s steps(1, end) infinite; }
+/* lompatan kecil & cepat dengan urutan tak berpola → terbaca sebagai semut TV
+   yang berkedip, bukan lapisan yang bergeser zig-zag (seperti grain di noise.css) */
+@keyframes foot-static {
+  0% { transform: translate3d(0, 0, 0); } 12.5% { transform: translate3d(-9px, 6px, 0); }
+  25% { transform: translate3d(7px, -10px, 0); } 37.5% { transform: translate3d(-4px, -7px, 0); }
+  50% { transform: translate3d(10px, 4px, 0); } 62.5% { transform: translate3d(-8px, -2px, 0); }
+  75% { transform: translate3d(3px, 9px, 0); } 87.5% { transform: translate3d(-6px, 10px, 0); }
+}
+/* + blur pada isi (bukan .footer, agar tepi latar tidak berpendar); ikut memudar bersama noise */
+.footer.is-noise > * { filter: blur(calc(var(--fn) * 10px)); }
+/* jelas sekali (efek tirai): glitch seperti sinyal yang baru tertangkap — noise putus-sambung
+   lalu hilang, tiap item terpecah warna (lime/biru), teriris & tergeser lalu diam. Item
+   dianimasikan langsung (bukan anak .footer) agar marquee .footer__big tidak tertimpa;
+   pakai `translate` (bukan transform) agar tidak bentrok dengan GSAP intro.
+   Durasi + jeda terbesar = FADE di footer.js */
+.footer.is-clearing::after { animation: foot-static .32s steps(1, end) infinite, foot-signal .6s steps(1, end) forwards; }
+.footer.is-clearing :is(.footer__grid, .footer__bottom) > * { animation: foot-glitch .7s steps(1, end) both; }
+.footer.is-clearing .footer__grid > :nth-child(2) { animation-delay: .08s; }
+.footer.is-clearing .footer__grid > :nth-child(3) { animation-delay: .16s; }
+.footer.is-clearing .footer__bottom > :nth-child(1) { animation-delay: .12s; }
+.footer.is-clearing .footer__bottom > :nth-child(2) { animation-delay: .2s; }
+@keyframes foot-signal {
+  0% { opacity: .9; } 18% { opacity: .2; } 30% { opacity: .6; } 45% { opacity: 0; }
+  60% { opacity: .25; } 75%, 100% { opacity: 0; }
+}
+@keyframes foot-glitch {
+  0% { translate: -10px 0; clip-path: inset(12% 0 58% 0); text-shadow: -4px 0 var(--lime), 4px 0 var(--blue); }
+  8% { translate: 8px 0; clip-path: inset(62% 0 8% 0); text-shadow: 3px 0 var(--lime), -3px 0 var(--blue); }
+  16% { translate: -4px 0; clip-path: inset(30% 0 35% 0); }
+  24% { translate: 0 0; clip-path: inset(0); text-shadow: -2px 0 var(--lime), 2px 0 var(--blue); }
+  34% { translate: 6px 0; clip-path: inset(45% 0 20% 0); text-shadow: 4px 0 var(--lime), -4px 0 var(--blue); }
+  42% { translate: 0 0; clip-path: inset(0); text-shadow: none; }
+  58% { translate: -3px 0; clip-path: inset(5% 0 75% 0); text-shadow: -2px 0 var(--lime), 2px 0 var(--blue); }
+  66% { translate: 0 0; clip-path: inset(0); text-shadow: 1px 0 var(--lime), -1px 0 var(--blue); }
+  80%, 100% { translate: 0 0; clip-path: inset(0); text-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer.is-noise::after { animation: none; }
+  /* tanpa glitch: langsung bersih */
+  .footer.is-clearing::after, .footer.is-clearing :is(.footer__grid, .footer__bottom) > * { animation: none; }
+}
+
+.footer-end { height: 0; }
 .footer__big { display: flex; width: max-content; gap: 0; padding: 40px 0 60px; font-size: clamp(60px, 11vw, 170px); font-weight: 700; line-height: 1; color: transparent; -webkit-text-stroke: 1.5px #555; white-space: nowrap; animation: marquee 60s linear infinite; }
 .footer__big span { padding-right: 60px; }
 .footer__big span:nth-child(odd) { -webkit-text-stroke-color: var(--lime); }
