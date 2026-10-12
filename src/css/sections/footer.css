@@ -12,8 +12,8 @@
    dikembalikan; semua aturan pointer-events:none lain memakai kelas (lebih spesifik) */
 body { pointer-events: none; }
 body > * { pointer-events: auto; }
-/* noise selama tersingkap (--fn 1→0 diatur footer.js: efek tirai → penuh sampai
-   90% tersingkap + 600ms lalu berkedip jelas sekali; .is-flat → bertahap, bersih di 35%).
+/* noise selama tersingkap (diatur footer.js): penuh sampai 90% tersingkap (efek tirai)
+   atau 25% masuk layar (.is-flat), bertahan 600ms lalu glitch & jelas — sekali per muat.
    Tekstur sama dengan .noise (noise.css), di atas isi footer seperti TV mencari sinyal */
 .footer::after {
   content: ''; position: absolute; inset: -60px; z-index: 2; pointer-events: none; opacity: 0;
