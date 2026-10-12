@@ -12,7 +12,7 @@
    dikembalikan; semua aturan pointer-events:none lain memakai kelas (lebih spesifik) */
 body { pointer-events: none; }
 body > * { pointer-events: auto; }
-/* noise selama tersingkap (diatur footer.js): penuh sampai 90% tersingkap (efek tirai)
+/* noise selama tersingkap (diatur footer.js): penuh sampai 65% tersingkap (efek tirai)
    atau 25% masuk layar (.is-flat), bertahan 600ms lalu glitch & jelas — sekali per muat.
    Tekstur sama dengan .noise (noise.css), di atas isi footer seperti TV mencari sinyal */
 .footer::after {
