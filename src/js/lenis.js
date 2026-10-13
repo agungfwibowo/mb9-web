@@ -58,14 +58,28 @@ let snapping = false, snapDir = 0;
 // layar (section tampil utuh). Kurang dari itu, atau sudah melewatinya, gulir bebas.
 // both: section juga punya tepi bawah seperti hero — dari dalam section, dorongan
 // ≥25% ke bawah meluncur ke bawahnya (section berikutnya rata atas layar).
-const snapEls = [['#asatidz', true]].map(([s, both]) => ({ el: $(s), both })).filter((x) => x.el);
+// exit: section yang lebih tinggi dari layar (Tentang, Layanan — termasuk jarak pin-nya, Denah) — hanya ekornya: antara
+// "bawah section = bawah layar" (a) dan "bawah section = atas layar" (b),
+// dorongan ≥25% layar ke suatu arah meluncur ke tepi itu, kurang → kembali.
+const snapEls = [['#tentang', false, true], ['#layanan', false, true], ['#asatidz', true], ['#denah', false, true]].map(([s, both, exit]) => ({ el: $(s), both, exit })).filter((x) => x.el);
 const sectionTo = (y) => {
   const vh = innerHeight;
-  for (const { el, both } of snapEls) {
+  for (const { el, both, exit } of snapEls) {
     const h = el.offsetHeight;
+    if (exit) {
+      const b = el.getBoundingClientRect().bottom + scrollY, a = b - vh;
+      if (y > a + 2 && y < b - 2) return snapDir > 0 ? (y - a > vh * 0.25 ? b : a) : (y - a < vh * 0.75 ? a : b);
+      continue;
+    }
     if (h > vh + 2) continue; // lebih tinggi dari layar → snap akan melompati isinya
     const t = el.getBoundingClientRect().top + scrollY; // posisi gulir nyata (y bisa = tujuan luncuran Lenis)
     if (Math.abs(y - t) <= 2 || (both && Math.abs(y - t - h) <= 2)) continue;
+    // both, sisi atas: antara "akhir section sebelumnya = bawah layar" (t - vh) dan
+    // "section ini = atas layar" (t) — dorongan ≥25% layar pindah tepi, kurang → kembali
+    if (both && y > t - vh + 2 && y < t - 2) {
+      const a = t - vh;
+      return snapDir > 0 ? (y - a > vh * 0.25 ? t : a) : (y - a < vh * 0.75 ? a : t);
+    }
     if (both && y > t && y < t + h) return snapDir > 0 ? (y - t > h * 0.25 ? t + h : t) : (y - t < h * 0.75 ? t : t + h);
     // turun: atas section sudah naik ke 75% atas layar; naik: section terbuka ≥25% dari atasnya
     if (snapDir > 0 && y < t && t - y < vh * 0.75) return t;
