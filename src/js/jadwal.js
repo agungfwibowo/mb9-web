@@ -188,6 +188,8 @@ const markLive = () => {
   const units = [...$$('.jrow', panel), ...$$('.jcard__item', panel)];
   units.forEach((el) => el.classList.toggle('is-done', on && now.min >= span(el)[1]));
   $$('.jdur .jcard', panel).forEach((card) => card.classList.toggle('is-done', $$('.jcard__item', card).every((it) => it.classList.contains('is-done'))));
+  sinkDone();
+  syncFold();
   if (!on) return;
   // tempat label: baris → di sel jam; item kartu Durasi → pojok kanan atas kartu
   const put = (el, html) => {
@@ -231,8 +233,45 @@ const markLive = () => {
   });
 };
 let panelH = 0;
+// Daftar Kajian & Talkshow: acara yang sudah selesai hari ini diciutkan jadi
+// satu tombol di atas daftar (hemat scroll). Hanya selama masih ada acara
+// berikutnya — kalau semua sudah selesai, semuanya tampil lagi.
+let pastOpen = false;
+// Layanan & kegiatan (blok tanpa rangkaian panggung): yang sudah selesai
+// turun ke bawah periodenya; urutan asal disimpan di data-ord agar bisa pulih.
+const sinkDone = () => {
+  const isDone = (el) => el.classList.contains('is-done') || (el.matches('.jdur') && $$('.jcard', el).every((c) => c.classList.contains('is-done')));
+  $$('.jperiode', panel).forEach((head) => {
+    const run = [];
+    for (let n = head.nextElementSibling; n && !n.matches('.jperiode, .jblock__title'); n = n.nextElementSibling) run.push(n);
+    if (!run.length || run.some((el) => el.matches('[data-seq], .jchain') || el.querySelector('[data-seq]'))) return;
+    run.forEach((el, i) => { if (!el.dataset.ord) el.dataset.ord = i; });
+    const order = [...run].sort((a, b) => isDone(a) - isDone(b) || a.dataset.ord - b.dataset.ord);
+    if (order.every((el, i) => el === run[i])) return;
+    const after = run[run.length - 1].nextSibling;
+    order.forEach((el) => head.parentNode.insertBefore(el, after));
+  });
+};
+const syncFold = () => {
+  const chain = $('.jchain', panel);
+  if (!chain) return;
+  const btn = $('.jchain__fold', chain);
+  const rows = $$(':scope > .jrow', chain);
+  const done = rows.filter((el) => el.classList.contains('is-done'));
+  const fold = done.length > 0 && done.length < rows.length;
+  const n = done.filter((el) => !el.hasAttribute('data-gap')).length;
+  chain.classList.toggle('is-folded', fold && !pastOpen);
+  btn.hidden = !fold;
+  btn.setAttribute('aria-expanded', String(pastOpen));
+  btn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg><span>${n} acara sudah selesai</span><b>${pastOpen ? 'Sembunyikan' : 'Tampilkan'}</b>`;
+  if (hasGsap && panel.offsetHeight !== panelH) {
+    panelH = panel.offsetHeight;
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+  }
+};
 // quiet: render ulang tanpa animasi masuk (mis. ganti Kartu/Daftar satu blok)
 const renderDay = (key, quiet) => {
+  if (key !== currentKey) pastOpen = false;
   currentKey = key;
   const day = D.days.find((d) => d.key === key);
   const rows = (D.jadwal && D.jadwal[key]) || [];
@@ -354,7 +393,7 @@ const renderDay = (key, quiet) => {
     }).join('');
   };
   const chain = chainRows.length
-    ? `${secHead('panggung', esc(chainTitle))}${secMode('panggung') === 'list' || chainRows.length < 2 ? `<div class="jchain">${asList(chainRows, true)}</div>` : durHtml({ rows: chainRows }, true)}`
+    ? `${secHead('panggung', esc(chainTitle))}${secMode('panggung') === 'list' || chainRows.length < 2 ? `<div class="jchain"><button type="button" class="jchain__fold mono" aria-expanded="false" hidden></button>${asList(chainRows, true)}</div>` : durHtml({ rows: chainRows }, true)}`
     : '';
   let lastP = null;
   const sections = [];
@@ -654,6 +693,7 @@ panel.addEventListener('click', (e) => {
   }
 });
 panel.addEventListener('click', (e) => {
+  if (e.target.closest('.jchain__fold')) { pastOpen = !pastOpen; syncFold(); return; }
   const b = e.target.closest('.jdur__nav button');
   if (b) {
     const rail = b.closest('.jdur').querySelector('.jrail');
