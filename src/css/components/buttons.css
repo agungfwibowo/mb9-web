@@ -55,7 +55,7 @@
 .mmenu__meta { --edge-s: 18px; --bw: 2px; }
 .cal__opts, .a2hs, .stats, .mmenu__meta, .share-pop { --edge: var(--ink); }
 .lcard { --edge: #4a4a4a; }
-.lcard:hover, .lcard--cta { --edge: var(--lime); }
+.lcard:hover, .lcard.is-active, .lcard--cta { --edge: var(--lime); }
 .lcard--cta:hover, .lcard--cta.is-active { --edge: var(--white); }
 .btn--sm { padding: 12px 18px; font-size: 12px; }
 /* .btn memakai display:inline-flex, yang menimpa display:none bawaan atribut
