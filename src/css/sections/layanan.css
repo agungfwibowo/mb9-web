@@ -11,25 +11,34 @@
 .layanan__head .title { font-size: clamp(24px, min(5vw, 5.5vh), 60px); }
 .layanan__head .sec-num { color: var(--lime); }
 .layanan__head .sec-sub { color: var(--grey-2); }
-.layanan__track { display: flex; justify-content: center; gap: 24px; padding: 0 var(--gutter); width: max-content; min-width: 100%; will-change: transform; }
+/* Kartu pertama mulai di tengah antara gutter dan tepi kiri konten section
+   (.container) — tidak mepet layar, tapi juga tidak sejauh judul. % padding
+   mengacu lebar .layanan__pin = lebar halaman. Kalau semua kartu muat 1 layar
+   tanpa digeser, intro.js memasang --fit → cukup gutter & kartu di tengah. */
+.layanan__track { --track-pad: max(var(--gutter), calc((100% - var(--maxw)) / 4 + var(--gutter))); display: flex; justify-content: center; gap: 24px; padding: 0 var(--track-pad); width: max-content; min-width: 100%; will-change: transform; }
+.layanan__track--fit { --track-pad: var(--gutter); }
 .lcard {
   position: relative; width: min(84vw, 460px); min-height: min(420px, 42vh); padding: 34px; background: var(--ink-2); border: var(--bw) solid var(--edge);
   display: flex; flex-direction: column; clip-path: var(--notch); transition: background .4s var(--ease), color .4s, --edge .4s, transform .5s var(--ease), filter .5s var(--ease);
 }
+/* aktif (ikut geseran, intro.js): latar tetap gelap, cukup border lime (--edge,
+   lihat buttons.css) + ikon miring. Latar lime hanya saat di-hover; kartu CTA
+   tetap berganti latar saat aktif. */
 .lcard:hover { background: var(--lime); color: var(--ink); }
 .lcard__num { font: 700 13px/1 var(--mono); color: var(--lime); margin-bottom: auto; }
 /* isi kartu layanan rata atas → ikon sejajar walau panjang daftarnya beda;
    kartu ajakan (CTA) tetap rata bawah */
 .lcard:not(.lcard--cta) .lcard__num { margin-bottom: 0; }
-.lcard:hover .lcard__num, .lcard.is-active .lcard__num { color: var(--blue); }
+.lcard:hover .lcard__num, .lcard--cta.is-active .lcard__num { color: var(--blue); }
 .lcard__icon { width: 64px; height: 64px; margin: 30px 0 22px; display: grid; place-items: center; background: var(--lime); color: var(--ink); transition: background .4s, color .4s, transform .6s var(--ease); }
-.lcard:hover .lcard__icon, .lcard.is-active .lcard__icon { background: var(--ink); color: var(--lime); transform: rotate(-8deg); }
+.lcard:hover .lcard__icon, .lcard.is-active .lcard__icon { transform: rotate(-8deg); }
+.lcard:hover .lcard__icon { background: var(--ink); color: var(--lime); }
 .lcard__icon svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 2; }
 .lcard h3 { font: 700 clamp(22px, 2.4vw, 28px)/1.15 var(--mono); text-transform: uppercase; margin-bottom: 20px; }
 .lcard ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .lcard li { position: relative; padding-left: 26px; font-size: 16px; line-height: 1.4; }
 .lcard li::before { content: ''; position: absolute; left: 0; top: 5px; width: 12px; height: 12px; background: var(--lime); clip-path: polygon(0 0, 100% 50%, 0 100%); transition: background .4s; }
-.lcard:hover li::before, .lcard.is-active li::before { background: var(--blue); }
+.lcard:hover li::before { background: var(--blue); }
 /* butir yang acaranya ada hari ini → tautan (href dipasang asatidz.js);
    tanpa href tampil sebagai teks biasa */
 .lcard__go { color: inherit; text-decoration: none; }
@@ -37,15 +46,23 @@
 .lcard__go[href] { margin-right: 8px; text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 4px; }
 .lcard__go[href]:hover, .lcard__go[href]:focus-visible { text-decoration-style: solid; }
 /* label status (Buka/Tutup/…) di belakang tautan; "Buka" lime ditukar saat kartu
-   lime (hover/aktif) supaya tidak hilang di latar yang sama */
+   lime (hover) supaya tidak hilang di latar yang sama */
 .lcard li .jopen { vertical-align: 2px; padding: 2px 7px; font-size: 10px; }
 .lcard li .jopen::before { display: none; } /* tanpa titik di kartu layanan */
-.lcard:hover li .jopen.is-open, .lcard.is-active li .jopen.is-open { background: var(--ink); color: var(--lime); }
+.lcard:hover li .jopen.is-open { background: var(--ink); color: var(--lime); }
 .lcard p { margin: 0; font-size: 16px; }
 .lcard p b { color: var(--lime); transition: color .4s; }
-.lcard:hover p b, .lcard.is-active p b { color: var(--ink); }
+.lcard:hover p b, .lcard--cta.is-active p b { color: var(--ink); }
 .lcard__free { position: absolute; top: 28px; right: 28px; font: 700 12px/1 var(--mono); padding: 6px 9px; background: var(--white); color: var(--ink); letter-spacing: .08em; }
 .lcard--cta { background: var(--lime); color: var(--ink); justify-content: flex-end; }
 .lcard--cta h3 { font-size: clamp(28px, 3vw, 40px); }
 .lcard--cta:hover, .lcard--cta.is-active { background: var(--white); }
 
+
+/* Mode tumpukan (HP yang cuma muat 1 kartu; class dipasang intro.js): semua
+   kartu di sel grid yang sama → setinggi kartu tertinggi, kartu belakangan di
+   atas. Lebar kartu = lebar layar dikurangi gutter. Kartu yang tertimpa mengecil
+   & memudar sampai hilang (intro.js). Transisi transform/filter
+   dimatikan — dipegang timeline GSAP yang di-scrub. */
+.layanan--stack .layanan__track { position: relative; z-index: 1; display: grid; width: auto; min-width: 0; padding: 0 var(--gutter); will-change: auto; }
+.layanan--stack .lcard { grid-area: 1 / 1; width: 100%; transform-origin: 50% 50%; transition: background .4s var(--ease), color .4s, --edge .4s; }

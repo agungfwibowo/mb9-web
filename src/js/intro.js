@@ -68,19 +68,59 @@ export const intro = () => {
 export const scrollAnims = () => {
   if (!hasGsap || reduced) return;
 
-  // layanan: horizontal pinned scroll (desktop & mobile)
-  gsap.from('.lcard', { opacity: 0, y: 80, duration: .9, stagger: .1, ease: 'power3.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: '.layanan', start: 'top 70%', once: true } });
+  // layanan: pinned scroll — horizontal (desktop & layar yang muat >1 kartu)
+  // atau tumpukan vertikal (HP yang cuma muat 1 kartu, lihat pinStack)
+  const lsec = $('.layanan');
+  const STACK = '(max-width: 840px) and (min-height: 521px)';
+  // Animasi masuk: di mode tumpukan yang dianimasikan track-nya, bukan kartu —
+  // transform kartu dipegang timeline tumpukan (clearProps akan menghapusnya).
+  gsap.matchMedia().add({ stack: STACK, other: `not all and ${STACK}` }, (ctx) => {
+    gsap.from(ctx.conditions.stack ? track : '.lcard', { opacity: 0, y: 80, duration: .9, stagger: .1, ease: 'power3.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: '.layanan', start: 'top 70%', once: true } });
+  });
   // Pin horizontal hanya masuk akal kalau layarnya cukup tinggi. Di HP
   // landscape (±375px) judul + kartu mustahil muat, dan section yang di-pin
   // TIDAK bisa di-scroll vertikal — jadi kartunya pasti terpotong. Di bawah
   // 521px pin-nya dilepas; kartunya jadi baris yang digeser dengan jari
   // (lihat aturan overflow-x di CSS). matchMedia dipakai agar ikut berubah
   // saat layar diputar, tanpa perlu reload.
-  gsap.matchMedia().add('(min-height: 521px)', () => {
-    // geser jari (HP) → gulir halaman setara; 1.42 = durasi geser + jeda di timeline
-    const perPx = (tl, d) => () => (d() ? ((tl.scrollTrigger.end - tl.scrollTrigger.start) / 1.42) / d() : 0);
+  gsap.matchMedia().add({ pin: '(min-height: 521px)', stack: STACK }, (ctx) => {
+    if (!ctx.conditions.pin) return;
+    // geser jari (HP) → gulir halaman setara; 1.72 = jeda awal + durasi geser + jeda akhir di timeline
+    const perPx = (tl, d) => () => (d() ? ((tl.scrollTrigger.end - tl.scrollTrigger.start) / 1.72) / d() : 0);
     const pinLayanan = () => {
       const dist = () => Math.max(0, track.scrollWidth - innerWidth);
+      // Muat 1 layar dengan padding gutter saja? → --fit (kartu di tengah, boleh
+      // dekat tepi). Kalau tidak, padding ikut tepi konten (lihat layanan.css).
+      // Diukur sebelum ScrollTrigger menghitung ulang dist()/end.
+      const fit = () => {
+        const cs = track.children, a = cs[0], z = cs[cs.length - 1];
+        if (!a) return;
+        const w = z.offsetLeft + z.offsetWidth - a.offsetLeft;
+        const gut = parseFloat(getComputedStyle($('.layanan__head')).paddingLeft) || 0; // = --gutter dalam px
+        track.classList.toggle('layanan__track--fit', w + gut * 2 <= innerWidth);
+      };
+      fit();
+      ScrollTrigger.addEventListener('refreshInit', fit);
+      // Desktop (mouse): kartu "aktif" = tampilan hover, berpindah 1 → 2 → 3 → CTA
+      // mengikuti geseran — titik fokus bergerak dari tengah kartu pertama ke tengah
+      // kartu terakhir seiring progres geser. Hover ke kartu lain mengambil alih.
+      const desk = matchMedia('(hover: hover) and (pointer: fine)').matches;
+      let hovered = null, scrollIdx = -1;
+      const setActive = (el) => [...track.children].forEach((c) => c.classList.toggle('is-active', c === el));
+      const syncActive = () => {
+        if (!desk || hovered) return;
+        const cs = [...track.children];
+        if (!cs.length || !dist()) { scrollIdx = -1; return setActive(null); }
+        const p = gsap.utils.clamp(0, 1, -gsap.getProperty(track, 'x') / dist());
+        const mid = (c) => c.offsetLeft + c.offsetWidth / 2;
+        const focus = mid(cs[0]) + (mid(cs[cs.length - 1]) - mid(cs[0])) * p;
+        let best = 0;
+        cs.forEach((c, i) => { if (Math.abs(mid(c) - focus) < Math.abs(mid(cs[best]) - focus)) best = i; });
+        if (best !== scrollIdx) { scrollIdx = best; setActive(cs[best]); }
+      };
+      const onOver = (e) => { const c = e.target.closest('.lcard'); if (c && c !== hovered) { hovered = c; setActive(c); } };
+      const onLeave = () => { hovered = null; scrollIdx = -1; syncActive(); };
+      if (desk) { track.addEventListener('mouseover', onOver); track.addEventListener('mouseleave', onLeave); }
       // petunjuk scroll HP: tetap tampil sampai kartu terakhir masuk layar,
       // memudar di seperempat jarak satu kartu terakhir sebelum track mentok
       const hint = $('.layanan__scroll');
@@ -92,24 +132,89 @@ export const scrollAnims = () => {
         gsap.set(hint, { autoAlpha: gsap.utils.clamp(0, 1, left / (step * .25)) });
       };
       const ltl = gsap.timeline({
-        onUpdate: fadeHint,
+        onUpdate: () => { fadeHint(); syncActive(); },
         scrollTrigger: {
           trigger: '.layanan__pin', start: 'top top',
-          end: () => `+=${dist() ? dist() * 1.45 + innerHeight * .3 : 1}`,
+          end: () => `+=${dist() ? dist() * 1.76 + innerHeight * .3 : 1}`,
           pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
-          // kartu CTA "aktif" (= tampilan hover) saat track sudah mentok di ujung kanan
-          onUpdate: (self) => { const c = $('.lcard--cta'); if (c) c.classList.toggle('is-active', self.progress > .68); },
-          onLeaveBack: () => { const c = $('.lcard--cta'); if (c) c.classList.remove('is-active'); },
+          // layar sentuh: kartu CTA "aktif" (= tampilan hover) saat track sudah mentok di ujung kanan
+          onUpdate: (self) => { const c = $('.lcard--cta'); if (c && !desk) c.classList.toggle('is-active', self.progress > .74); },
+          onLeaveBack: () => { const c = $('.lcard--cta'); if (c && !desk) c.classList.remove('is-active'); },
         },
       })
+        .to({}, { duration: .3 }) // jeda di kartu pertama sebelum mulai bergeser
         .to(track, { x: () => -dist(), ease: 'none', duration: 1 })
         .to({}, { duration: .42 }); // jeda di kartu terakhir sebelum lanjut scroll
       pinSwipe.layanan = { perPx: perPx(ltl, dist) };
+      syncActive();
+      return () => {
+        ScrollTrigger.removeEventListener('refreshInit', fit);
+        track.removeEventListener('mouseover', onOver); track.removeEventListener('mouseleave', onLeave);
+        track.classList.remove('layanan__track--fit'); setActive(null);
+      };
     };
     // Asatidz tidak lagi di-pin: deretan kartunya digeser biasa (lihat asatidz.js)
-    pinLayanan();
+    // HP yang cuma muat 1 kartu: scroll vertikal, kartu menumpuk ala sticky —
+    // kartu berikutnya naik dari bawah (kecil → hampir selebar layar), kartu
+    // sebelumnya mengecil & meredup di belakangnya. Section tetap di-pin (sama
+    // seperti mode horizontal) supaya judul + tumpukan muat 1 layar.
+    const pinStack = () => {
+      const cs = [...track.children], n = cs.length;
+      lsec.classList.add('layanan--stack');
+      const hint = $('.layanan__scroll');
+      const front = () => { // kartu terdepan = yang terakhir sudah naik ≥ separuh jalan
+        let f = 0;
+        cs.forEach((c, i) => { if (i && gsap.getProperty(c, 'y') < innerHeight * .45) f = i; });
+        return f;
+      };
+      let cur = -1, dir = 1; // dir: arah gulir terakhir oleh pengguna (1 turun, -1 naik)
+      // Snap per kartu: dorongan ≥30% dari kartu asal ke arah gulir → pindah ke
+      // kartu berikut/sebelumnya; kurang dari itu → kembali ke kartu asal.
+      // Titik snap = jeda kartu pertama selesai (c0) & tiap kartu sudah penuh (cN).
+      // Sebelum c0 / sesudah kartu terakhir gulir bebas (masuk/keluar section).
+      const snapTo = (p) => {
+        const d = tl.duration();
+        const pts = cs.map((c, i) => (i ? tl.labels[`c${i}`] : .3) / d);
+        if (p <= pts[0] || p >= pts[n - 1]) return p;
+        let k = 0;
+        while (p > pts[k + 1]) k++;
+        const [a, b] = [pts[k], pts[k + 1]];
+        return dir > 0 ? ((p - a) / (b - a) >= .3 ? b : a) : ((b - p) / (b - a) >= .3 ? a : b);
+      };
+      const onUpdate = () => {
+        const f = front();
+        if (f !== cur) { cur = f; cs.forEach((c, i) => c.classList.toggle('is-active', i === f)); }
+        if (hint && n > 1) gsap.set(hint, { autoAlpha: gsap.utils.clamp(0, 1, gsap.getProperty(cs[n - 1], 'y') / (innerHeight * .2)) });
+      };
+      const tl = gsap.timeline({
+        onUpdate,
+        scrollTrigger: {
+          trigger: '.layanan__pin', start: 'top top',
+          end: () => `+=${n > 1 ? (n - 1) * innerHeight * .8 + innerHeight * .3 : 1}`,
+          pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
+          // setelah gulir berhenti, meluncur halus ke kartu (lihat snapTo);
+          // inertia mati → yang dinilai posisi berhenti sebenarnya, bukan tebakan lontaran
+          snap: { snapTo, inertia: false, duration: { min: .3, max: .8 }, delay: .15, ease: 'sine.inOut' },
+          // arah gulir terakhir; luncuran snap ikut mengubahnya, tapi gerakan
+          // pengguna berikutnya selalu menimpanya sebelum snap dihitung lagi
+          onUpdate: (self) => { dir = self.direction || dir; },
+        },
+      }).addLabel('c0', 0).to({}, { duration: .3 }); // jeda di kartu pertama
+      for (let j = 1; j < n; j++) {
+        const at = tl.duration();
+        // kartu masuk: solid (tidak transparan — kartu belakang tidak boleh tembus), kecil → penuh
+        tl.fromTo(cs[j], { y: () => innerHeight * .9, scale: .88 }, { y: 0, scale: 1, ease: 'power2.out', duration: 1 }, at);
+        // kartu sebelumnya mengecil & memudar sampai hilang di belakangnya
+        tl.to(cs[j - 1], { scale: .9, autoAlpha: 0, ease: 'power1.inOut', duration: 1 }, at);
+        tl.addLabel(`c${j}`, at + 1);
+      }
+      tl.to({}, { duration: .42 }).addLabel('end'); // jeda di kartu terakhir
+      onUpdate();
+      return () => { lsec.classList.remove('layanan--stack'); cs.forEach((c) => c.classList.remove('is-active')); };
+    };
+    const unpinLayanan = ctx.conditions.stack ? pinStack() : pinLayanan();
 
-    return () => { pinSwipe.layanan = null; };
+    return () => { pinSwipe.layanan = null; unpinLayanan(); };
 
   });
 
