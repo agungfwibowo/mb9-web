@@ -119,7 +119,7 @@ let shareText = 'Bagikan lokasi';
 // pointermove, <img> logo ikut dibuat ulang terus dan berkedip.
 let tipFor = null;
 // Tautan situs (D.links) — hanya bisa diklik saat tooltip menempel di tenda
-// terpilih (.is-live); saat mengikuti kursor ia tetap tembus klik.
+// terpilih (.is-live, juga tombol ✕); saat mengikuti kursor ia tetap tembus klik.
 const linkOf = (g) => {
   const url = D.links && D.links[g.dataset.tenant];
   if (!url) return '';
@@ -173,9 +173,11 @@ const fillTip = (g) => {
   const mark = logo
     ? `<span class="booth-tip__logo${logo.dark ? ' is-dark' : ''}"><img src="${esc(logo.src)}" alt="" decoding="async"></span>`
     : `<span class="booth-tip__logo is-icon"><svg class="jico" viewBox="0 0 24 24" aria-hidden="true"><path d="${JICONS[iconKey({ title: ss.rs.length ? ss.rs[0].title : who })]}"/></svg></span>`;
-  tip.innerHTML = who
+  // tombol ✕ hanya tampil saat tooltip menempel di tenda terpilih (.is-live, lihat CSS)
+  const x = '<button type="button" class="booth-tip__x" aria-label="Tutup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+  tip.innerHTML = (who
     ? `${mark}<span class="booth-tip__txt"><small>${esc(meta)}</small><b>${esc(who)}</b>${hoursOf(ss)}${linkOf(g)}</span>`
-    : esc(meta);
+    : esc(meta)) + x;
 };
 // Koordinat layar (clientX/Y). Kartu di atas titik `top`; kalau ruang di
 // atasnya (sampai tepi layar) tidak cukup, dibalik ke bawah titik `bottom`.
@@ -220,7 +222,7 @@ const tipAtBooth = (g) => {
   fillTip(g);
   const br = boothRect(g);
   placeTip(br.left + br.width / 2, br.top + 4, br.top + br.height - 4);
-  tip.classList.toggle('is-live', g.classList.contains('is-sel') && !!$('a', tip));
+  tip.classList.toggle('is-live', g.classList.contains('is-sel'));
 };
 
 /* Tooltip perkenalan denah — tampil sekali, disimpan sampai acara berakhir */
@@ -340,8 +342,10 @@ svg.addEventListener('pointerout', (e) => {
   toFront($('.booth.is-sel', svg));
   if (e.pointerType !== 'touch') paintGroup(picked);
 });
-// ketuk area kosong denah: lepas pilihan, bingkai grup, dan tooltip
-svg.addEventListener('click', (e) => { const g = e.target.closest('.booth'); if (g) selectBooth(g); else if (picked) { clearSel(); hideTip(); setBoothUrl(null); denahShare.close(); boothShare.hidden = true; } });
+// ketuk area kosong denah / tombol ✕ di tooltip: lepas pilihan, bingkai grup, dan tooltip
+const unpick = () => { clearSel(); hideTip(); setBoothUrl(null); denahShare.close(); boothShare.hidden = true; };
+svg.addEventListener('click', (e) => { const g = e.target.closest('.booth'); if (g) selectBooth(g); else if (picked) unpick(); });
+tip.addEventListener('click', (e) => { if (e.target.closest('.booth-tip__x')) unpick(); });
 svg.addEventListener('keydown', (e) => {
   const g = e.target.closest('.booth');
   if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); selectBooth(g); }
