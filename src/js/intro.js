@@ -190,8 +190,10 @@ export const scrollAnims = () => {
         onUpdate,
         scrollTrigger: {
           trigger: '.layanan__pin', start: 'top top',
-          end: () => `+=${n > 1 ? (n - 1) * innerHeight * .8 + innerHeight * .3 : 1}`,
-          pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
+          // jarak gulir per kartu ±45% layar (dulu 80% → terasa harus tarik terlalu jauh);
+          // scrub pendek agar kartu menempel ke jari, tidak tertinggal
+          end: () => `+=${n > 1 ? (n - 1) * innerHeight * .45 + innerHeight * .2 : 1}`,
+          pin: true, pinType: 'fixed', scrub: .35, invalidateOnRefresh: true, anticipatePin: 1,
           // setelah gulir berhenti, meluncur halus ke kartu (lihat snapTo);
           // inertia mati → yang dinilai posisi berhenti sebenarnya, bukan tebakan lontaran
           snap: { snapTo, inertia: false, duration: { min: .3, max: .8 }, delay: .15, ease: 'sine.inOut' },
