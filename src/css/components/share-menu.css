@@ -82,3 +82,9 @@
 .booth-tip__link { justify-self: start; margin-top: 2px; font: 700 12px/1.2 var(--mono); color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .booth-tip__link:hover, .booth-tip__link:focus-visible { background: var(--lime); text-decoration: none; }
 
+/* tombol ✕ kecil di pojok kanan atas — hanya saat tooltip menempel di tenda terpilih */
+.booth-tip__x { display: none; position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; padding: 0; place-items: center; border: 0; background: transparent; color: var(--ink-3); cursor: pointer; }
+.booth-tip__x svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.booth-tip__x:hover, .booth-tip__x:focus-visible { background: var(--lime); color: var(--ink); }
+.booth-tip.is-live .booth-tip__x { display: grid; }
+.booth-tip.is-live { padding-right: 32px; }

@@ -41,7 +41,7 @@ export const goToHash = (id) => {
   history.replaceState(null, '', url);
   return true;
 };
-// Snap hanya di hero: hero jadi satu "layar" yang menempel. Selagi posisi masih
+// Snap di hero (+ Asatidz, lihat sectionTo): hero jadi satu "layar" yang menempel. Selagi posisi masih
 // di dalam hero, setelah gulir berhenti halaman meluncur ke tepi hero sesuai
 // arah bila sudah terdorong ≥25% (turun → tepi bawah hero, naik → atas hero);
 // kurang dari itu kembali ke tepi asal. Di luar hero gulir bebas. Luncurannya
@@ -53,15 +53,38 @@ const heroEl = $('#home');
 const heroFits = () => !!heroEl && heroEl.offsetHeight <= innerHeight + 2;
 const easeSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
 let snapping = false, snapDir = 0;
+// Section lain yang muat satu layar (kini hanya Asatidz): bila sudah masuk
+// ≥25% layar menurut arah gulir, halaman meluncur sampai atas section = atas
+// layar (section tampil utuh). Kurang dari itu, atau sudah melewatinya, gulir bebas.
+// both: section juga punya tepi bawah seperti hero — dari dalam section, dorongan
+// ≥25% ke bawah meluncur ke bawahnya (section berikutnya rata atas layar).
+const snapEls = [['#asatidz', true]].map(([s, both]) => ({ el: $(s), both })).filter((x) => x.el);
+const sectionTo = (y) => {
+  const vh = innerHeight;
+  for (const { el, both } of snapEls) {
+    const h = el.offsetHeight;
+    if (h > vh + 2) continue; // lebih tinggi dari layar → snap akan melompati isinya
+    const t = el.getBoundingClientRect().top + scrollY; // posisi gulir nyata (y bisa = tujuan luncuran Lenis)
+    if (Math.abs(y - t) <= 2 || (both && Math.abs(y - t - h) <= 2)) continue;
+    if (both && y > t && y < t + h) return snapDir > 0 ? (y - t > h * 0.25 ? t + h : t) : (y - t < h * 0.75 ? t : t + h);
+    // turun: atas section sudah naik ke 75% atas layar; naik: section terbuka ≥25% dari atasnya
+    if (snapDir > 0 && y < t && t - y < vh * 0.75) return t;
+    if (snapDir < 0 && y > t && y - t < h * 0.75) return t;
+  }
+  return null;
+};
 const snapHero = (y) => {
-  if (!heroEl || snapping || navLocked || root.classList.contains('menu-open') || root.classList.contains('snap-boot') || (lenis && lenis.isStopped) || !heroFits()) return;
-  const end = heroEl.offsetHeight;
-  if (y <= 2 || y >= end - 2) return;
-  // butuh dorongan cukup (≥25% hero) ke arah itu; kurang dari itu kembali ke tepi asal
-  const to = snapDir > 0 ? (y > end * 0.25 ? end : 0) : (y < end * 0.75 ? 0 : end);
+  if (snapping || navLocked || root.classList.contains('menu-open') || root.classList.contains('snap-boot') || (lenis && lenis.isStopped)) return;
+  const end = heroEl ? heroEl.offsetHeight : 0;
+  let to = null, dur = 1.2;
+  if (heroEl && heroFits() && y > 2 && y < end - 2) {
+    // butuh dorongan cukup (≥25% hero) ke arah itu; kurang dari itu kembali ke tepi asal
+    to = snapDir > 0 ? (y > end * 0.25 ? end : 0) : (y < end * 0.75 ? 0 : end);
+  } else if ((to = sectionTo(y)) !== null) dur = 0.9;
+  if (to === null) return;
   snapping = true;
   const done = () => { snapping = false; };
-  if (lenis) lenis.scrollTo(to, { duration: 1.2, easing: easeSine, lock: true, force: true, onComplete: done });
+  if (lenis) lenis.scrollTo(to, { duration: dur, easing: easeSine, lock: true, force: true, onComplete: done });
   else { scrollTo({ top: to, behavior: 'smooth' }); setTimeout(done, 900); }
 };
 if (!reduced && finePointer && lenis) {
