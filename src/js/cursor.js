@@ -17,7 +17,8 @@ if (finePointer && !reduced) {
   loop();
   document.addEventListener('pointerover', (e) => {
     const lab = e.target.closest('[data-cursor]');
-    const hov = e.target.closest('a, button, .booth, .logo-tile, .plogo, .tenant__grid li');
+    // link nav atas punya efek sendiri (teks bergulir) → kursor tetap titik kecil
+    const hov = !e.target.closest('.nav__links') && e.target.closest('a, button, .booth, .logo-tile, .plogo, .tenant__grid li');
     cur.classList.toggle('has-label', !!lab);
     cur.classList.toggle('is-hover', !!hov && !lab);
     cur.classList.toggle('is-on-dark', !!e.target.closest('.footer, .layanan, .denah__stage, .marquee--dark'));

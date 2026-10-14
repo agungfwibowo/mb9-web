@@ -21,6 +21,11 @@
 }
 .nav__links a:hover::after, .nav__links a.is-active::after { transform: scaleX(1); }
 .nav__links a.is-active { color: var(--ink); }
+/* Hover: teks bergulir — teks naik keluar, salinannya (text-shadow) masuk dari bawah */
+.roll { display: inline-block; overflow: hidden; vertical-align: top; padding: .15em 0; margin: -.15em 0; }
+.roll > span { display: inline-block; text-shadow: 0 1.6em currentColor; transition: translate .45s var(--ease); }
+.nav__links a:hover .roll > span { translate: 0 -1.6em; }
+@media (prefers-reduced-motion: reduce) { .roll > span { transition: none; } }
 /* penanda "ada jadwal hari ini" di link Jadwal — hanya tampil selama acara */
 .nav__flag { position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; background: var(--blue); animation: blink 1s steps(2) infinite; }
 .nav__flag[hidden] { display: none; }
