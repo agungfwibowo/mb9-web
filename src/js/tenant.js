@@ -31,6 +31,53 @@ const grid = $('#tenantGrid');
 grid.innerHTML = tenants.map((t) => `
     <li data-name="${esc(t.name.toLowerCase())}"><a href="#denah" data-tenant-link="${esc(t.name)}" data-cursor="Lokasi" aria-label="${esc(t.name)} — lihat lokasi di denah"><div class="ph${t.tone === 'dark' ? ' is-dark' : ''}"><img class="lazy-img" data-src="${esc(t.src)}" alt="" decoding="async"></div><span>${esc(t.name)}${boothsOf[t.name] ? `<small>Tenda ${boothsOf[t.name].join(', ')}</small>` : ''}</span></a></li>`).join('');
 lazyWatch(grid);
+
+// Latar kotak logo menyesuaikan logonya (dibaca dari piksel lewat canvas):
+// tepi logo berwarna solid → kotak memakai warna itu (logo menyatu tanpa
+// bingkai); tepi transparan → hitam bila bagian putih logo lebih banyak dari
+// bagian hitamnya (mis. tulisan putih), selain itu putih.
+// Logo bertanda 'dark' di data tetap hitam. Hasil disimpan per file — salinan
+// marquee & daftar brand tidak dihitung ulang.
+const toneCache = new Map();
+const sampleBg = (img) => {
+  const N = 40;
+  const c = document.createElement('canvas');
+  c.width = c.height = N;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0, N, N);
+  const px = ctx.getImageData(0, 0, N, N).data;
+  const at = (x, y) => { const i = (y * N + x) * 4; return [px[i], px[i + 1], px[i + 2], px[i + 3]]; };
+  const edge = [];
+  for (let i = 0; i < N; i++) edge.push(at(i, 0), at(i, N - 1), at(0, i), at(N - 1, i));
+  const solid = edge.filter((p) => p[3] > 220);
+  if (solid.length > edge.length * .85) {
+    const avg = [0, 1, 2].map((k) => solid.reduce((t, p) => t + p[k], 0) / solid.length);
+    const spread = solid.reduce((t, p) => t + Math.abs(p[0] - avg[0]) + Math.abs(p[1] - avg[1]) + Math.abs(p[2] - avg[2]), 0) / solid.length;
+    return spread < 40 ? `rgb(${avg.map(Math.round).join(',')})` : '';
+  }
+  // tepi transparan: pilih latar yang paling sedikit "menelan" piksel logo —
+  // piksel nyaris putih hilang di latar putih, nyaris hitam hilang di hitam
+  let putih = 0, hitam = 0;
+  for (let i = 0; i < px.length; i += 4) {
+    if (px[i + 3] < 128) continue;
+    const lum = .2126 * px[i] + .7152 * px[i + 1] + .0722 * px[i + 2];
+    if (lum > 225) putih++;
+    else if (lum < 40) hitam++;
+  }
+  return putih > hitam ? 'var(--ink)' : '';
+};
+const fitBg = (img) => {
+  const box = img.parentElement;
+  if (!box || box.classList.contains('is-dark') || !img.naturalWidth) return;
+  const key = img.currentSrc || img.src;
+  if (!toneCache.has(key)) {
+    try { toneCache.set(key, sampleBg(img)); } catch (_) { toneCache.set(key, ''); }
+  }
+  box.style.backgroundColor = toneCache.get(key);
+};
+[marquee, grid].forEach((root) => root.addEventListener('load', (e) => {
+  if (e.target.tagName === 'IMG') fitBg(e.target);
+}, true));
 const toggle = $('#tenantToggle');
 const all = $('#tenantAll');
 toggle.addEventListener('click', () => {
