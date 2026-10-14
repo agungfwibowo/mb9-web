@@ -9,7 +9,10 @@
 }
 .totop.is-in { translate: none; opacity: 1; pointer-events: auto; }
 .totop svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; }
-.totop:hover, .totop:focus-visible { background: var(--lime); color: var(--ink); }
+/* :hover hanya di perangkat ber-mouse — di layar sentuh status hover "menempel"
+   pada tombol yang baru diketuk, jadi tombol tetap lime selama gulir ke atas */
+.totop:focus-visible { background: var(--lime); color: var(--ink); }
+@media (hover: hover) { .totop:hover { background: var(--lime); color: var(--ink); } }
 .menu-open .totop { translate: 0 160%; opacity: 0; pointer-events: none; }
 
 /* ---------- Sembunyikan brand (mengambang, tenant.js) ----------
