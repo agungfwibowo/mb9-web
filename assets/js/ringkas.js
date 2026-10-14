@@ -226,4 +226,77 @@
     });
     $('layananSec').hidden = false;
   }
+  // ---- Tenant & penyelenggara: deretan geser horizontal + panah ‹ › ----
+  // Path gambar di data relatif ke akar situs → diawali "../".
+  const SVG = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const tendaOf = {};
+  (D.placements || []).forEach(([name, from, to = from]) => {
+    (tendaOf[name] = tendaOf[name] || []).push(from === to ? pad2(from) : `${pad2(from)}–${pad2(to)}`);
+  });
+  const links = D.links || {};
+  // box: wadah .geser; judul: elemen h2/h3; items: [{name, src, tone, sub}]
+  const geser = (box, judul, items, label) => {
+    const kepala = el('div', 'geser__kepala');
+    const panah = el('div', 'panah');
+    panah.setAttribute('role', 'group');
+    panah.setAttribute('aria-label', `Geser ${label}`);
+    const prev = el('button'), next = el('button');
+    prev.type = next.type = 'button';
+    prev.setAttribute('aria-label', `${label} sebelumnya`);
+    next.setAttribute('aria-label', `${label} berikutnya`);
+    prev.innerHTML = SVG('M15 5l-7 7 7 7');
+    next.innerHTML = SVG('M9 5l7 7-7 7');
+    panah.append(prev, next);
+    kepala.append(judul, panah);
+    const ul = el('ul', 'geser__baris');
+    items.forEach((t) => {
+      const li = el('li');
+      const href = links[t.name];
+      const a = el(href ? 'a' : 'div', 'logo');
+      if (href) Object.assign(a, { href, target: '_blank', rel: 'noopener' });
+      const ph = el('div', `logo__img${t.tone === 'dark' ? ' is-dark' : ''}`);
+      ph.append(Object.assign(document.createElement('img'), { src: `../${t.src}`, alt: '', loading: 'lazy', decoding: 'async' }));
+      const nama = el('div', 'logo__nama', t.name);
+      if (t.sub) nama.append(el('small', '', t.sub));
+      a.append(ph, nama);
+      li.append(a);
+      ul.append(li);
+    });
+    box.append(kepala, ul);
+    // satu ketukan = geser satu halaman (2 kartu di HP, 3 di tablet)
+    const step = (dir) => ul.scrollBy({ left: dir * ul.clientWidth, behavior: 'smooth' });
+    prev.addEventListener('click', () => step(-1));
+    next.addEventListener('click', () => step(1));
+    const sync = () => {
+      const max = ul.scrollWidth - ul.clientWidth;
+      panah.hidden = max <= 1;
+      prev.disabled = ul.scrollLeft <= 1;
+      next.disabled = ul.scrollLeft >= max - 1;
+    };
+    ul.addEventListener('scroll', sync, { passive: true });
+    addEventListener('resize', sync);
+    requestAnimationFrame(sync);
+  };
+
+  const T = D.tenants || [];
+  if (T.length) {
+    const h = el('h2', '', 'Tenant');
+    h.id = 'h-tenant';
+    $('tenantSec').hidden = false;
+    geser($('tenant'), h, T.map(([name, file, tone]) => ({
+      name, tone, src: `assets/img/tenant/${file}`, sub: tendaOf[name] ? `Tenda ${tendaOf[name].join(', ')}` : '',
+    })), 'Tenant');
+    $('tenant').after(el('p', 'jumlah', `${T.length} brand di Open Gate Bazar & Foodcourt.`));
+  }
+
+  const P = (D.partners || []).filter((g) => (g.logos || []).length);
+  if (P.length) {
+    $('mitraSec').hidden = false;
+    P.forEach((g) => {
+      const box = el('div', 'geser');
+      $('mitra').append(box);
+      geser(box, el('h3', '', g.group), g.logos.map(([name, src, tone]) => ({ name, src, tone })), g.group);
+    });
+  }
 })();

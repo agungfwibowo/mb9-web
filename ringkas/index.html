@@ -6,14 +6,14 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Tampilan Sederhana — Muslim Berdedikasi 9</title>
-  <meta name="description" content="Info ringkas Muslim Berdedikasi 9 dengan huruf besar: tanggal, jam buka, lokasi, jadwal per hari, dan layanan gratis.">
+  <meta name="description" content="Info ringkas Muslim Berdedikasi 9 dengan huruf besar: tanggal, jam buka, lokasi, jadwal per hari, layanan gratis, tenant, penyelenggara dan sponsor.">
   <!-- Samakan dengan index.html: hapus noindex saat situs siap tayang. -->
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#c5fa01">
-  <script src="../assets/js/data-prod.js?v=1.1.388" defer></script>
-  <script src="../assets/js/data-dev.js?v=1.1.388" defer></script>
-  <script src="../assets/js/ringkas.js?v=1.1.388" defer></script>
-  <script src="../assets/js/akhir.js?v=1.1.388" defer></script>
+  <script src="../assets/js/data-prod.js?v=1.1.389" defer></script>
+  <script src="../assets/js/data-dev.js?v=1.1.389" defer></script>
+  <script src="../assets/js/ringkas.js?v=1.1.389" defer></script>
+  <script src="../assets/js/akhir.js?v=1.1.389" defer></script>
   <link rel="icon" type="image/png" href="../assets/img/logo/favicon.png?v=2">
   <link rel="manifest" href="../manifest.webmanifest">
   <link rel="canonical" href="https://www.muslimberdedikasi.com/ringkas/">
@@ -102,6 +102,32 @@
     .layanan li + li { margin-top: .35rem; }
     .layanan p { margin: 0; }
 
+    /* Tenant & penyelenggara: deretan geser horizontal (min 2 kartu per layar)
+       dengan panah ‹ › kecil di kanan judul — mirip panah Asatidz di halaman
+       lengkap, tanpa kartu aktif yang membesar. Panah sembunyi bila semua muat. */
+    .geser + .geser { margin-top: 1.5rem; }
+    .geser__kepala { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin: 0 0 .75rem; }
+    .geser__kepala h2, .geser__kepala h3 { margin: 0; }
+    .geser__kepala h3 { font-size: 1.15rem; }
+    .panah { display: flex; flex: none; }
+    .panah[hidden] { display: none; }
+    .panah button { width: 2.75rem; height: 2.75rem; display: grid; place-items: center; padding: 0; border: 2px solid var(--ink); background: var(--white); color: var(--ink); cursor: pointer; }
+    .panah button + button { margin-left: -2px; }
+    .panah button:disabled { color: #9a9a9a; background: var(--paper); cursor: default; }
+    .panah svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: square; }
+    .geser__baris { --n: 2; list-style: none; margin: 0; padding: 0; display: flex; gap: .75rem; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+    .geser__baris::-webkit-scrollbar { display: none; }
+    @media (min-width: 600px) { .geser__baris { --n: 3; } }
+    .geser__baris > li { flex: 0 0 calc((100% - (var(--n) - 1) * .75rem) / var(--n)); min-width: 0; scroll-snap-align: start; }
+    .logo { display: flex; flex-direction: column; height: 100%; background: var(--white); border: 2px solid var(--ink); border-radius: .75rem; overflow: hidden; text-decoration: none; }
+    .logo__img { aspect-ratio: 1; min-width: 0; overflow: hidden; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; padding: .75rem; border-bottom: 2px solid var(--ink); }
+    .logo__img.is-dark { background: var(--ink); }
+    .logo__img img { width: 100%; height: 100%; object-fit: contain; }
+    .logo__nama { padding: .5rem .65rem .6rem; font-weight: 800; font-size: .95rem; line-height: 1.25; overflow-wrap: anywhere; }
+    .logo__nama small { display: block; margin-top: .15rem; font-weight: 700; font-size: .85rem; color: var(--ink-2); }
+    a.logo .logo__nama { text-decoration: underline; text-decoration-thickness: 2px; }
+    .jumlah { margin: .5rem 0 0; color: var(--ink-2); }
+
     /* Pita offline: menempel di atas selama tidak ada sinyal; "tersambung
        kembali" tampil sebentar lalu hilang sendiri (ringkas.js). */
     .net { display: flex; align-items: center; gap: .75rem; padding: .75rem var(--gutter); background: #ffd84d; color: var(--ink); border-bottom: 2px solid var(--ink); font-weight: 800; line-height: 1.3; }
@@ -174,6 +200,15 @@
       <div id="layanan"></div>
     </section>
 
+    <section aria-labelledby="h-tenant" id="tenantSec" hidden>
+      <div class="geser" id="tenant"></div>
+    </section>
+
+    <section aria-labelledby="h-mitra" id="mitraSec" hidden>
+      <h2 id="h-mitra">Penyelenggara &amp; Sponsor</h2>
+      <div id="mitra"></div>
+    </section>
+
     <section aria-labelledby="h-kontak">
       <h2 id="h-kontak">Butuh bantuan?</h2>
       <p>Hubungi panitia:</p>
@@ -185,7 +220,7 @@
 
   <footer class="footer">
     <div class="wrap">
-      <p>Ingin melihat denah, daftar tenant, dan info lengkap lainnya?</p>
+      <p>Ingin melihat denah lokasi tenda dan info lengkap lainnya?</p>
       <a class="btn" href="../">Buka tampilan lengkap</a>
       <small><a href="../privasi/">Ketentuan &amp; Privasi</a></small>
     </div>
