@@ -10,10 +10,10 @@
   <!-- Samakan dengan index.html: hapus noindex saat situs siap tayang. -->
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#c5fa01">
-  <script src="../assets/js/data-prod.js?v=1.1.392" defer></script>
-  <script src="../assets/js/data-dev.js?v=1.1.392" defer></script>
-  <script src="../assets/js/ringkas.js?v=1.1.392" defer></script>
-  <script src="../assets/js/akhir.js?v=1.1.392" defer></script>
+  <script src="../assets/js/data-prod.js?v=1.1.393" defer></script>
+  <script src="../assets/js/data-dev.js?v=1.1.393" defer></script>
+  <script src="../assets/js/ringkas.js?v=1.1.393" defer></script>
+  <script src="../assets/js/akhir.js?v=1.1.393" defer></script>
   <link rel="icon" type="image/png" href="../assets/img/logo/favicon.png?v=2">
   <link rel="manifest" href="../manifest.webmanifest">
   <link rel="canonical" href="https://www.muslimberdedikasi.com/ringkas/">
@@ -119,6 +119,9 @@
     .geser__baris::-webkit-scrollbar { display: none; }
     @media (min-width: 600px) { .geser__baris { --n: 3; } }
     .geser__baris > li { flex: 0 0 calc((100% - (var(--n) - 1) * .75rem) / var(--n)); min-width: 0; scroll-snap-align: start; }
+    /* Tenant: dua baris — kartu mengalir per kolom (atas, bawah, lalu kolom berikutnya) */
+    .geser__baris--2 { display: grid; grid-template-rows: repeat(2, auto); grid-auto-flow: column; grid-auto-columns: calc((100% - (var(--n) - 1) * .75rem) / var(--n)); }
+    .geser__baris--2 > li { flex: none; }
     .logo { display: flex; flex-direction: column; height: 100%; background: var(--white); border: 2px solid var(--ink); border-radius: .75rem; overflow: hidden; text-decoration: none; }
     .logo__img { aspect-ratio: 1; min-width: 0; overflow: hidden; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; padding: .3rem; border-bottom: 2px solid var(--ink); }
     .logo__img.is-dark { background: var(--ink); }

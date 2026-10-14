@@ -326,6 +326,7 @@
     const baris = geser($('tenant'), h, T.map(([name, file, tone]) => ({
       name, tone, src: `assets/img/tenant/${file}`, sub: tendaOf[name] ? `Tenda ${tendaOf[name].join(', ')}` : '',
     })), 'Tenant', true);
+    baris.classList.add('geser__baris--2');
     $('tenant').after(el('p', 'jumlah', `${T.length} brand di Open Gate Bazar & Foodcourt.`));
     // Geser otomatis 1 kartu tiap 2 detik; di ujung kembali ke awal. Berhenti
     // selama disentuh/digeser/difokus (lanjut 5 detik setelahnya), saat deretan
