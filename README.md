@@ -28,9 +28,13 @@ src/js/                 Sumber JS per fitur (ES module), entry: src/js/main.js
   navbar.js             Sembunyi/tampil navbar, progress bar, lockNav
   konten.js kalender.js bagikan.js a2hs.js koneksi.js
   jadwal.js asatidz.js tenant.js marquee.js denah.js countdown.js
-  menu.js lenis.js totop.js cursor.js teks.js intro.js hemat.js grain.js sw-register.js
+  menu.js lenis.js footer.js totop.js cursor.js teks.js intro.js hemat.js grain.js
+  ringkas-hint.js       Gelembung petunjuk ke Tampilan Sederhana (tombol Aa, layar ≤1080px)
+  sw-register.js
 assets/fonts/           Font self-hosted (Public Sans, Roboto Mono, subset Noto Sans Mono)
 assets/img/             Gambar & logo (org/, sponsor/, tenant/, logo/)
+tools/peta-lokasi.py    Pembuat assets/img/peta-lokasi.svg dari data OpenStreetMap (lihat di bawah)
+tools/osm/              Data OSM mentah hasil unduhan — di-.gitignore
 sw.js                   Service worker — cache offline untuk dipakai di lokasi acara
 manifest.webmanifest    Manifest PWA (bisa dipasang ke layar utama)
 .github/workflows/deploy.yml  Deploy otomatis ke GitHub Pages
@@ -66,6 +70,17 @@ python3 -m http.server 5501
 
 Buka <http://localhost:5501/>. Service worker hanya aktif di `localhost` atau HTTPS.
 
+### Peta lokasi
+
+Peta di section Lokasi adalah SVG statis yang dibuat dari data OpenStreetMap. Untuk membuat ulang:
+
+```bash
+python3 tools/peta-lokasi.py ambil   # unduh data OSM → tools/osm/*.json (sekali / bila ingin data baru)
+python3 tools/peta-lokasi.py         # bangun assets/img/peta-lokasi.svg dari tools/osm/*.json
+```
+
+Atribusi OpenStreetMap wajib tetap tampil di halaman (`.peta__osm` di `index.html`).
+
 ## Deploy (GitHub Pages)
 
 Situs terbit otomatis lewat GitHub Actions ([deploy.yml](.github/workflows/deploy.yml)) setiap ada
@@ -89,7 +104,7 @@ Catatan: GitHub Pages gratis untuk repo **public**. Untuk repo private butuh aku
 ## Merilis perubahan
 
 0. Bila mengubah `src/js` atau `src/css`: `npm run build`.
-1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.312` → `mb9-1.1.313`).
+1. Naikkan `VERSION` di [sw.js](sw.js) (mis. `mb9-1.1.396` → `mb9-1.1.397`).
 2. Samakan semua `?v=` di [index.html](index.html) dengan angka versi tersebut
    (`style.css`, `data-prod.js`, `data-dev.js`, `main.js`, `akhir.js`), `privasi.js` di [privasi/index.html](privasi/index.html), serta `data-prod.js`, `data-dev.js`, `ringkas.js`, `akhir.js` di [ringkas/index.html](ringkas/index.html). Cache lama otomatis dibuang saat worker baru aktif.
 3. Perbarui `<lastmod>` di [sitemap.xml](sitemap.xml) bila konten berubah.
@@ -131,7 +146,7 @@ CSP mengizinkan satu `<script>` inline di `<head>` `index.html` lewat hash `sha2
 **Setiap kali isi script itu diubah**, hitung ulang hash-nya dan ganti nilainya di tag CSP `<meta>` `index.html`:
 
 ```bash
-python3 -c "import re,hashlib,base64;s=open('index.html').read();[print('sha256-'+base64.b64encode(hashlib.sha256(m.encode()).digest()).decode()) for m in re.findall(r'<script>(.*?)</script>',s,re.S)]"
+python3 -c "import re,hashlib,base64;s=re.sub(r'<!--.*?-->','',open('index.html').read(),flags=re.S);[print('sha256-'+base64.b64encode(hashlib.sha256(m.encode()).digest()).decode()) for m in re.findall(r'<script>(.*?)</script>',s,re.S)]"
 ```
 
 Bila menambah library CDN atau embed dari domain baru, tambahkan domainnya ke direktif yang sesuai
