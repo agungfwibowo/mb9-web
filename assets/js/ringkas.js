@@ -235,8 +235,43 @@
     (tendaOf[name] = tendaOf[name] || []).push(from === to ? pad2(from) : `${pad2(from)}–${pad2(to)}`);
   });
   const links = D.links || {};
-  // box: wadah .geser; judul: elemen h2/h3; items: [{name, src, tone, sub}]
-  const geser = (box, judul, items, label) => {
+  // Latar kotak logo tenant menyesuaikan logonya — sama dengan tampilan lengkap
+  // (src/js/tenant.js): tepi berwarna solid → kotak memakai warna itu; tepi
+  // transparan → hitam bila bagian putih logo lebih banyak dari bagian
+  // hitamnya, selain itu putih. Logo bertanda 'dark' di data tetap hitam.
+  const sampleBg = (img) => {
+    const N = 40;
+    const c = document.createElement('canvas');
+    c.width = c.height = N;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, N, N);
+    const px = ctx.getImageData(0, 0, N, N).data;
+    const at = (x, y) => { const i = (y * N + x) * 4; return [px[i], px[i + 1], px[i + 2], px[i + 3]]; };
+    const edge = [];
+    for (let i = 0; i < N; i++) edge.push(at(i, 0), at(i, N - 1), at(0, i), at(N - 1, i));
+    const solid = edge.filter((p) => p[3] > 220);
+    if (solid.length > edge.length * .85) {
+      const avg = [0, 1, 2].map((k) => solid.reduce((t, p) => t + p[k], 0) / solid.length);
+      const spread = solid.reduce((t, p) => t + Math.abs(p[0] - avg[0]) + Math.abs(p[1] - avg[1]) + Math.abs(p[2] - avg[2]), 0) / solid.length;
+      return spread < 40 ? `rgb(${avg.map(Math.round).join(',')})` : '';
+    }
+    let putih = 0, hitam = 0;
+    for (let i = 0; i < px.length; i += 4) {
+      if (px[i + 3] < 128) continue;
+      const lum = .2126 * px[i] + .7152 * px[i + 1] + .0722 * px[i + 2];
+      if (lum > 225) putih++;
+      else if (lum < 40) hitam++;
+    }
+    return putih > hitam ? 'var(--ink)' : '';
+  };
+  const fitBg = (img) => {
+    const box = img.parentElement;
+    if (!box || box.classList.contains('is-dark') || !img.naturalWidth) return;
+    try { box.style.backgroundColor = sampleBg(img); } catch (_) { /* canvas diblokir */ }
+  };
+  // box: wadah .geser; judul: elemen h2/h3; items: [{name, src, tone, sub}];
+  // autoBg: latar logo menyesuaikan warnanya (hanya tenant, seperti tampilan lengkap)
+  const geser = (box, judul, items, label, autoBg) => {
     const kepala = el('div', 'geser__kepala');
     const panah = el('div', 'panah');
     panah.setAttribute('role', 'group');
@@ -256,7 +291,10 @@
       const a = el(href ? 'a' : 'div', 'logo');
       if (href) Object.assign(a, { href, target: '_blank', rel: 'noopener' });
       const ph = el('div', `logo__img${t.tone === 'dark' ? ' is-dark' : ''}`);
-      ph.append(Object.assign(document.createElement('img'), { src: `../${t.src}`, alt: '', loading: 'lazy', decoding: 'async' }));
+      const img = Object.assign(document.createElement('img'), { alt: '', loading: 'lazy', decoding: 'async' });
+      if (autoBg) img.addEventListener('load', () => fitBg(img), { once: true });
+      img.src = `../${t.src}`;
+      ph.append(img);
       const nama = el('div', 'logo__nama', t.name);
       if (t.sub) nama.append(el('small', '', t.sub));
       a.append(ph, nama);
@@ -287,7 +325,7 @@
     $('tenantSec').hidden = false;
     const baris = geser($('tenant'), h, T.map(([name, file, tone]) => ({
       name, tone, src: `assets/img/tenant/${file}`, sub: tendaOf[name] ? `Tenda ${tendaOf[name].join(', ')}` : '',
-    })), 'Tenant');
+    })), 'Tenant', true);
     $('tenant').after(el('p', 'jumlah', `${T.length} brand di Open Gate Bazar & Foodcourt.`));
     // Geser otomatis 1 kartu tiap 2 detik; di ujung kembali ke awal. Berhenti
     // selama disentuh/digeser/difokus (lanjut 5 detik setelahnya), saat deretan
