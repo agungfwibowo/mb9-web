@@ -14,17 +14,18 @@
 .search { display: flex; align-items: center; gap: 12px; padding: 0 18px; margin-bottom: 22px; border: 2px solid var(--ink); background: var(--white); max-width: 480px; }
 .search svg { width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 2.4; flex: none; }
 .search input { flex: 1; border: 0; background: transparent; padding: 16px 0; font: 500 16px var(--sans); outline: none; min-width: 0; }
-.tenant__grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0; padding: 0 2px 2px 0; }
-.tenant__grid li { min-width: 0; overflow: hidden; clip-path: var(--notch); background: var(--white); border: 2px solid var(--ink); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; margin: 0 -2px -2px 0; }
+.tenant__grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.tenant__grid li { min-width: 0; overflow: hidden; clip-path: var(--notch); background: var(--white); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
 .tenant__grid .ph { min-width: 0; overflow: hidden; aspect-ratio: 1; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; padding: 6px; }
 .tenant__grid img { width: 100%; height: 100%; object-fit: contain; }
-.tenant__grid span { padding: 8px 10px; border-top: 2px solid var(--ink); font: 600 12.5px/1.25 var(--sans); }
+.tenant__grid span { padding: 8px 10px; border-top: 2px solid var(--ink); background: var(--white); color: var(--ink); font: 600 12.5px/1.25 var(--sans); }
 .tenant__grid li.is-hidden { display: none; }
 /* tiap tenant = link ke denah; nomor tendanya di bawah nama */
 .tenant__grid li > a { display: grid; grid-template-rows: auto 1fr; min-width: 0; color: inherit; text-decoration: none; }
-.tenant__grid span small { display: block; margin-top: 4px; font: 700 10.5px/1.2 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--blue); }
-.tenant__grid li > a span { transition: background .2s; }
-.tenant__grid li > a:hover span, .tenant__grid li > a:focus-visible span { background: var(--lime); }
+.tenant__grid span small { display: block; margin-top: 4px; font: 700 10.5px/1.2 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); }
+.tenant__grid li > a span { transition: background .2s, color .2s; }
+.tenant__grid li > a:hover span, .tenant__grid li > a:focus-visible span { background: var(--lime); color: var(--ink); }
+.tenant__grid li > a:hover span small, .tenant__grid li > a:focus-visible span small { color: var(--ink); }
 .logo-tile { text-decoration: none; }
 .tenant__empty { padding: 30px 0; font-weight: 700; }
 
