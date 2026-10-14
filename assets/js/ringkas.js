@@ -277,6 +277,7 @@
     ul.addEventListener('scroll', sync, { passive: true });
     addEventListener('resize', sync);
     requestAnimationFrame(sync);
+    return ul;
   };
 
   const T = D.tenants || [];
@@ -284,10 +285,28 @@
     const h = el('h2', '', 'Tenant');
     h.id = 'h-tenant';
     $('tenantSec').hidden = false;
-    geser($('tenant'), h, T.map(([name, file, tone]) => ({
+    const baris = geser($('tenant'), h, T.map(([name, file, tone]) => ({
       name, tone, src: `assets/img/tenant/${file}`, sub: tendaOf[name] ? `Tenda ${tendaOf[name].join(', ')}` : '',
     })), 'Tenant');
     $('tenant').after(el('p', 'jumlah', `${T.length} brand di Open Gate Bazar & Foodcourt.`));
+    // Geser otomatis 1 kartu tiap 2 detik; di ujung kembali ke awal. Berhenti
+    // selama disentuh/digeser/difokus (lanjut 5 detik setelahnya), saat deretan
+    // tidak terlihat atau tab disembunyikan, dan bila "kurangi gerakan" aktif.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let terlihat = false, jedaSampai = 0;
+      const jeda = () => { jedaSampai = Date.now() + 5000; };
+      ['pointerdown', 'touchstart', 'wheel', 'focusin'].forEach((t) => baris.addEventListener(t, jeda, { passive: true }));
+      $('tenant').querySelectorAll('.panah button').forEach((b) => b.addEventListener('click', jeda));
+      new IntersectionObserver(([e]) => { terlihat = e.isIntersecting; }, { threshold: .5 }).observe(baris);
+      setInterval(() => {
+        if (!terlihat || document.hidden || Date.now() < jedaSampai || baris.contains(document.activeElement)) return;
+        const max = baris.scrollWidth - baris.clientWidth;
+        if (max <= 1) return;
+        const li = baris.firstElementChild;
+        const langkah = li.offsetWidth + parseFloat(getComputedStyle(baris).columnGap || 0);
+        baris.scrollTo({ left: baris.scrollLeft >= max - 1 ? 0 : baris.scrollLeft + langkah, behavior: 'smooth' });
+      }, 2000);
+    }
   }
 
   const P = (D.partners || []).filter((g) => (g.logos || []).length);
