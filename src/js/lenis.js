@@ -61,11 +61,23 @@ let snapping = false, snapDir = 0;
 // exit: section yang lebih tinggi dari layar (Tentang, Layanan — termasuk jarak pin-nya, Denah) — hanya ekornya: antara
 // "bawah section = bawah layar" (a) dan "bawah section = atas layar" (b),
 // dorongan ≥25% layar ke suatu arah meluncur ke tepi itu, kurang → kembali.
-const snapEls = [['#tentang', false, true], ['#layanan', false, true], ['#asatidz', true], ['#denah', false, true]].map(([s, both, exit]) => ({ el: $(s), both, exit })).filter((x) => x.el);
+// enter: section lebih tinggi dari layar (Penyelenggara) — hanya sisi atasnya,
+// sama seperti sisi atas `both`: dari peta, dorongan ≥25% layar meluncur sampai
+// atas section = atas layar. mobile: aturan hanya berlaku di HP (≤860px) —
+// ekor Penyelenggara → footer.
+const isMobile = matchMedia('(max-width: 860px)');
+const snapEls = [['#tentang', false, true], ['#layanan', false, true], ['#asatidz', true], ['#denah', false, true], ['#sponsor', false, false, true], ['#sponsor', false, true, false, true]]
+  .map(([s, both, exit, enter, mobile]) => ({ el: $(s), both, exit, enter, mobile })).filter((x) => x.el);
 const sectionTo = (y) => {
   const vh = innerHeight;
-  for (const { el, both, exit } of snapEls) {
+  for (const { el, both, exit, enter, mobile } of snapEls) {
+    if (mobile && !isMobile.matches) continue;
     const h = el.offsetHeight;
+    if (enter) {
+      const t = el.getBoundingClientRect().top + scrollY, a = t - vh;
+      if (y > a + 2 && y < t - 2) return snapDir > 0 ? (y - a > vh * 0.25 ? t : a) : (y - a < vh * 0.75 ? a : t);
+      continue;
+    }
     if (exit) {
       const b = el.getBoundingClientRect().bottom + scrollY, a = b - vh;
       if (y > a + 2 && y < b - 2) return snapDir > 0 ? (y - a > vh * 0.25 ? b : a) : (y - a < vh * 0.75 ? a : b);
