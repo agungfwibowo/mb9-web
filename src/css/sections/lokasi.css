@@ -14,22 +14,13 @@
    halo warna daratan agar terbaca di atas garis jalan & bangunan */
 .peta__road { font: 600 calc(10.5px / var(--k)) var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: var(--ink-3); paint-order: stroke; stroke: #e7e6e2; stroke-width: calc(3px / var(--k)); stroke-linejoin: round; }
 .peta__road--main { font-weight: 700; fill: var(--ink); }
-/* rute masuk dari jalan utama ke pin: lime berkontur hitam, putus-putus yang
-   berjalan ke arah lokasi. Tebal & ukuran dalam px layar (dibagi --k). */
-.peta__labels .peta__route-c, .peta__labels .peta__route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.peta__route-c { stroke: var(--ink); stroke-width: calc(7px / var(--k)); }
-.peta__route { stroke: var(--lime); stroke-width: calc(3.4px / var(--k)); stroke-dasharray: calc(9px / var(--k)) calc(6px / var(--k)); animation: peta-route .9s linear infinite; }
-@keyframes peta-route { to { stroke-dashoffset: calc(-15px / var(--k)); } }
-@media (prefers-reduced-motion: reduce) { .peta__route { animation: none; } }
-.peta__gate { font: 700 calc(10px / var(--k)) var(--mono); letter-spacing: .06em; text-transform: uppercase; fill: var(--ink); paint-order: stroke; stroke: #e7e6e2; stroke-width: calc(3px / var(--k)); stroke-linejoin: round; }
 /* pin: kotak lime berdenyut + label nama tempat */
 .peta__pin { position: absolute; left: calc(1500px * var(--k)); top: calc(500px * var(--k)); width: 0; height: 0; }
 .peta__pin > i { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; background: var(--lime); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
 .peta__pin > i::after { content: ''; position: absolute; inset: -9px; border: 2px solid var(--ink); opacity: 0; animation: peta-pulse 2s ease-out infinite; }
 @keyframes peta-pulse { from { transform: scale(.6); opacity: .7; } to { transform: scale(1.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .peta__pin > i::after { animation: none; } }
-/* label di kanan bawah pin: rute masuk datang dari kanan sejajar pin, jangan tertutup */
-.peta__pin > b { position: absolute; left: 4px; top: 16px; white-space: nowrap; padding: 4px 8px; background: var(--ink); color: var(--lime); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.peta__pin > b { position: absolute; left: 18px; top: -12px; white-space: nowrap; padding: 4px 8px; background: var(--ink); color: var(--lime); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 /* kompas di pojok kanan atas (tak tertutup kartu lokasi di desktop maupun HP):
    jarum utara hitam pekat, selatan bergaris, garis lime = kiblat (292,8°).
    Statis di semua perangkat (tanpa sensor). */

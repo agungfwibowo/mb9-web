@@ -88,7 +88,7 @@
     @font-face { font-family: 'Roboto Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(assets/fonts/roboto-mono-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     @font-face { font-family: 'Noto Sans Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(assets/fonts/noto-sans-mono-blocks.woff2) format('woff2'); unicode-range: U+2591-2593; }
   </style>
-  <link rel="stylesheet" href="assets/css/style.css?v=1.1.402">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.1.403">
   <script>document.documentElement.classList.add('js');
     // Kunjungan ulang dalam sesi yang sama → preloader mode cepat (hanya 3 panel
     // terangkat). Diputuskan di sini, sebelum halaman digambar, agar layar lime
@@ -477,16 +477,11 @@
            Koordinat SVG dalam meter, (0,0) = pin; ukuran & posisi lewat CSS (--k). -->
       <div class="lokasi__map peta" role="img" aria-label="Peta lokasi: Lapangan Asrama Haji Medan, Jl. A.H. Nasution">
         <div class="peta__canvas" aria-hidden="true">
-          <img src="assets/img/peta-lokasi.svg?v=1.1.402" alt="" width="2500" height="1000" decoding="async">
+          <img src="assets/img/peta-lokasi.svg?v=1.1.403" alt="" width="2500" height="1000" decoding="async">
           <svg class="peta__labels" viewBox="-1500 -500 2500 1000">
             <path id="petaJ1" d="M-124 -170L276 -161"/>
             <path id="petaJ2" d="M-164 219L38 219"/>
             <path id="petaJ3" d="M84 68L84 228"/>
-            <!-- rute masuk: gerbang di jalan utama → jalan dalam Asrama Haji ke selatan,
-                 lalu ke barat menyusuri sisi selatan taman (OSM way 1133292235, 160738896) → pin -->
-            <path class="peta__route-c" d="M36-150V-92L34-85L30-78L27-66L26-53V-39L27-34L28-30L30-25L34-15L35-10V-4L34 0L31 1H0"/>
-            <path class="peta__route" d="M36-150V-92L34-85L30-78L27-66L26-53V-39L27-34L28-30L30-25L34-15L35-10V-4L34 0L31 1H0"/>
-            <text class="peta__gate" x="44" y="-128">Pintu masuk</text>
             <text class="peta__road peta__road--main"><textPath href="#petaJ1" startOffset="50%" text-anchor="middle">Jl. A.H. Nasution</textPath></text>
             <text class="peta__road"><textPath href="#petaJ2" startOffset="50%" text-anchor="middle">Jl. Karya Tani</textPath></text>
             <text class="peta__road"><textPath href="#petaJ3" startOffset="50%" text-anchor="middle">Jl. Karyawan</textPath></text>
@@ -597,9 +592,9 @@
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
   <!-- QR untuk menu Bagikan (ikut di-precache SW → tetap jalan offline) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
-  <script src="assets/js/data-prod.js?v=1.1.402" defer></script>
-  <script src="assets/js/data-dev.js?v=1.1.402" defer></script>
-  <script src="assets/js/main.js?v=1.1.402" defer></script>
-  <script src="assets/js/akhir.js?v=1.1.402" defer></script>
+  <script src="assets/js/data-prod.js?v=1.1.403" defer></script>
+  <script src="assets/js/data-dev.js?v=1.1.403" defer></script>
+  <script src="assets/js/main.js?v=1.1.403" defer></script>
+  <script src="assets/js/akhir.js?v=1.1.403" defer></script>
 </body>
 </html>
