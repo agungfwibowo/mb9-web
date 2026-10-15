@@ -3,7 +3,7 @@
    di lokasi acara. Naikkan VERSION setiap rilis: cache lama
    otomatis dibuang saat worker baru aktif.
    ========================================================= */
-const VERSION = 'mb9-1.1.401';
+const VERSION = 'mb9-1.1.402';
 // Versi aset diambil dari VERSION, jadi cukup satu kali naik versi dan URL
 // ?v= di sini selalu sama persis dengan yang ditulis index.html.
 const V = VERSION.slice(VERSION.indexOf('-') + 1);
@@ -23,10 +23,20 @@ self.addEventListener('install', (e) => {
   );
 });
 
+// Cache lama dibuang, KECUALI satu versi tepat sebelumnya: halaman versi lama
+// yang masih terbuka (mis. tab dibiarkan berjam-jam) bisa memuat ulang asetnya
+// kapan saja. Kalau cache-nya sudah hilang, ?v= lama diambil dari server — yang
+// mengabaikan query → dapat aset BARU yang tak cocok dengan HTML lama (contoh:
+// peta baru dengan titik pusat bergeser di bawah pin & rute lama). Halaman
+// lama itu sendiri dimuat ulang saat ditinggal (lihat sw-register.js).
+// caches.keys() berurutan menurut waktu dibuat → yang terakhir = paling baru.
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then((keys) => {
+        const prev = keys.filter((k) => k !== VERSION).slice(-1);
+        return Promise.all(keys.filter((k) => k !== VERSION && !prev.includes(k)).map((k) => caches.delete(k)));
+      })
       .then(() => self.clients.claim()),
   );
 });

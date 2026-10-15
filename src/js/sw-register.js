@@ -4,6 +4,21 @@
    --------------------------------------------------------- */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  // Versi baru aktif saat halaman ini masih terbuka (worker baru langsung
+  // mengambil alih) → HTML yang tampil sudah basi dan asetnya bisa tak cocok
+  // lagi. Muat ulang diam-diam begitu tab ditinggal; saat kembali pengunjung
+  // langsung melihat versi terbaru. Kunjungan pertama (belum ada worker) bukan
+  // pembaruan → diabaikan. Kembali ke tab → minta browser cek versi baru.
+  let hadWorker = !!navigator.serviceWorker.controller, stale = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadWorker) { hadWorker = true; return; }
+    stale = true;
+    if (document.hidden) location.reload();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { if (stale) location.reload(); return; }
+    navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
+  });
   // Kirim daftar aset halaman ke worker agar tersimpan untuk offline (lihat
   // handler 'message' di sw.js). data-src ikut dikumpulkan: logo lazy yang
   // belum pernah di-scroll belum punya src. Font Google sengaja tidak ikut —
