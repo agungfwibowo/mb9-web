@@ -22,28 +22,42 @@ const SCRAMBLE_PCT = 0.35;  // bagian EKOR tiap KATA yang ikut glitch
 // huruf ASLINYA, dan tiap kata dibungkus inline-block nowrap. Glyph apa pun
 // yang masuk, lebar kata tidak berubah, jadi titik pemenggalan baris persis
 // sama dari awal sampai akhir animasi.
-const measurer = document.createElement('canvas').getContext('2d');
+//
+// Lebar diukur dari DOM (huruf asli dirender dulu), bukan canvas: canvas
+// tidak tahu text-transform (judul .title uppercase → huruf kecil terukur
+// lebih sempit) maupun letter-spacing, sehingga kata saat scramble lebih
+// sempit dari teks akhirnya dan pemenggalan barisnya bisa berbeda.
 const charBoxes = (el, text) => {
-  const cs = getComputedStyle(el);
-  measurer.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-  const frag = document.createDocumentFragment();
   const cells = new Array(text.length).fill(null);
+  const words = [];
+  el.textContent = '';
   let i = 0;
   while (i < text.length) {
-    if (text[i] === ' ') { frag.appendChild(document.createTextNode(' ')); i++; continue; }
+    if (text[i] === ' ') { el.appendChild(document.createTextNode(' ')); i++; continue; }
     const word = document.createElement('span');
     word.style.cssText = 'display:inline-block;white-space:nowrap';
     while (i < text.length && text[i] !== ' ') {
       const cell = document.createElement('span');
-      cell.style.cssText = `display:inline-block;width:${measurer.measureText(text[i]).width}px;text-align:center`;
+      cell.style.display = 'inline-block';
       cell.textContent = text[i];
       word.appendChild(cell);
       cells[i] = cell;
       i++;
     }
-    frag.appendChild(word);
+    el.appendChild(word);
+    words.push(word);
   }
-  return { frag, cells };
+  // baca semua dulu (satu reflow), baru tulis; skala dikoreksi bila judul
+  // sedang di-transform (animasi reveal)
+  const widths = words.map((word) => {
+    const r = word.getBoundingClientRect().width;
+    const k = r ? word.offsetWidth / r : 1;
+    return [...word.children].map((c) => c.getBoundingClientRect().width * k);
+  });
+  words.forEach((word, w) => [...word.children].forEach((c, j) => {
+    c.style.cssText = `display:inline-block;width:${widths[w][j]}px;text-align:center`;
+  }));
+  return { cells };
 };
 export const scramble = (el) => {
   const original = el.dataset.text || (el.dataset.text = el.textContent);
@@ -80,9 +94,7 @@ export const scramble = (el) => {
     }
     w = end;
   }
-  const { frag, cells } = charBoxes(el, original);
-  el.textContent = '';
-  el.appendChild(frag);
+  const { cells } = charBoxes(el, original);
   // Berbasis waktu, bukan hitungan frame: versi lama memakai satu frame per
   // langkah sehingga di layar 120Hz efeknya jalan dua kali lebih cepat.
   let start = 0;
