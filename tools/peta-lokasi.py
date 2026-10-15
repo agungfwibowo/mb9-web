@@ -18,7 +18,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OSM = os.path.join(ROOT, 'tools', 'osm')
 OUT = os.path.join(ROOT, 'assets', 'img', 'peta-lokasi.svg')
 
-PIN = (3.5400828, 98.6739472)          # lapangan Asrama Haji (pin "Petunjuk Arah")
+PIN = (3.5404265, 98.6740732)          # sisi selatan lapangan/Taman Asrama Haji (dikoreksi panitia)
 BBOX = '3.5322,98.6560,3.5484,98.6830'  # area unduhan (lat_min,lon_min,lat_max,lon_max)
 WIN = (-1500, -500, 2500, 1000)         # x, y, lebar, tinggi (meter) — harus sama dengan CSS
 BLD = (-1300, 900, -400, 400)           # bangunan hanya di jendela ini (x0, x1, y0, y1): hemat ukuran file
@@ -155,12 +155,13 @@ def build():
             add('j-' + k, path(simplify(pts)))
 
     W = {'utama': 15, 'utama-link': 8, 'besar': 10, 'kecil': 6.5, 'gang': 4.2}
-    roads = ['gang', 'kecil', 'besar']
+    # jalan utama ikut putih (lebih tebal), bukan hitam pekat — dulu terkesan jalan tol
+    roads = ['gang', 'kecil', 'besar', 'utama-link', 'utama']
     css = (
         '.l{fill:#e7e6e2}.b{fill:#d9d8d3}.h{fill:#dbe0cd}.v{fill:#c5fa01;fill-opacity:.5;stroke:#2b2b2b;stroke-width:2}'
         '.w{fill:#afc3f8}.r{fill:none;stroke:#afc3f8;stroke-width:6;stroke-linecap:round}'
-        '.c,.f,.u,.p{fill:none;stroke-linecap:round;stroke-linejoin:round}.c{stroke:#c9c8c3}.f{stroke:#fff}'
-        '.u{stroke:#2b2b2b}.p{stroke:#a9a7a3;stroke-width:1.4;stroke-dasharray:4 4}'
+        '.c,.f,.p{fill:none;stroke-linecap:round;stroke-linejoin:round}.c{stroke:#c9c8c3}.f{stroke:#fff}'
+        '.p{stroke:#a9a7a3;stroke-width:1.4;stroke-dasharray:4 4}'
     )
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{x} {y} {w} {h}" width="{w}" height="{h}">',
            f'<!-- Data © OpenStreetMap contributors (ODbL) — dibangun tools/peta-lokasi.py --><style>{css}</style>',
@@ -177,8 +178,6 @@ def build():
         lay('j-' + k, 'c', f' stroke-width="{W[k] + 2.4}"')
     for k in roads:
         lay('j-' + k, 'f', f' stroke-width="{W[k]}"')
-    lay('j-utama-link', 'u', f' stroke-width="{W["utama-link"]}"')
-    lay('j-utama', 'u', f' stroke-width="{W["utama"]}"')
     out.append('</svg>')
     svg = '\n'.join(out)
     open(OUT, 'w').write(svg)
