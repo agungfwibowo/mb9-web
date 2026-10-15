@@ -125,10 +125,14 @@ if (!reduced && finePointer && lenis) {
 } else if (!reduced && !finePointer) {
   // sentuh: setelah jari diangkat DAN guliran momentum berhenti (140ms tanpa
   // event scroll). Menyentuh lagi saat meluncur → luncuran dibatalkan.
-  let touching = false, lastY = scrollY, idleT = 0;
-  const later = () => { clearTimeout(idleT); idleT = setTimeout(() => { if (!touching) snapHero(scrollY); }, 140); };
+  // armed: snap hanya untuk guliran yang diawali jari. Event scroll tanpa
+  // sentuhan (scroll anchoring saat gambar/konten termuat, address bar HP
+  // menyusut, ScrollTrigger.refresh) dulu ikut memicu snap → halaman yang
+  // didiamkan di ekor Denah tiba-tiba meluncur ke Tenant.
+  let touching = false, armed = false, lastY = scrollY, idleT = 0;
+  const later = () => { clearTimeout(idleT); idleT = setTimeout(() => { if (!touching && armed) { armed = false; snapHero(scrollY); } }, 140); };
   addEventListener('touchstart', () => {
-    touching = true;
+    touching = true; armed = true;
     clearTimeout(idleT);
     if (snapping) { snapping = false; if (lenis) lenis.scrollTo(scrollY, { immediate: true, force: true }); }
   }, { passive: true });
