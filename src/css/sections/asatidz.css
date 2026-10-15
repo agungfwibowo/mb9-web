@@ -1,9 +1,9 @@
 /* ---------- Asatidz ---------- */
 .asatidz { background: var(--white); padding: 0; }
-/* ukurannya masih diikat ke tinggi layar (tampilan sama seperti saat dulu di-pin) */
-.asatidz__pin { position: relative; z-index: 1; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: clamp(84px, 9vh, 150px) 0 clamp(40px, 6vh, 90px); }
-.asatidz .sec-head .title { font-size: clamp(24px, min(5vw, 5.5vh), 60px); }
-.asatidz .sec-head { margin-bottom: min(64px, 5vh); }
+/* tinggi = layar nyata (--ast-h, dipasang asatidz.js); ukuran isi diikat ke svh (layar terkecil, bilah alamat tampil) → selalu muat */
+.asatidz__pin { position: relative; z-index: 1; min-height: var(--ast-h, 100svh); display: flex; flex-direction: column; justify-content: center; padding: clamp(84px, 9svh, 150px) 0 clamp(40px, 6svh, 90px); }
+.asatidz .sec-head .title { font-size: clamp(24px, min(5vw, 5.5svh), 60px); }
+.asatidz .sec-head { margin-bottom: min(64px, 5svh); }
 .asatidz .container { position: relative; z-index: 1; }
 /* satu baris; jika melebihi layar → digeser mendatar biasa (jari/trackpad, mouse:
    seret — lihat asatidz.js). Scrollbar disembunyikan. Margin auto di kartu
@@ -11,8 +11,7 @@
 .asatidz__grid {
   /* position: relative → offsetLeft kartu diukur dari deretan (lihat markFront) */
   position: relative; flex: none; align-items: flex-start; display: flex; flex-wrap: nowrap; gap: var(--ast-gap); --ast-gap: 16px; padding: 0 var(--ast-pad, var(--gutter));
-  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; /* tak ada gulir vertikal di dalamnya */
-  /* hanya sumbu x yang ditahan (cegah geser-kembali browser); sumbu y dibiarkan
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; /* tak ada gulir vertikal di dalamnya */  /* hanya sumbu x yang ditahan (cegah geser-kembali browser); sumbu y dibiarkan
      agar usapan naik/turun di atas kartu tetap menggulir halaman (HP) */
   touch-action: pan-x pan-y;
   /* snap: kartu berlabuh di --ast-pad (dihitung asatidz.js) → 1/2/3 kartu yang muat
@@ -22,12 +21,12 @@
 }
 .asatidz__grid::-webkit-scrollbar { display: none; }
 /* panah ‹ › di kanan bawah deretan — tampilan dari .days-nav (jadwal.css) */
-.asatidz__nav { margin: min(20px, 2.4vh) 0 0; }
+.asatidz__nav { margin: min(20px, 2.4svh) 0 0; }
 .asatidz__grid.is-dragging { cursor: grabbing; scroll-snap-type: none; } /* seret mouse: snap menyusul saat dilepas */
 /* ukuran tetap (tidak menyusut): dulu boleh s/d 85% agar semua muat, tapi
    dengan banyak pemateri kartu jadi kecil & foto tergencet nama — lebih baik
    deretan digeser seperti di HP */
-.asatidz__grid > .ustadz { --ust-w: min(300px, 34vh); flex: 0 0 var(--ust-w); scroll-snap-align: start; }
+.asatidz__grid > .ustadz { --ust-w: min(300px, 34svh); flex: 0 0 var(--ust-w); scroll-snap-align: start; }
 .asatidz__grid > .ustadz:first-child { margin-left: auto; }
 .asatidz__grid > .ustadz:last-child { margin-right: auto; }
 @media (max-width: 860px) { .layanan__track { touch-action: pan-y; } } /* HP: geser horizontal ditangani JS (→ gulir halaman) */
