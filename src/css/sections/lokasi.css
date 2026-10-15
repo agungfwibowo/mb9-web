@@ -28,7 +28,7 @@
 /* dial di kiri, tombol & pesan di kanan → kotak tetap pendek, tidak menutupi
    label pin di peta HP yang hanya 300px */
 .peta__compass { position: absolute; right: 12px; top: 12px; z-index: 1; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-items: center; justify-items: start; column-gap: 8px; row-gap: 4px; padding: 8px; background: var(--white); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); transition: background .3s; }
-.peta__dial { grid-row: 1 / span 2; position: relative; display: block; width: 52px; height: 52px; }
+.peta__dial { grid-row: 1 / span 3; position: relative; display: block; width: 52px; height: 52px; }
 .peta__kbtn[hidden] + .peta__kmsg:empty, .peta__kbtn[hidden] { display: none; }
 .peta__dial svg { width: 100%; height: 100%; display: block; rotate: var(--rot, 0deg); }
 .peta__compass .ring { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 2 3.76; }
@@ -47,6 +47,17 @@
 .peta__kbtn[aria-pressed="true"] { background: var(--white); color: var(--ink); outline: 2px solid var(--ink); outline-offset: -2px; }
 .peta__kmsg { align-self: start; max-width: 112px; font-size: 10px; line-height: 1.3; text-align: left; color: var(--ink); }
 .peta__kmsg:empty { display: none; }
+/* akurasi: titik hijau = akurat, kuning = meragukan (+ ajakan kalibrasi angka 8
+   di bawah, selebar kotak) */
+.peta__kacc { display: flex; align-items: center; gap: 5px; font-size: 9.5px; color: var(--ink-3); }
+.peta__kacc[hidden], .peta__k8[hidden] { display: none; }
+.peta__kacc i { width: 8px; height: 8px; border-radius: 50%; background: #2fa84f; box-shadow: 0 0 0 1.5px var(--ink); }
+.peta__compass.is-uncal .peta__kacc i { background: #f2b705; }
+.peta__k8 { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; max-width: 200px; padding-top: 6px; border-top: 1px solid var(--ink); }
+.peta__k8 svg { flex: none; width: 44px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 10 6; animation: peta-k8 1.6s linear infinite; }
+.peta__k8 small { font-size: 9.5px; line-height: 1.3; color: var(--ink); }
+@keyframes peta-k8 { to { stroke-dashoffset: -32; } }
+@media (prefers-reduced-motion: reduce) { .peta__k8 svg { animation: none; } }
 /* Arah kiblat dari pin (292,8° dari utara). Ukuran dalam px layar, berapa
    pun skala peta. --kr = jari-jari cincin.
    Cincin skala 360°: garis kecil tiap 5°, garis besar tiap 30° — dua
