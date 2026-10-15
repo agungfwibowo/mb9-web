@@ -101,14 +101,12 @@ export const scrollAnims = () => {
       };
       fit();
       ScrollTrigger.addEventListener('refreshInit', fit);
-      // Desktop (mouse): kartu "aktif" = tampilan hover, berpindah 1 → 2 → 3 → CTA
-      // mengikuti geseran — titik fokus bergerak dari tengah kartu pertama ke tengah
-      // kartu terakhir seiring progres geser. Hover ke kartu lain mengambil alih.
-      const desk = matchMedia('(hover: hover) and (pointer: fine)').matches;
-      let hovered = null, scrollIdx = -1;
+      // Kartu "aktif" (border lime + ikon miring; desktop & layar sentuh) berpindah
+      // 1 → 2 → 3 → CTA mengikuti geseran — titik fokus bergerak dari tengah kartu
+      // pertama ke tengah kartu terakhir seiring progres geser.
+      let scrollIdx = -1;
       const setActive = (el) => [...track.children].forEach((c) => c.classList.toggle('is-active', c === el));
       const syncActive = () => {
-        if (!desk || hovered) return;
         const cs = [...track.children];
         if (!cs.length || !dist()) { scrollIdx = -1; return setActive(null); }
         const p = gsap.utils.clamp(0, 1, -gsap.getProperty(track, 'x') / dist());
@@ -118,9 +116,6 @@ export const scrollAnims = () => {
         cs.forEach((c, i) => { if (Math.abs(mid(c) - focus) < Math.abs(mid(cs[best]) - focus)) best = i; });
         if (best !== scrollIdx) { scrollIdx = best; setActive(cs[best]); }
       };
-      const onOver = (e) => { const c = e.target.closest('.lcard'); if (c && c !== hovered) { hovered = c; setActive(c); } };
-      const onLeave = () => { hovered = null; scrollIdx = -1; syncActive(); };
-      if (desk) { track.addEventListener('mouseover', onOver); track.addEventListener('mouseleave', onLeave); }
       // petunjuk scroll HP: tetap tampil sampai kartu terakhir masuk layar,
       // memudar di seperempat jarak satu kartu terakhir sebelum track mentok
       const hint = $('.layanan__scroll');
@@ -137,9 +132,6 @@ export const scrollAnims = () => {
           trigger: '.layanan__pin', start: 'top top',
           end: () => `+=${dist() ? dist() * 1.76 + innerHeight * .3 : 1}`,
           pin: true, pinType: 'fixed', scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
-          // layar sentuh: kartu CTA "aktif" (= tampilan hover) saat track sudah mentok di ujung kanan
-          onUpdate: (self) => { const c = $('.lcard--cta'); if (c && !desk) c.classList.toggle('is-active', self.progress > .74); },
-          onLeaveBack: () => { const c = $('.lcard--cta'); if (c && !desk) c.classList.remove('is-active'); },
         },
       })
         .to({}, { duration: .3 }) // jeda di kartu pertama sebelum mulai bergeser
@@ -149,7 +141,6 @@ export const scrollAnims = () => {
       syncActive();
       return () => {
         ScrollTrigger.removeEventListener('refreshInit', fit);
-        track.removeEventListener('mouseover', onOver); track.removeEventListener('mouseleave', onLeave);
         track.classList.remove('layanan__track--fit'); setActive(null);
       };
     };
