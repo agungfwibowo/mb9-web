@@ -18,7 +18,6 @@ import './asatidz.js';
 import './tenant.js';
 import './marquee.js';
 import './denah.js';
-import './kiblat.js';
 import './countdown.js';
 import './menu.js';
 import './lenis.js';
