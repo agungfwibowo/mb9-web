@@ -43,6 +43,8 @@
    pun skala peta. --kr = jari-jari cincin.
    Cincin skala 360°: garis kecil tiap 5°, garis besar tiap 30° — dua
    repeating-conic-gradient yang di-mask jadi pita tipis di tepi lingkaran.
+   Mata angin U/T/S/B di dalam cincin; U lebih besar dengan segitiga di
+   antara garis utara dan hurufnya.
    Ka'bah duduk di cincin pada sudut kiblat: --kr × (sin, −cos) 292,8°, dengan
    latar warna daratan yang memudar (menutup peta di belakangnya). */
 .peta__pin { --kr: 120px; }
@@ -51,8 +53,13 @@
 .peta__ring::before { background: repeating-conic-gradient(from -.4deg, rgba(43, 43, 43, .55) 0 .8deg, transparent .8deg 5deg);
   -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 7px)); mask: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 7px)); }
 .peta__ring::after { background: repeating-conic-gradient(from -.75deg, var(--ink) 0 1.5deg, transparent 1.5deg 30deg);
-  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 14px), #000 calc(100% - 14px)); mask: radial-gradient(closest-side, transparent calc(100% - 14px), #000 calc(100% - 14px)); }
-.peta__ring b { position: absolute; left: 50%; top: 16px; translate: -50% 0; font-size: 10px; font-weight: 700; color: var(--ink); }
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 10px), #000 calc(100% - 10px)); mask: radial-gradient(closest-side, transparent calc(100% - 10px), #000 calc(100% - 10px)); }
+.peta__ring b { position: absolute; font-size: 10px; font-weight: 700; line-height: 1; color: var(--ink); }
+.peta__ring .u { left: 50%; top: 24px; translate: -50% 0; font-size: 14px; }
+.peta__ring .u::before { content: ''; position: absolute; left: 50%; bottom: calc(100% + 2px); translate: -50% 0; border: 0 solid transparent; border-width: 0 4px 8px; border-bottom-color: var(--ink); }
+.peta__ring .t { right: 15px; top: 50%; translate: 0 -50%; }
+.peta__ring .s { left: 50%; bottom: 15px; translate: -50% 0; }
+.peta__ring .b { left: 15px; top: 50%; translate: 0 -50%; z-index: 1; } /* di atas latar pudar Ka'bah */
 /* garis putus-putus pin → Ka'bah (berhenti sebelum ikon) */
 .peta__kiblat { position: absolute; left: 0; top: 0; width: calc(var(--kr) - 22px); height: 0; border-top: 2px dashed var(--ink); transform-origin: 0 0; rotate: 202.8deg; }
 .peta__kaaba { position: absolute; left: calc(var(--kr) * -.9219); top: calc(var(--kr) * -.3875); width: 0; height: 0; }
