@@ -16,11 +16,61 @@
 .peta__road--main { font-weight: 700; fill: var(--ink); }
 /* pin: kotak lime berdenyut + label nama tempat */
 .peta__pin { position: absolute; left: calc(1500px * var(--k)); top: calc(500px * var(--k)); width: 0; height: 0; }
-.peta__pin i { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; background: var(--lime); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
-.peta__pin i::after { content: ''; position: absolute; inset: -9px; border: 2px solid var(--ink); opacity: 0; animation: peta-pulse 2s ease-out infinite; }
+.peta__pin > i { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; background: var(--lime); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.peta__pin > i::after { content: ''; position: absolute; inset: -9px; border: 2px solid var(--ink); opacity: 0; animation: peta-pulse 2s ease-out infinite; }
 @keyframes peta-pulse { from { transform: scale(.6); opacity: .7; } to { transform: scale(1.6); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .peta__pin i::after { animation: none; } }
-.peta__pin b { position: absolute; left: 18px; top: -12px; white-space: nowrap; padding: 4px 8px; background: var(--ink); color: var(--lime); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+@media (prefers-reduced-motion: reduce) { .peta__pin > i::after { animation: none; } }
+.peta__pin > b { position: absolute; left: 18px; top: -12px; white-space: nowrap; padding: 4px 8px; background: var(--ink); color: var(--lime); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+/* kompas di pojok kanan atas (tak tertutup kartu lokasi di desktop maupun HP):
+   jarum utara hitam pekat, selatan bergaris, garis lime = kiblat (292,8°).
+   Mode hidup (kiblat.js): dial diputar --rot mengikuti arah HP; segitiga di
+   atas = arah depan HP; lurus ke kiblat → kotak jadi lime. */
+/* dial di kiri, tombol & pesan di kanan → kotak tetap pendek, tidak menutupi
+   label pin di peta HP yang hanya 300px */
+.peta__compass { position: absolute; right: 12px; top: 12px; z-index: 1; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-items: center; justify-items: start; column-gap: 8px; row-gap: 4px; padding: 8px; background: var(--white); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); transition: background .3s; }
+.peta__dial { grid-row: 1 / span 2; position: relative; display: block; width: 52px; height: 52px; }
+.peta__kbtn[hidden] + .peta__kmsg:empty, .peta__kbtn[hidden] { display: none; }
+.peta__dial svg { width: 100%; height: 100%; display: block; rotate: var(--rot, 0deg); }
+.peta__compass .ring { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 2 3.76; }
+.peta__compass .u { font: 700 8px var(--mono); fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+.peta__compass .n { fill: var(--ink); }
+.peta__compass .s { fill: var(--white); stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+/* garis kiblat: lime berkontur hitam (dua garis bertumpuk) + Ka'bah di ujungnya */
+.peta__compass .qo, .peta__compass .q { fill: none; stroke-linecap: round; }
+.peta__compass .qo { stroke: var(--ink); stroke-width: 5; }
+.peta__compass .q { stroke: var(--lime); stroke-width: 2.4; }
+.peta__compass .qk { fill: var(--ink); stroke: #c9a227; stroke-width: 1.2; }
+.peta__compass .dot { fill: var(--lime); stroke: var(--ink); stroke-width: 1.2; }
+.peta__compass.is-live .peta__dial::before { content: ''; position: absolute; left: 50%; top: -7px; translate: -50% 0; border: 5px solid transparent; border-top-color: var(--ink); border-bottom: 0; }
+.peta__compass.is-aligned { background: var(--lime); }
+.peta__kbtn { padding: 5px 7px; background: var(--ink); color: var(--lime); border: 0; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.peta__kbtn[aria-pressed="true"] { background: var(--white); color: var(--ink); outline: 2px solid var(--ink); outline-offset: -2px; }
+.peta__kmsg { align-self: start; max-width: 112px; font-size: 10px; line-height: 1.3; text-align: left; color: var(--ink); }
+.peta__kmsg:empty { display: none; }
+/* Arah kiblat dari pin (292,8° dari utara). Ukuran dalam px layar, berapa
+   pun skala peta. --kr = jari-jari cincin.
+   Cincin skala 360°: garis kecil tiap 5°, garis besar tiap 30° — dua
+   repeating-conic-gradient yang di-mask jadi pita tipis di tepi lingkaran.
+   Ka'bah duduk di cincin pada sudut kiblat: --kr × (sin, −cos) 292,8°, dengan
+   latar warna daratan yang memudar (menutup peta di belakangnya). */
+.peta__pin { --kr: 120px; }
+.peta__ring { position: absolute; left: calc(var(--kr) * -1); top: calc(var(--kr) * -1); width: calc(var(--kr) * 2); height: calc(var(--kr) * 2); border-radius: 50%; pointer-events: none; }
+.peta__ring::before, .peta__ring::after { content: ''; position: absolute; inset: 0; border-radius: 50%; }
+.peta__ring::before { background: repeating-conic-gradient(from -.4deg, rgba(43, 43, 43, .55) 0 .8deg, transparent .8deg 5deg);
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 7px)); mask: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 7px)); }
+.peta__ring::after { background: repeating-conic-gradient(from -.75deg, var(--ink) 0 1.5deg, transparent 1.5deg 30deg);
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 14px), #000 calc(100% - 14px)); mask: radial-gradient(closest-side, transparent calc(100% - 14px), #000 calc(100% - 14px)); }
+.peta__ring b { position: absolute; left: 50%; top: 16px; translate: -50% 0; font-size: 10px; font-weight: 700; color: var(--ink); }
+/* garis putus-putus pin → Ka'bah (berhenti sebelum ikon) */
+.peta__kiblat { position: absolute; left: 0; top: 0; width: calc(var(--kr) - 22px); height: 0; border-top: 2px dashed var(--ink); transform-origin: 0 0; rotate: 202.8deg; }
+.peta__kaaba { position: absolute; left: calc(var(--kr) * -.9219); top: calc(var(--kr) * -.3875); width: 0; height: 0; }
+.peta__kaaba::before { content: ''; position: absolute; left: -60px; top: -56px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(closest-side, #e7e6e2 52%, rgba(231, 230, 226, .9) 66%, rgba(231, 230, 226, .5) 82%, rgba(231, 230, 226, 0)); }
+.peta__kaaba svg { position: absolute; left: -16px; top: -17px; width: 32px; height: 32px; display: block; }
+.peta__kaaba .kl { fill: #1c1c1c; }
+.peta__kaaba .kr { fill: var(--ink); }
+.peta__kaaba .kt { fill: #4a4a4a; }
+.peta__kaaba .kg { fill: #c9a227; }
+.peta__kaaba b { position: absolute; left: 0; top: 18px; translate: -50% 0; white-space: nowrap; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
 /* atribusi wajib data OpenStreetMap (ODbL) */
 .peta__osm { position: absolute; right: 8px; bottom: 8px; z-index: 1; padding: 2px 6px; background: rgba(255, 255, 255, .85); color: var(--ink-3); font-size: 10.5px; text-decoration: none; }
 .peta__osm:hover { color: var(--ink); text-decoration: underline; }
