@@ -112,12 +112,19 @@ const sortAsatidz = (st, today) => {
     .map((x) => x.card);
   const now = [...agrid.children].filter((c) => c.classList.contains('ustadz'));
   if (sorted.every((c, i) => c === now[i])) return;
+  const keep = agrid.scrollLeft;
   sorted.forEach((c) => agrid.appendChild(c));
   queueFront(); // urutan berubah → kartu depan diukur ulang
-  // kartu terdepan terlihat — tapi jangan ganggu yang sedang menggeser deretan
+  // kartu terdepan terlihat — tapi jangan ganggu yang sedang menggeser deretan.
+  // Memindah kartu ikut menggeser deretan (Chrome: mengikuti kartu yang
+  // dipindah ke belakang) → posisi lama dipasang lagi. Pengurutan pertama
+  // (saat muat) selalu dari kartu terdepan: setelah reload di section ini
+  // deretan dulu mendarat di ujung kanan (kartu "Selesai").
   const r = agrid.getBoundingClientRect();
-  if (r.bottom < 0 || r.top > innerHeight) agrid.scrollLeft = 0;
+  agrid.scrollLeft = !sortedOnce || r.bottom < 0 || r.top > innerHeight ? 0 : keep;
+  sortedOnce = true;
 };
+let sortedOnce = false;
 // klik badge → pilih tab hari itu dulu (gulir ke #jadwal oleh handler anchor
 // umum), lalu acara ustadz itu berkedip di tampilan yang sedang terbuka:
 // Tabel → barisnya; Durasi → kartunya (baris kartu digeser ke sana dulu).
@@ -437,6 +444,43 @@ const centerSnap = () => {
 centerSnap();
 addEventListener('resize', centerSnap);
 addEventListener('load', centerSnap);
+// Tinggi section = tinggi layar nyata (innerHeight), angka yang sama dengan
+// yang dipakai snap (lenis.js). 100svh saja tidak cukup: di HP saat bilah
+// alamat tersembunyi layar lebih tinggi dari svh → section tak memenuhi layar
+// dan section berikutnya mengintip di bawah. Diukur ulang saat resize, bilah
+// alamat muncul/hilang, dan rotasi. Isinya tetap berukuran svh (pasti muat).
+const asec = $('#asatidz');
+if (asec) {
+  let lastW = innerWidth, t = 0;
+  const fitH = () => {
+    const h = `${innerHeight}px`;
+    if (asec.style.getPropertyValue('--ast-h') === h) return;
+    // section sudah (sebagian) di atas layar → isi di bawahnya ikut bergeser;
+    // gulir dikoreksi sebesar pergeseran nyata (Chrome kadang sudah
+    // mengoreksinya sendiri lewat scroll anchoring → selisihnya 0)
+    const next = asec.nextElementSibling;
+    const above = asec.getBoundingClientRect().top < 0;
+    const before = next ? next.getBoundingClientRect().top : 0;
+    asec.style.setProperty('--ast-h', h);
+    const shift = next ? next.getBoundingClientRect().top - before : 0;
+    if (above && shift) {
+      const y = scrollY + shift;
+      if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
+    }
+    if (hasGsap) ScrollTrigger.refresh();
+  };
+  fitH();
+  const queueFit = () => {
+    clearTimeout(t);
+    // lebar berubah = rotasi/ubah ukuran jendela → segera (+ ulang: iOS
+    // melaporkan innerHeight final sedikit terlambat setelah rotasi);
+    // hanya tinggi = bilah alamat → tunggu sampai tenang
+    if (innerWidth !== lastW) { lastW = innerWidth; requestAnimationFrame(fitH); t = setTimeout(fitH, 350); }
+    else t = setTimeout(fitH, 200);
+  };
+  addEventListener('resize', queueFit);
+  addEventListener('orientationchange', () => setTimeout(fitH, 350));
+}
 // Nama asatidz di jadwal → gulir ke section Asatidz, deretan kartunya digeser
 // sampai kartu itu di tengah, lalu kartunya berkedip.
 const goToUstadz = (id) => {
