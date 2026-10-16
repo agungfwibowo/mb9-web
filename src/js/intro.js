@@ -1,5 +1,5 @@
 import { $, $$, hasGsap, reduced, root } from './core.js';
-import { track } from './konten.js';
+import { peekTop, track } from './konten.js';
 import { asatidzEntered, pinSwipe } from './asatidz.js';
 import { scramble } from './teks.js';
 
@@ -153,9 +153,16 @@ export const scrollAnims = () => {
       const cs = [...track.children], n = cs.length;
       lsec.classList.add('layanan--stack');
       const hint = $('.layanan__scroll');
-      const front = () => { // kartu terdepan = yang terakhir sudah naik ≥ separuh jalan
+      // Kartu berikutnya menunggu di posisi intip (tepi atasnya = peekTop, lihat
+      // konten.js), sedikit mengecil; kartu sesudahnya menunggu di bawah layar.
+      // Tiap langkah: kartu intip naik jadi kartu depan, kartu sesudahnya naik ke posisi intip.
+      const pin = $('.layanan__pin'), PS = .92;
+      const peekY = () => peekTop(pin) - track.offsetTop - track.offsetHeight * (1 - PS) / 2; // scale dari tengah
+      const offY = () => pin.clientHeight - track.offsetTop + 20;
+      const front = () => { // kartu terdepan = yang terakhir sudah naik ≥ separuh jalan dari posisi intip
         let f = 0;
-        cs.forEach((c, i) => { if (i && gsap.getProperty(c, 'y') < innerHeight * .45) f = i; });
+        const half = peekY() / 2;
+        cs.forEach((c, i) => { if (i && gsap.getProperty(c, 'y') < half) f = i; });
         return f;
       };
       let cur = -1, dir = 1; // dir: arah gulir terakhir oleh pengguna (1 turun, -1 naik)
@@ -195,8 +202,11 @@ export const scrollAnims = () => {
       }).addLabel('c0', 0).to({}, { duration: .3 }); // jeda di kartu pertama
       for (let j = 1; j < n; j++) {
         const at = tl.duration();
-        // kartu masuk: solid (tidak transparan — kartu belakang tidak boleh tembus), kecil → penuh
-        tl.fromTo(cs[j], { y: () => innerHeight * .9, scale: .88 }, { y: 0, scale: 1, ease: 'power2.out', duration: 1 }, at);
+        // kartu masuk: solid (tidak transparan — kartu belakang tidak boleh tembus), intip → penuh
+        // (tween pertama tiap kartu dirender segera → posisi awalnya terpasang sebelum gulir)
+        tl.fromTo(cs[j], { y: peekY, scale: PS }, { y: 0, scale: 1, ease: 'power2.out', duration: 1, immediateRender: j === 1 }, at);
+        // kartu sesudahnya naik dari bawah layar ke posisi intip
+        if (cs[j + 1]) tl.fromTo(cs[j + 1], { y: offY, scale: PS }, { y: peekY, scale: PS, ease: 'power2.out', duration: 1 }, at);
         // kartu sebelumnya mengecil & memudar sampai hilang di belakangnya
         tl.to(cs[j - 1], { scale: .9, autoAlpha: 0, ease: 'power1.inOut', duration: 1 }, at);
         tl.addLabel(`c${j}`, at + 1);

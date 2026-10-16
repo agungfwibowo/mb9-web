@@ -88,13 +88,22 @@ $$('.lqip').forEach((box) => {
 // layar — menempel di bawah kartu terlalu tinggi di layar panjang, menempel di
 // dasar layar terlalu rendah (bisa tertutup bilah browser). Dihitung ulang tiap
 // kali section/kartu berubah ukuran (layar, font, label "Buka" yang diperbarui).
+// Mode tumpukan (HP): kartu berikutnya mengintip di dasar section — tepi
+// atasnya ±44px di atas dasar, tapi tidak pernah lebih dekat dari 12px ke
+// bawah kartu depan, jadi kartu depan selalu tampil utuh (di layar pendek
+// intipannya mengecil sendiri). Dipakai intro.js (posisi kartu) & petunjuk
+// SCROLL di bawah (diletakkan di tengah ruang antara kartu & intipan).
+export const PEEK = 44;
+export const peekTop = (pin) => Math.max(track.offsetTop + track.offsetHeight + 12, pin.clientHeight - PEEK);
 const lhint = $('.layanan__scroll');
 if (lhint && 'ResizeObserver' in window) {
   const pin = lhint.parentElement;
   const place = () => {
     if (getComputedStyle(lhint).display === 'none') return;
     const below = track.offsetTop + track.offsetHeight; // offsetParent = pin (relative)
-    const gap = pin.clientHeight - below;
+    const gap = (pin.closest('.layanan--stack') ? peekTop(pin) : pin.clientHeight) - below;
+    // layar pendek: ruang antara kartu & intipan tak cukup → petunjuk disembunyikan (intipan sudah jadi petunjuknya)
+    lhint.classList.toggle('is-tight', gap < lhint.offsetHeight + 8);
     lhint.style.top = `${Math.round(below + Math.max(4, (gap - lhint.offsetHeight) / 2))}px`;
   };
   new ResizeObserver(place).observe(pin);
