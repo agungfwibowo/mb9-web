@@ -122,6 +122,7 @@
      Cadangan tanpa JS: menempel di dasar. Gaya meniru .hero__scroll */
   .layanan__scroll { position: absolute; left: 50%; bottom: 1.2vh; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--grey-2); }
   .layanan__scroll[style*="top"] { bottom: auto; }
+  .layanan__scroll.is-tight { opacity: 0 !important; } /* menang atas autoAlpha GSAP (inline) */
   .layanan__scroll i { width: 2px; height: 20px; background: rgba(255, 255, 255, .2); position: relative; overflow: hidden; }
   .layanan__scroll i::after { content: ''; position: absolute; inset: 0; background: var(--lime); animation: scrollline 1.8s var(--ease) infinite; }
   .layanan__head .title { font-size: clamp(24px, min(7vw, 4.4vh), 34px); }
