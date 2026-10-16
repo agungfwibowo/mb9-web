@@ -129,10 +129,26 @@ if (!reduced && finePointer && lenis) {
   // sentuhan (scroll anchoring saat gambar/konten termuat, address bar HP
   // menyusut, ScrollTrigger.refresh) dulu ikut memicu snap → halaman yang
   // didiamkan di ekor Denah tiba-tiba meluncur ke Tenant.
-  let touching = false, armed = false, lastY = scrollY, idleT = 0;
-  const later = () => { clearTimeout(idleT); idleT = setTimeout(() => { if (!touching && armed) { armed = false; snapHero(scrollY); } }, 140); };
+  // Sentuhan saja belum cukup: ketukan, geser peta Leaflet, atau sentuhan saat
+  // kembali dari aplikasi lain juga memicu touchstart/touchend tanpa halaman
+  // bergeser — dulu tetap memanggil snap dengan arah sisa guliran sebelumnya,
+  // sehingga dari ekor Denah halaman melompat ke Tenant. Kini halaman harus
+  // benar-benar bergeser ≥12px sejak jari menyentuh, dan arah snap diambil
+  // dari total geseran itu (bukan delta event scroll terakhir).
+  let touching = false, armed = false, startY = scrollY, lastY = scrollY, idleT = 0;
+  const later = () => {
+    clearTimeout(idleT);
+    idleT = setTimeout(() => {
+      if (touching || !armed) return;
+      armed = false;
+      const moved = scrollY - startY;
+      if (Math.abs(moved) < 12) return;
+      snapDir = Math.sign(moved);
+      snapHero(scrollY);
+    }, 140);
+  };
   addEventListener('touchstart', () => {
-    touching = true; armed = true;
+    touching = true; armed = true; startY = scrollY;
     clearTimeout(idleT);
     if (snapping) { snapping = false; if (lenis) lenis.scrollTo(scrollY, { immediate: true, force: true }); }
   }, { passive: true });
