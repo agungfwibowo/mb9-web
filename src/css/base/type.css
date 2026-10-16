@@ -10,6 +10,7 @@
 .title { font-family: var(--mono); font-weight: 700; font-size: clamp(30px, 5vw, 60px); letter-spacing: -.02em; text-transform: uppercase; color: var(--ink); }
 .title--light { color: var(--white); }
 .notch { display: inline; background: var(--ink); color: var(--white); padding: .06em .3em; box-decoration-break: clone; -webkit-box-decoration-break: clone; line-height: 1.35; }
+.notch--lime { background: var(--lime); color: var(--ink); }
 .hl-block { display: inline; background: var(--lime); color: var(--ink); padding: 0 .25em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .sec-head { margin-bottom: clamp(36px, 5vw, 64px); max-width: 880px; }
 .sec-head--center { margin-inline: auto; text-align: center; }
