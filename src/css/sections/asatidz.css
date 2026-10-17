@@ -41,8 +41,8 @@
 .asatidz__grid.will-in > .ustadz { opacity: 0; translate: 0 80px; }
 .asatidz__grid.will-in.is-in > .ustadz {
   opacity: 1; translate: 0 0;
-  transition: opacity .9s cubic-bezier(.215, .61, .355, 1), translate .9s cubic-bezier(.215, .61, .355, 1), scale .35s var(--ease);
-  transition-delay: calc(var(--i, 0) * .1s), calc(var(--i, 0) * .1s), 0s;
+  transition: opacity .9s cubic-bezier(.215, .61, .355, 1), translate .9s cubic-bezier(.215, .61, .355, 1), scale .35s var(--ease), transform-origin .35s var(--ease);
+  transition-delay: calc(var(--i, 0) * .1s), calc(var(--i, 0) * .1s), 0s, 0s;
 }
 .ustadz { position: relative; aspect-ratio: 1; background: var(--paper); border: 2px solid transparent; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
 /* bingkai transparan (lebar tetap → kartu tak bergeser saat live), berwarna

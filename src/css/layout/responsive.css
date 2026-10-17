@@ -166,7 +166,7 @@
      sendiri tanpa henti. Pelabuhan sepenuhnya oleh asatidz.js (seret/lontaran,
      panah, settle saat gulir berhenti) dari offsetLeft yang kebal scale. */
   .asatidz__grid { scroll-snap-type: none; }
-  .asatidz__grid > .ustadz { scale: .86; transform-origin: 100% 100%; transition: scale .35s var(--ease); scroll-snap-align: end; }
+  .asatidz__grid > .ustadz { scale: .86; transform-origin: 100% 100%; transition: scale .35s var(--ease), transform-origin .35s var(--ease); scroll-snap-align: end; }
   .asatidz__grid > .ustadz.is-front { scale: 1; }
   .asatidz__grid > .ustadz.is-front ~ .ustadz { transform-origin: 0 100%; scroll-snap-align: start; } /* HP: ukuran tetap, digeser */
   .ustadz__body { padding: 12px; min-height: 73px; }
