@@ -1,4 +1,4 @@
-import { $, $$, BULAN, D, esc, lenis, reduced, root, stripIndex } from './core.js';
+import { $, $$, BULAN, D, esc, lenis, logoTone, reduced, root, stripIndex } from './core.js';
 
 /* ---------------------------------------------------------
    MENU BAGIKAN — dropdown berisi QR (logo di tengah) di atas, lalu
@@ -43,7 +43,10 @@ const drawQR = async (canvas, px, url, logo) => {
   const img = logo && logo.src && await fetchImg(logo.src);
   if (img) {
     const box = px * .22, x = (px - box) / 2, pad = box * .1;
-    c.fillStyle = logo.dark ? '#2b2b2b' : '#fff';
+    // latar kotak logo tenant = latar kartunya di daftar brand (logoTone);
+    // logo MB9 tetap putih
+    const tone = logo.dark ? 'var(--ink)' : logo === MB9_LOGO ? '' : logoTone(img);
+    c.fillStyle = tone === 'var(--ink)' ? '#2b2b2b' : tone || '#fff';
     c.fillRect(x, x, box, box);
     c.strokeStyle = '#2b2b2b'; c.lineWidth = Math.max(2, px * .006);
     c.strokeRect(x, x, box, box);
