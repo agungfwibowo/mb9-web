@@ -1,4 +1,4 @@
-import { $, $$, D, esc, hasGsap, lenis, reduced, root, stripIndex } from './core.js';
+import { $, $$, D, esc, hasGsap, lenis, logoTone, reduced, root, stripIndex } from './core.js';
 import { lockNav } from './navbar.js';
 import { MB9_LOGO, shareMenu } from './bagikan.js';
 import { JICONS, dayLabel, fmtMin, iconKey, openDayAt, tendaNos, toMin, wibNow } from './jadwal.js';
@@ -178,6 +178,17 @@ const fillTip = (g) => {
   tip.innerHTML = (who
     ? `${mark}<span class="booth-tip__txt"><small>${esc(meta)}</small><b>${esc(who)}</b>${hoursOf(ss)}${linkOf(g)}</span>`
     : esc(meta)) + x;
+  // latar kotak logo = latar kartunya di daftar brand (logoTone); bingkai ikut
+  // warnanya bila tidak putih (sama seperti .is-dark)
+  const img = $('.booth-tip__logo:not(.is-dark) img', tip);
+  if (img) {
+    const fit = () => {
+      const tone = img.naturalWidth ? logoTone(img) : '';
+      img.parentElement.style.backgroundColor = tone;
+      img.parentElement.style.borderColor = tone;
+    };
+    if (img.complete) fit(); else img.addEventListener('load', fit, { once: true });
+  }
 };
 // Koordinat layar (clientX/Y). Kartu di atas titik `top`; kalau ruang di
 // atasnya (sampai tepi layar) tidak cukup, dibalik ke bawah titik `bottom`.
