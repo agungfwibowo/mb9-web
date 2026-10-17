@@ -53,6 +53,8 @@ const heroEl = $('#home');
 const heroFits = () => !!heroEl && heroEl.offsetHeight <= innerHeight + 2;
 const easeSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
 let snapping = false, snapDir = 0;
+// posisi awal guliran jari (layar sentuh; null = roda/trackpad), lihat `exit`
+let fromY = null;
 // Section lain yang muat satu layar (kini hanya Asatidz): bila sudah masuk
 // ≥25% layar menurut arah gulir, halaman meluncur sampai atas section = atas
 // layar (section tampil utuh). Kurang dari itu, atau sudah melewatinya, gulir bebas.
@@ -80,6 +82,10 @@ const sectionTo = (y) => {
     }
     if (exit) {
       const b = el.getBoundingClientRect().bottom + scrollY, a = b - vh;
+      // naik dari section di bawahnya (mis. dari peta Lokasi/Tenant) dan
+      // berhenti saat ekor section ini terlihat → jangan ditarik masuk;
+      // ekor hanya dilabuhkan bila gulirannya dimulai dari dalam zona
+      if (snapDir < 0 && fromY != null && fromY >= b - 2) continue;
       if (y > a + 2 && y < b - 2) return snapDir > 0 ? (y - a > vh * 0.25 ? b : a) : (y - a < vh * 0.75 ? a : b);
       continue;
     }
@@ -144,7 +150,9 @@ if (!reduced && finePointer && lenis) {
       const moved = scrollY - startY;
       if (Math.abs(moved) < 12) return;
       snapDir = Math.sign(moved);
+      fromY = startY;
       snapHero(scrollY);
+      fromY = null;
     }, 140);
   };
   addEventListener('touchstart', () => {
