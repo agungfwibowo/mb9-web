@@ -412,7 +412,7 @@ export const realignAsatidz = (i) => {
 // animasi dan kartu pertama tampak menempel di tepi kiri.
 if (!entered) agrid.style.scrollSnapType = 'none';
 export const asatidzEntered = () => { entered = true; realignAsatidz(); };
-// Jarak sisi deretan (--ast-pad) agar kartu yang muat penuh (1/2/3…) berada tepat
+// Jarak sisi deretan (--ast-pad) agar kartu yang muat penuh (hanya bila 1) berada tepat
 // di tengah layar saat berlabuh. Hanya bila deretan meluber; kalau semua muat,
 // kartu sudah rata tengah lewat margin auto. Lebar kartu & deretan tidak
 // bergantung pada padding, jadi dihitung tanpa melepas --ast-pad: dulu
@@ -430,7 +430,11 @@ const centerSnap = () => {
   const gutter = parseFloat(getComputedStyle($('.asatidz .container') || root).paddingLeft) || 16;
   const overflow = cards.length * step - gap + 2 * gutter > W;
   const k = Math.max(1, Math.floor((W - 32 + gap) / step)); // sisakan ≥16px tiap sisi
-  const pad = overflow ? `${Math.round((W - (k * step - gap)) / 2)}px` : '';
+  // hanya bila yang muat penuh cuma 1 kartu; 2+ → rata kiri seperti Layanan
+  // (--track-pad): di tengah antara gutter dan tepi kiri judul (.container)
+  const maxw = parseFloat(getComputedStyle(root).getPropertyValue('--maxw')) || 1280;
+  const edge = Math.max(gutter, (W - maxw) / 4 + gutter);
+  const pad = !overflow ? '' : `${Math.round(k === 1 ? (W - cw) / 2 : edge)}px`;
   if (agrid.style.getPropertyValue('--ast-pad') === pad) return; // tak berubah → jangan sentuh
   // Padding berubah → Chrome melabuhkan ulang deretan sendiri ke posisi yang
   // salah (kartu pertama menempel di tepi). Maka snap dimatikan sebentar,

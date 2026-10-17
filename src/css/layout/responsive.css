@@ -160,6 +160,12 @@
      dengan start biasa. Dulu semua start: geser balik ke kartu kiri (masih
      .86, tumpu kanan → tepi kirinya +14% lebar) berlabuh ~40px kelewat dan
      kartu pertama menempel di tepi layar. */
+  /* Snap browser dimatikan di mode ini: titik labuhnya ikut berubah tiap
+     .is-front pindah (scale & end/start), sedangkan .is-front ditentukan posisi
+     gulir → labuh, kartu depan berganti, labuh ulang… deretan bolak-balik
+     sendiri tanpa henti. Pelabuhan sepenuhnya oleh asatidz.js (seret/lontaran,
+     panah, settle saat gulir berhenti) dari offsetLeft yang kebal scale. */
+  .asatidz__grid { scroll-snap-type: none; }
   .asatidz__grid > .ustadz { scale: .86; transform-origin: 100% 100%; transition: scale .35s var(--ease); scroll-snap-align: end; }
   .asatidz__grid > .ustadz.is-front { scale: 1; }
   .asatidz__grid > .ustadz.is-front ~ .ustadz { transform-origin: 0 100%; scroll-snap-align: start; } /* HP: ukuran tetap, digeser */
