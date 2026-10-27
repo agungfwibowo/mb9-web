@@ -18,7 +18,7 @@ body > * { pointer-events: auto; }
 .footer::after {
   content: ''; position: absolute; inset: -60px; z-index: 2; pointer-events: none; opacity: 0;
   background-color: var(--ink);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.3' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 .footer.is-noise::after { opacity: calc(var(--fn) * .9); animation: foot-static .32s steps(1, end) infinite; }
 /* lompatan kecil & cepat dengan urutan tak berpola → terbaca sebagai semut TV
