@@ -63,7 +63,7 @@
 /* garis putus-putus pin → Ka'bah (berhenti sebelum ikon) */
 .peta__kiblat { position: absolute; left: 0; top: 0; width: calc(var(--kr) - 22px); height: 0; border-top: 2px dashed var(--ink); transform-origin: 0 0; rotate: 202.8deg; }
 .peta__kaaba { position: absolute; left: calc(var(--kr) * -.9219); top: calc(var(--kr) * -.3875); width: 0; height: 0; }
-.peta__kaaba::before { content: ''; position: absolute; left: -60px; top: -56px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(closest-side, #e7e6e2 52%, rgba(231, 230, 226, .9) 66%, rgba(231, 230, 226, .5) 82%, rgba(231, 230, 226, 0)); }
+.peta__kaaba::before { content: ''; position: absolute; left: -50px; top: -46px; width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(closest-side, #e7e6e2 52%, rgba(231, 230, 226, .9) 66%, rgba(231, 230, 226, .5) 82%, rgba(231, 230, 226, 0)); }
 .peta__kaaba svg { position: absolute; left: -16px; top: -17px; width: 32px; height: 32px; display: block; }
 .peta__kaaba .kl { fill: #1c1c1c; }
 .peta__kaaba .kr { fill: var(--ink); }
