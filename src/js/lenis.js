@@ -68,12 +68,16 @@ let fromY = null;
 // atas section = atas layar. mobile: aturan hanya berlaku di HP (≤860px) —
 // ekor Penyelenggara → footer.
 const isMobile = matchMedia('(max-width: 860px)');
+const tabletTouch = () => !finePointer && !isMobile.matches;
 const snapEls = [['#tentang', false, true], ['#layanan', false, true], ['#asatidz', true], ['#denah', false, true], ['#sponsor', false, false, true], ['#sponsor', false, true, false, true]]
   .map(([s, both, exit, enter, mobile]) => ({ el: $(s), both, exit, enter, mobile })).filter((x) => x.el);
 const sectionTo = (y) => {
   const vh = innerHeight;
   for (const { el, both, exit, enter, mobile } of snapEls) {
     if (mobile && !isMobile.matches) continue;
+    // tablet sentuh (iPad dkk., >860px): section tinggi tidak dilabuhkan —
+    // dorongan jari biasa sudah melewati ambang 25% layar, terasa memaksa
+    if ((exit || enter) && tabletTouch()) continue;
     const h = el.offsetHeight;
     if (enter) {
       const t = el.getBoundingClientRect().top + scrollY, a = t - vh;
