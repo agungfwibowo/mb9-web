@@ -1,4 +1,4 @@
-import { $, $$, BULAN, D, esc, lenis, logoTone, reduced, root, stripIndex } from './core.js';
+import { $, $$, BULAN, D, esc, lenis, logoTone, off, reduced, root, stripIndex } from './core.js';
 
 /* ---------------------------------------------------------
    MENU BAGIKAN — dropdown berisi QR (logo di tengah) di atas, lalu
@@ -174,7 +174,8 @@ const drawPoster = async (url) => {
   c.font = mono(70); c.fillStyle = INK; c.textBaseline = 'alphabetic';
   spaced('PINDAI', rx, qy + 430, 6); spaced('UNTUK', rx, qy + 520, 6); spaced('INFO:', rx, qy + 610, 6);
   const nT = (D.tenants || []).length;
-  const items = ['Jadwal 5 hari', 'Denah tenda', nT ? `${nT} tenant bazar` : 'Tenant bazar', 'Layanan gratis'];
+  // fitur yang disembunyikan (D.sembunyi) tidak dijanjikan di poster
+  const items = [!off.has('jadwal') && `Jadwal ${D.days.length} hari`, 'Denah tenda', !off.has('brand') && (nT ? `${nT} tenant bazar` : 'Tenant bazar'), 'Layanan gratis', off.has('jadwal') && off.has('brand') && 'Lokasi & rute'].filter(Boolean);
   c.font = sans(52, 700);
   items.forEach((t, i) => {
     const iy = qy + 690 + i * 82;

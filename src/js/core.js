@@ -13,6 +13,40 @@ export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', 
 // tautan yang dibagikan tidak perlu menampilkan "index.html" — cukup domain/path
 export const stripIndex = (p) => p.replace(/\/index\.html$/, '/');
 
+// Fitur yang disembunyikan sementara (D.sembunyi di data-prod.js). Datanya
+// dikosongkan di sini — sebelum modul lain membaca — supaya semua turunannya
+// ikut hilang (tautan layanan → jadwal, acara di tooltip tenda, nama tenant di
+// denah, poster QR, …). Elemen HTML bertanda data-fitur="…" disembunyikan lewat
+// kelas .off-<fitur> di <html> (base/fitur.css). DOM-nya tetap ada: modul
+// jadwal/asatidz/tenant saling bergantung dan tetap berjalan dengan data kosong.
+export const off = new Set(D.sembunyi || []);
+if (off.has('jadwal')) D.jadwal = Object.fromEntries(D.days.map((d) => [d.key, []]));
+if (off.has('asatidz')) D.asatidz = [];
+if (off.has('brand')) {
+  const keep = new Set((D.boothOwners || []).map(([n]) => n)); // mis. Rasyaad TV
+  D.tenants = [];
+  D.placements = (D.placements || []).filter(([n]) => keep.has(n));
+}
+off.forEach((f) => root.classList.add(`off-${f}`));
+// elemen (atau induknya) milik fitur yang disembunyikan?
+export const isOff = (el) => {
+  const f = el && el.closest('[data-fitur]');
+  return !!f && f.dataset.fitur.split(' ').some((k) => off.has(k));
+};
+// Nomor menu mobile & nomor section (sec-num) diurutkan ulang tanpa celah
+if (off.size) {
+  let i = 0;
+  $$('#mobileMenu a[href^="#"]').forEach((a) => {
+    const small = $('small', a);
+    if (!small || isOff(a)) return;
+    const num = String(++i).padStart(2, '0');
+    small.textContent = num;
+    const sec = document.getElementById(a.getAttribute('href').slice(1));
+    const sn = sec && $('.sec-num', sec);
+    if (sn) sn.textContent = num;
+  });
+}
+
 // Instance Lenis (smooth scroll). Dibuat di lenis.js, tapi dipakai modul yang
 // berjalan lebih dulu (bagikan, jadwal, denah, …) — selalu di dalam callback,
 // jadi cukup live binding: null sampai setLenis() dipanggil.
@@ -59,7 +93,9 @@ if (evDays.length) {
     if (el.dataset.mb9 === 'monthYear') el.innerHTML = v; else el.textContent = v;
   });
   $$('[data-mb9-aria="menuAria"]').forEach((el) => {
-    el.setAttribute('aria-label', `Lihat jadwal acara — ${range(' sampai ', (t) => t)}${sameMonth ? ` ${mon(b)}` : ''} ${b.y}, ${venue}`);
+    // jadwal disembunyikan → tanggal & tempat di menu mengarah ke Lokasi
+    if (off.has('jadwal')) el.setAttribute('href', '#lokasi');
+    el.setAttribute('aria-label', `Lihat ${off.has('jadwal') ? 'lokasi' : 'jadwal'} acara — ${range(' sampai ', (t) => t)}${sameMonth ? ` ${mon(b)}` : ''} ${b.y}, ${venue}`);
   });
 }
 
@@ -74,6 +110,8 @@ if (evDays.length) {
 export const bootHash = (() => {
   const h = location.hash;
   if (!/^#[A-Za-z][\w-]*$/.test(h) || h === '#home' || !document.getElementById(h.slice(1))) return null;
+  // section yang disembunyikan (mis. tautan #jadwal lama) → buang hash, mulai dari atas
+  if (isOff(document.getElementById(h.slice(1)))) { history.replaceState(null, '', location.pathname + location.search); return null; }
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   history.replaceState(null, '', location.pathname + location.search);
   scrollTo(0, 0);

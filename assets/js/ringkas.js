@@ -68,6 +68,17 @@
   const D = window.MB9;
   if (!D || !Array.isArray(D.days) || !D.days.length) return;
 
+  // Fitur yang disembunyikan sementara (D.sembunyi di data-prod.js) — sama
+  // dengan halaman utama (src/js/core.js): datanya dikosongkan.
+  const off = new Set(D.sembunyi || []);
+  if (off.has('jadwal')) { D.jadwal = {}; $('jadwalSec').hidden = true; }
+  if (off.has('asatidz')) D.asatidz = [];
+  if (off.has('brand')) {
+    const keep = new Set((D.boothOwners || []).map(([n]) => n));
+    D.tenants = [];
+    D.placements = (D.placements || []).filter(([n]) => keep.has(n));
+  }
+
   // ---- Tanggal & jam (WIB) ----
   const wibNow = () => {
     const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {

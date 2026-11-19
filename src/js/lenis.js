@@ -1,4 +1,4 @@
-import { $, finePointer, hasGsap, lenis, reduced, root, setLenis, stripIndex } from './core.js';
+import { $, finePointer, hasGsap, isOff, lenis, reduced, root, setLenis, stripIndex } from './core.js';
 import { lockNav, navLocked, onScroll } from './navbar.js';
 import { chosenDay, isPastDay } from './jadwal.js';
 import { picked, slug } from './denah.js';
@@ -70,7 +70,7 @@ let fromY = null;
 const isMobile = matchMedia('(max-width: 860px)');
 const tabletTouch = () => !finePointer && !isMobile.matches;
 const snapEls = [['#tentang', false, true], ['#layanan', false, true], ['#asatidz', true], ['#denah', false, true], ['#sponsor', false, false, true], ['#sponsor', false, true, false, true]]
-  .map(([s, both, exit, enter, mobile]) => ({ el: $(s), both, exit, enter, mobile })).filter((x) => x.el);
+  .map(([s, both, exit, enter, mobile]) => ({ el: $(s), both, exit, enter, mobile })).filter((x) => x.el && !isOff(x.el)); // tersembunyi (D.sembunyi) → tak ikut snap
 const sectionTo = (y) => {
   const vh = innerHeight;
   for (const { el, both, exit, enter, mobile } of snapEls) {

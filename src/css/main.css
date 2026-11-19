@@ -1,6 +1,7 @@
 /* MB9 — titik masuk CSS. Urutan @import = urutan cascade; jangan diacak.
    Dibundel ke assets/css/style.css lewat npm run build. */
 @import "./base/tokens.css";
+@import "./base/fitur.css";
 @import "./base/noise.css";
 @import "./base/cursor.css";
 @import "./components/preloader.css";

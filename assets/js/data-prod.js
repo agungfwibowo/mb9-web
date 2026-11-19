@@ -3,6 +3,15 @@
    Data contoh/uji untuk pengembangan lokal ada di data-dev.js.
    ========================================================= */
 window.MB9 = {
+  /* SEMBUNYIKAN SEMENTARA (permintaan panitia — data belum fix).
+     'jadwal'  → section Jadwal + menu, link "Lihat jadwal", tautan layanan → jadwal.
+     'asatidz' → section Asatidz + menu.
+     'brand'   → section Brand Peserta + menu, nama/logo tenant di denah
+                 (denah, layout & nomor tenda tetap; tenda Rasyaad TV tetap).
+     Berlaku juga di /ringkas/ dan di data-dev.js (contoh). Hapus nama dari
+     daftar ini untuk menampilkannya kembali. */
+  sembunyi: ['jadwal', 'asatidz', 'brand'],
+
   // Jam buka harian (WIB). Countdown otomatis: mulai = hari pertama jam open, selesai = hari terakhir jam close
   hours: { open: '08:00', close: '21:00' },
 

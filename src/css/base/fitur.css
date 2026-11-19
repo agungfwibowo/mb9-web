@@ -1,0 +1,5 @@
+/* Fitur yang disembunyikan sementara — kelas .off-<fitur> dipasang core.js
+   dari D.sembunyi (data-prod.js). Preloader menutupi halaman sampai JS jalan. */
+.off-jadwal [data-fitur~="jadwal"],
+.off-asatidz [data-fitur~="asatidz"],
+.off-brand [data-fitur~="brand"] { display: none !important; }
