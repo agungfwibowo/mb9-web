@@ -1,4 +1,4 @@
-import { $, $$, D, esc, finePointer, hasGsap, lenis, logoTone, reduced } from './core.js';
+import { $, $$, D, esc, finePointer, hasGsap, lenis, logoTone, off, reduced } from './core.js';
 import { lockNav, nav } from './navbar.js';
 import { lazyWatch } from './konten.js';
 
@@ -18,9 +18,14 @@ export const boothsOf = {};
 });
 // salinan kedua di tiap baris hanya untuk loop marquee: disembunyikan dari
 // pembaca layar & urutan Tab supaya tiap tenant tidak terbaca dua kali
-const tile = (t, dup) => `<a href="#denah" class="logo-tile${t.tone === 'dark' ? ' is-dark' : ''}" data-tenant-link="${esc(t.name)}" data-cursor="Lokasi"`
-  + (dup ? ' tabindex="-1" aria-hidden="true">' : ` aria-label="${esc(t.name)} — lihat lokasi di denah">`)
-  + `<img class="lazy-img" data-src="${esc(t.src)}" alt="" decoding="async"></a>`;
+// D.sembunyi 'brand': lokasi tenda belum fix → logo bukan tautan ke denah
+const linkOn = !off.has('brand');
+const tile = (t, dup) => (linkOn
+  ? `<a href="#denah" class="logo-tile${t.tone === 'dark' ? ' is-dark' : ''}" data-tenant-link="${esc(t.name)}" data-cursor="Lokasi"`
+    + (dup ? ' tabindex="-1" aria-hidden="true">' : ` aria-label="${esc(t.name)} — lihat lokasi di denah">`)
+    + `<img class="lazy-img" data-src="${esc(t.src)}" alt="" decoding="async"></a>`
+  : `<div class="logo-tile${t.tone === 'dark' ? ' is-dark' : ''}"${dup ? ' aria-hidden="true"' : ` role="img" aria-label="${esc(t.name)}"`}>`
+    + `<img class="lazy-img" data-src="${esc(t.src)}" alt="" decoding="async"></div>`);
 marquee.innerHTML = rows.map((r, i) => {
   const tiles = r.map((t) => tile(t, false)).join('') + r.map((t) => tile(t, true)).join('');
   return `<div class="logo-row${i % 2 ? ' rev' : ''}" style="--dur:${70 + i * 12}s">${tiles}</div>`;
@@ -29,7 +34,7 @@ lazyWatch(marquee);
 
 const grid = $('#tenantGrid');
 grid.innerHTML = tenants.map((t) => `
-    <li data-name="${esc(t.name.toLowerCase())}"><a href="#denah" data-tenant-link="${esc(t.name)}" data-cursor="Lokasi" aria-label="${esc(t.name)} — lihat lokasi di denah"><div class="ph${t.tone === 'dark' ? ' is-dark' : ''}"><img class="lazy-img" data-src="${esc(t.src)}" alt="" decoding="async"></div><span>${esc(t.name)}${boothsOf[t.name] ? `<small>Tenda ${boothsOf[t.name].join(', ')}</small>` : ''}</span></a></li>`).join('');
+    <li data-name="${esc(t.name.toLowerCase())}">${linkOn ? `<a href="#denah" data-tenant-link="${esc(t.name)}" data-cursor="Lokasi" aria-label="${esc(t.name)} — lihat lokasi di denah">` : '<div>'}<div class="ph${t.tone === 'dark' ? ' is-dark' : ''}"><img class="lazy-img" data-src="${esc(t.src)}" alt="" decoding="async"></div><span>${esc(t.name)}${boothsOf[t.name] ? `<small>Tenda ${boothsOf[t.name].join(', ')}</small>` : ''}</span>${linkOn ? '</a>' : '</div>'}</li>`).join('');
 lazyWatch(grid);
 
 // Latar kotak logo menyesuaikan logonya: logoTone (core.js).

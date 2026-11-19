@@ -19,7 +19,9 @@ if (finePointer && !reduced) {
   addEventListener('pointerdown', () => cur.classList.add('is-down'), { passive: true });
   ['pointerup', 'pointercancel', 'blur'].forEach((ev) => addEventListener(ev, () => cur.classList.remove('is-down'), { passive: true }));
 
-  const CLICKABLE = 'a[href], button:not(:disabled), [role="button"], label[for], summary, select, .booth, .logo-tile, .plogo, .tenant__grid li, .day, .jcard.is-piled, .hero__visual, .footer__logo';
+  const CLICKABLE = 'a[href], button:not(:disabled), [role="button"], label[for], summary, select, .booth, .plogo, .day, .jcard.is-piled, .hero__visual, .footer__logo';
+  // Logo tenant cukup lewat a[href]: saat tautannya dimatikan (D.sembunyi
+  // 'brand') logonya berupa <div> → kursor tetap panah.
   // Kolom teks memakai kursor ketik bawaan → kursor kustom disembunyikan di sana.
   const NATIVE = 'input, textarea, select, [contenteditable]';
   // Area seret → tangan terbuka / mengepal (diutamakan di atas tautan di dalamnya).

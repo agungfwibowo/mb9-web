@@ -23,8 +23,8 @@ export const off = new Set(D.sembunyi || []);
 if (off.has('jadwal')) D.jadwal = Object.fromEntries(D.days.map((d) => [d.key, []]));
 if (off.has('asatidz')) D.asatidz = [];
 if (off.has('brand')) {
+  // daftar brand tetap tampil; hanya penempatannya di denah yang dikosongkan
   const keep = new Set((D.boothOwners || []).map(([n]) => n)); // mis. Rasyaad TV
-  D.tenants = [];
   D.placements = (D.placements || []).filter(([n]) => keep.has(n));
 }
 off.forEach((f) => root.classList.add(`off-${f}`));

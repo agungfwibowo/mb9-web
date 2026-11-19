@@ -6,8 +6,9 @@ window.MB9 = {
   /* SEMBUNYIKAN SEMENTARA (permintaan panitia — data belum fix).
      'jadwal'  → section Jadwal + menu, link "Lihat jadwal", tautan layanan → jadwal.
      'asatidz' → section Asatidz + menu.
-     'brand'   → section Brand Peserta + menu, nama/logo tenant di denah
-                 (denah, layout & nomor tenda tetap; tenda Rasyaad TV tetap).
+     'brand'   → nama/logo tenant di denah (denah, layout & nomor tenda tetap;
+                 tenda Rasyaad TV tetap). Daftar Brand Peserta tetap tampil,
+                 tapi logonya tidak menjadi tautan ke tenda di denah.
      Berlaku juga di /ringkas/ dan di data-dev.js (contoh). Hapus nama dari
      daftar ini untuk menampilkannya kembali. */
   sembunyi: ['jadwal', 'asatidz', 'brand'],
@@ -100,29 +101,34 @@ window.MB9 = {
   ],
 
   tenants: [
-    ['AKA Travel', 'aka-travel.webp'], ['Akhwatgoods.id', 'akhwatgoods-id.webp'], ['Abaya Nafisah', 'abaya-nafisah.webp'],
-    ['Abayabaruku', 'abayabaruku.webp', 'dark'], ["Adiani Syar'i", 'adiani-syar-i.webp'], ['Al Hijaab', 'al-hijaab.webp'],
-    ['Alkahfi Tour & Travel', 'alkahfi-tour-travel.webp'], ['Annurwear', 'annurwear.webp', 'dark'], ['Arbaqi Honey', 'arbaqi-honey.webp'],
-    ['Ayam Jukut Juragan', 'ayam-jukut-juragan.webp'], ['Baraka', 'baraka.webp'], ['Boksa Bakso', 'boksa-bakso.webp'],
-    ['Boksa Drink', 'boksa-drink.webp'], ['Burger Kejam', 'burger-kejam.webp'], ['Churros Faama.eat', 'churros-faama-eat.webp'],
-    ['Fastab Coffee', 'fastab-coffee.webp'], ['GNG Shop', 'gng-shop.webp'], ['Hiru Koffee', 'hiru-koffee.webp'],
-    ['House of Hurriyyah', 'house-of-hurriyyah.webp'], ['Jejak Lapar', 'jejak-lapar.webp'], ['Itam.id', 'itam-id.webp'],
-    ['Jajanan Umi Rina', 'jajanan-umi-rina.webp'], ['Juragan Dimsum', 'juragan-dimsum.webp'], ['Justrue', 'justrue.webp'],
-    ['Kalila Dailywear', 'kalila-dailywear.webp'], ["Kalila Syar'i", 'kalila-syar-i.webp', 'dark'], ['Khansa Stores', 'khansa-stores.webp'],
-    ['Khazanah Store', 'khazanah-store.webp'], ['Kitchyurie', 'kitchyurie.webp'], ['Koaki.idn', 'koaki-idn.webp'],
-    ['Kopikuh', 'kopikuh.webp'], ['Kuna Patisserie', 'kuna-patisserie.webp'], ['Lagilah', 'lagilah.webp'],
-    ['Little Maryamm', 'little-maryamm.webp'], ['Mabit Tour', 'mabit-tour.webp'], ['Mahabbah Cake & Cookies', 'mahabbah-cake-cookies.webp'],
-    ['Mamawiwa', 'mamawiwa.webp', 'dark'], ['Mango Time', 'mango-time.webp'], ['Maya Salon Muslimah', 'maya-salon-muslimah.webp'],
-    ['Mecca Luxury', 'mecca-luxury.webp'], ['Muda Burger', 'muda-burger.webp'], ['Mumtaz Store', 'mumtaz-store.webp'],
-    ['NIMERA', 'nimera.webp'], ['Nasgor Basmati Rafka', 'nasgor-basmati-rafka.webp'], ['Nasgor Tiarbah', 'nasgor-tiarbah.webp'],
-    ['Nasgor Wagyu Khalid', 'nasgor-wagyu-khalid.webp'], ['Omarabic', 'omarabic.webp'], ['Pempek Nabil', 'pempek-nabil.webp'],
-    ['Rafka Store', 'rafka-store.webp'], ['Rasa Coffee', 'rasa-coffee.webp'], ['Rihlah Store', 'rihlah-store.webp'],
-    ['Risol Mimi', 'risol-mimi.webp'], ['Samase Shahih Gallery', 'samase-shahih-gallery.webp'], ['Segerinajaa', 'segerinajaa.webp'],
-    ['Shaffat Parfum Arab Medan', 'shaffat-parfum-arab-medan.webp'], ['Shawarma Al Masri', 'shawarma-al-masri.webp'], ['Shockelat', 'shockelat.webp'],
-    ['Sirun Kebab', 'sirun-kebab.webp'], ['SnD Kitchenette', 'snd-kitchenette.webp'], ['Sundae Halalicious', 'sundae-halalicious.webp'],
-    ['Teras Mbonk', 'teras-mbonk.webp'], ['UMMECC', 'ummecc.webp'], ['Warung Tiga Sekawan', 'warung-tiga-sekawan.webp'],
+    ['Abaya Nafisaah', 'abaya-nafisaah.webp'], ['Abayabaruku', 'abayabaruku.webp', 'dark'], ["Adiani Syar'i", 'adiani-syar-i.webp'],
+    ['AKA Travel', 'aka-travel.webp'], ['Akhwatgoods.id', 'akhwatgoods-id.webp'], ['Al Hijaab', 'al-hijaab.webp'],
+    ['Alfa Fitness', 'alfa-fitness.webp'], ['Alkahfi Tour & Travel', 'alkahfi-tour-travel.webp'], ['Annurwear', 'annurwear.webp', 'dark'],
+    ['Arbaqi Honey', 'arbaqi-honey.webp'], ['Ayam Jukut Juragan', 'ayam-jukut-juragan.webp'], ['Baba Ari', 'baba-ari.webp'],
+    ['Baraka', 'baraka.webp'], ['Baz Store', 'baz-store.webp'], ['Boksa Bakso', 'boksa-bakso.webp'],
+    ['Boksa Drink', 'boksa-drink.webp'], ['Buah Segar Medan', 'buah-segar-medan.webp'], ['Burger Kejam', 'burger-kejam.webp'],
+    ['Cerita Cireng', 'cerita-cireng.webp'], ['Churros Faama.eat', 'churros-faama-eat.webp'], ['Dimsum Qoqom', 'dimsum-qoqom.webp'],
+    ['Es Teh Poci Dispora', 'es-teh-poci-dispora.webp'], ['Fastab Coffee', 'fastab-coffee.webp'], ['Fresh Juice Smoothies', 'fresh-juice-smoothies.webp'],
+    ['GNG Shop', 'gng-shop.webp'], ['Hamdalah Kitchen', 'hamdalah-kitchen.webp'], ['Hiru Koffee', 'hiru-koffee.webp'],
+    ['House of Hurriyyah', 'house-of-hurriyyah.webp'], ['Itam.id', 'itam-id.webp'], ['Jajanan Umi Rina', 'jajanan-umi-rina.webp'],
+    ['Jawara Dimsum', 'jawara-dimsum.webp'], ['Jejak Lapar', 'jejak-lapar.webp'], ['Juragan Dimsum', 'juragan-dimsum.webp'],
+    ['Justrue', 'justrue.webp'], ['Kalila Dailywear', 'kalila-dailywear.webp'], ["Kalila Syar'i", 'kalila-syar-i.webp', 'dark'],
+    ['Khansa Stores', 'khansa-stores.webp'], ['Khazanah Store', 'khazanah-store.webp'], ['Kitchyurie', 'kitchyurie.webp'],
+    ['Koaki.idn', 'koaki-idn.webp'], ['Kopikuh', 'kopikuh.webp'], ['Kuna Patisserie', 'kuna-patisserie.webp'],
+    ['Lagilah', 'lagilah.webp'], ['Little Maryamm', 'little-maryamm.webp'], ['Lupis Abu Razqa', 'lupis-abu-razqa.webp'],
+    ['Mabit Tour', 'mabit-tour.webp'], ['Mahabbah Cake & Cookies', 'mahabbah-cake-cookies.webp'], ['Mamawiwa', 'mamawiwa.webp', 'dark'],
+    ['Mango Time', 'mango-time.webp'], ['MauLagi Cake & Dessert', 'maulagi-cake-dessert.webp'], ['Maya Salon Muslimah', 'maya-salon-muslimah.webp'],
+    ['Mecca Luxury', 'mecca-luxury.webp'], ['Mie Ayam Abah Shafwah', 'mie-ayam-abah-shafwah.webp'], ['Muda Burger', 'muda-burger.webp'],
+    ['Mumtaz Store', 'mumtaz-store.webp'], ['Nasgor Basmati Rafka', 'nasgor-basmati-rafka.webp'], ['Nasgor Tiarbah', 'nasgor-tiarbah.webp'],
+    ['Nasgor Wagyu Khalid', 'nasgor-wagyu-khalid.webp'], ['NIMERA', 'nimera.webp'], ['Omarabic', 'omarabic.webp'],
+    ['Pempek Nabil', 'pempek-nabil.webp'], ['Piknik Halal Tour', 'piknik-halal-tour.webp'], ['Rafka Store', 'rafka-store.webp'],
+    ['Rasa Coffee', 'rasa-coffee.webp'], ['Rihlah Store', 'rihlah-store.webp'], ['Risol Mimi', 'risol-mimi.webp'],
+    ['Samase Shahih Gallery', 'samase-shahih-gallery.webp'], ['Segerinajaa', 'segerinajaa.webp'], ['Shaffat Parfum Arab Medan', 'shaffat-parfum-arab-medan.webp'],
+    ['Shawarma Al Masri', 'shawarma-al-masri.webp'], ['Shockelat', 'shockelat.webp'], ['Sirun Kebab', 'sirun-kebab.webp'],
+    ['SnD Kitchenette', 'snd-kitchenette.webp'], ['Sundae Halalicious', 'sundae-halalicious.webp'], ['Teras Mbonk Drinks', 'teras-mbonk-drinks.webp'],
+    ['Toko Kopi Sei Tuan', 'toko-kopi-sei-tuan.webp'], ['UMMECC', 'ummecc.webp'], ['Warung Tiga Sekawan', 'warung-tiga-sekawan.webp'],
     ['Warung Ummu Aisyah', 'warung-ummu-aisyah.webp'], ['Wedrinkeat', 'wedrinkeat.webp'], ['Yossi Soselisa', 'yossi-soselisa.webp'],
-    ['Youvieshop', 'youvieshop.webp'], ['Yuriz', 'yuriz.webp'],
+    ['Youvieshop', 'youvieshop.webp'], ['Yuriz', 'yuriz.webp'], ['Zayn Briyani', 'zayn-briyani.webp'],
   ],
   // Penempatan tenant di denah: [nama tenant, tenda awal, tenda akhir?].
   // SEMENTARA — diacak (food → tenda Food/VIP, lainnya → Non-Food/Subsidi),
@@ -149,7 +155,7 @@ window.MB9 = {
   placements: [
     ['Rasyaad TV', 31, 32],
     ["Shaffat Parfum Arab Medan", 1], ["Little Maryamm", 2], ["Omarabic", 3],
-    ["Annurwear", 4], ["Teras Mbonk", 5], ["NIMERA", 6],
+    ["Annurwear", 4], ["Teras Mbonk Drinks", 5], ["NIMERA", 6],
     ["Rihlah Store", 7], ["Itam.id", 8], ["GNG Shop", 9],
     ["Khazanah Store", 10], ["Mumtaz Store", 11], ["Yuriz", 12, 13],
     ["Akhwatgoods.id", 14], ["Alkahfi Tour & Travel", 15], ["Rafka Store", 16],
@@ -172,7 +178,7 @@ window.MB9 = {
     ["Arbaqi Honey", 80, 81], ["Nasgor Tiarbah", 82], ["Jajanan Umi Rina", 83],
     ["Risol Mimi", 84], ["Juragan Dimsum", 85, 86], ["Baraka", 87, 88],
     ["Koaki.idn", 89], ["House of Hurriyyah", 90], ["Lagilah", 91],
-    ["Mabit Tour", 92, 94], ["Abaya Nafisah", 95],
+    ["Mabit Tour", 92, 94], ["Abaya Nafisaah", 95],
   ],
 
   partners: [

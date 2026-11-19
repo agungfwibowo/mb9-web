@@ -75,7 +75,6 @@
   if (off.has('asatidz')) D.asatidz = [];
   if (off.has('brand')) {
     const keep = new Set((D.boothOwners || []).map(([n]) => n));
-    D.tenants = [];
     D.placements = (D.placements || []).filter(([n]) => keep.has(n));
   }
 

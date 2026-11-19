@@ -88,7 +88,7 @@
     @font-face { font-family: 'Roboto Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(assets/fonts/roboto-mono-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     @font-face { font-family: 'Noto Sans Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url(assets/fonts/noto-sans-mono-blocks.woff2) format('woff2'); unicode-range: U+2591-2593; }
   </style>
-  <link rel="stylesheet" href="assets/css/style.css?v=1.1.421">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.1.422">
   <script>document.documentElement.classList.add('js');
     // Kunjungan ulang dalam sesi yang sama → preloader mode cepat (hanya 3 panel
     // terangkat). Diputuskan di sini, sebelum halaman digambar, agar layar lime
@@ -166,7 +166,7 @@
       <a href="#layanan"><span class="roll"><span>Layanan Gratis</span></span></a>
       <a href="#jadwal" data-fitur="jadwal"><span class="roll"><span>Jadwal</span></span><i class="nav__flag" id="navToday" title="Ada jadwal hari ini" hidden></i></a>
       <a href="#denah"><span class="roll"><span>Denah</span></span></a>
-      <a href="#tenant" data-fitur="brand"><span class="roll"><span>Tenant</span></span></a>
+      <a href="#tenant"><span class="roll"><span>Tenant</span></span></a>
     </nav>
     <a href="#lokasi" class="btn btn--dark btn--sm nav__cta magnetic">Temukan Lokasi</a>
     <a href="ringkas/" class="nav__simple mono" aria-label="Tampilan sederhana, huruf besar" title="Tampilan sederhana (huruf besar)">Aa</a>
@@ -184,7 +184,7 @@
       <a href="#jadwal" data-fitur="jadwal"><small>03</small>Jadwal<em class="mmenu__flag mono" id="menuToday" hidden>Hari ini</em></a>
       <a href="#asatidz" data-fitur="asatidz"><small>04</small>Asatidz</a>
       <a href="#denah"><small>05</small>Denah</a>
-      <a href="#tenant" data-fitur="brand"><small>06</small>Tenant</a>
+      <a href="#tenant"><small>06</small>Tenant</a>
       <a href="#lokasi"><small>07</small>Lokasi</a>
       <a href="#sponsor"><small>08</small>Sponsor</a>
     </nav>
@@ -446,7 +446,7 @@
     </section>
 
     <!-- ============ 7. TENANT ============ -->
-    <section class="section tenant" id="tenant" data-fitur="brand">
+    <section class="section tenant" id="tenant">
       <div class="container">
         <header class="sec-head sec-head--row">
           <div>
@@ -477,7 +477,7 @@
            Koordinat SVG dalam meter, (0,0) = pin; ukuran & posisi lewat CSS (--k). -->
       <div class="lokasi__map peta" role="img" aria-label="Peta lokasi: Lapangan Asrama Haji Medan, Jl. A.H. Nasution">
         <div class="peta__canvas" aria-hidden="true">
-          <img src="assets/img/peta-lokasi.svg?v=1.1.421" alt="" width="2500" height="1000" decoding="async">
+          <img src="assets/img/peta-lokasi.svg?v=1.1.422" alt="" width="2500" height="1000" decoding="async">
           <svg class="peta__labels" viewBox="-1500 -500 2500 1000">
             <path id="petaJ1" d="M-124 -170L276 -161"/>
             <path id="petaJ2" d="M-164 219L38 219"/>
@@ -497,7 +497,7 @@
               <svg viewBox="0 0 32 32"><path class="kl" d="M4 9l12 5v15L4 24Z"/><path class="kr" d="M16 14l12-5v15l-12 5Z"/><path class="kt" d="M4 9l12-5 12 5-12 5Z"/><path class="kg" d="M4 12.5l12 5 12-5v2.6l-12 5-12-5Z"/><path class="kg" d="M8 20.6l3.4 1.4v5.2L8 25.8Z"/></svg>
               <b class="mono">Kiblat 292,8°</b>
             </span>
-            <i><img src="assets/img/logo/mb9-mark-mono.webp?v=1.1.421" alt="" width="20" height="26" decoding="async"></i><b class="mono">Asrama Haji Medan</b>
+            <i><img src="assets/img/logo/mb9-mark-mono.webp?v=1.1.422" alt="" width="20" height="26" decoding="async"></i><b class="mono">Asrama Haji Medan</b>
           </span>
         </div>
         <!-- kompas: peta selalu menghadap utara (tools/peta-lokasi.py, tanpa rotasi) →
@@ -582,7 +582,7 @@
 
   <!-- tombol kembali ke atas (mengambang) — hanya muncul saat footer terlihat, lihat totop.js -->
   <!-- tombol mengambang selama daftar brand terbuka & tombol asli sudah tergulir lewat (tenant.js) -->
-  <button type="button" class="btn btn--dark tenant-hide" id="tenantHide" data-fitur="brand" aria-controls="tenantAll" tabindex="-1"><svg class="th-up" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg><svg class="th-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span>Sembunyikan Brand</span></button>
+  <button type="button" class="btn btn--dark tenant-hide" id="tenantHide" aria-controls="tenantAll" tabindex="-1"><svg class="th-up" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg><svg class="th-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span>Sembunyikan Brand</span></button>
   <a href="#home" class="totop" id="toTop" aria-label="Kembali ke atas" title="Kembali ke atas" tabindex="-1">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </a>
@@ -592,9 +592,9 @@
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
   <!-- QR untuk menu Bagikan (ikut di-precache SW → tetap jalan offline) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
-  <script src="assets/js/data-prod.js?v=1.1.421" defer></script>
-  <script src="assets/js/data-dev.js?v=1.1.421" defer></script>
-  <script src="assets/js/main.js?v=1.1.421" defer></script>
-  <script src="assets/js/akhir.js?v=1.1.421" defer></script>
+  <script src="assets/js/data-prod.js?v=1.1.422" defer></script>
+  <script src="assets/js/data-dev.js?v=1.1.422" defer></script>
+  <script src="assets/js/main.js?v=1.1.422" defer></script>
+  <script src="assets/js/akhir.js?v=1.1.422" defer></script>
 </body>
 </html>
