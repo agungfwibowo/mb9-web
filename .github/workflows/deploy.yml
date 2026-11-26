@@ -1,6 +1,5 @@
-# Deploy ke GitHub Pages setiap push ke main (atau manual dari tab Actions).
-# Aktifkan sekali: Settings → Pages → Build and deployment → Source: "GitHub Actions".
-name: Deploy GitHub Pages
+# Deploy ke server sendiri setiap push ke main (atau manual dari tab Actions).
+name: Deploy ke server
 
 on:
   push:
@@ -9,24 +8,17 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: deploy-server
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
-      # JS di src/js & CSS di src/css → dibundel ulang ke assets/js/main.js
-      # dan assets/css/style.css, jadi yang terbit selalu sesuai sumber walau lupa `npm run build`.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -34,16 +26,21 @@ jobs:
       - name: Build JS & CSS
         run: npm ci && npm run build
 
-      # Hanya file situs yang ikut terbit (README, _headers, .github tidak).
       - name: Siapkan folder situs
         run: |
           mkdir _site
-          cp -r index.html privasi assets sw.js manifest.webmanifest robots.txt sitemap.xml .well-known _site/
+          cp -r index.html privasi ringkas assets sw.js manifest.webmanifest robots.txt sitemap.xml .well-known _site/
 
-      - uses: actions/configure-pages@v5
-      # v3: folder tersembunyi (.well-known) ikut terunggah
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Pasang kunci SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Kirim ke server
+        run: |
+          rsync -rlz --delete --chmod=D755,F644 \
+            --exclude=.well-known/acme-challenge \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            _site/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/"
